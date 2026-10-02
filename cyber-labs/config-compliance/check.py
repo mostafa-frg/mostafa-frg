@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from pathlib import Path
+import argparse
 import re
-import sys
 
 RULES = [
     ("TELNET", re.compile(r"transport input .*telnet", re.I), "SSH-only management is preferred"),
@@ -10,13 +10,32 @@ RULES = [
     ("ENABLE_PASSWORD", re.compile(r"^enable password\b", re.M | re.I), "Use stronger secret storage"),
 ]
 
-root = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("configs")
-for path in sorted(root.glob("*.conf")):
-    text = path.read_text(encoding="utf-8", errors="ignore")
-    print(f"\n## {path.name}")
-    findings = 0
-    for code, pattern, advice in RULES:
-        if pattern.search(text):
-            findings += 1
-            print(f"[{code}] {advice}")
-    print("status=PASS" if findings == 0 else f"status=FINDINGS count={findings}")
+def main():
+    p = argparse.ArgumentParser(description="Offline Cisco configuration compliance checker")
+    p.add_argument("root", nargs="?", default="configs")
+    args = p.parse_args()
+    root = Path(args.root)
+    if not root.exists():
+        p.error(f"config directory does not exist: {root}")
+    if not root.is_dir():
+        p.error(f"not a directory: {root}")
+    paths = sorted(root.glob("*.conf"))
+    if not paths:
+        p.error(f"no .conf files found in {root}")
+
+    for path in paths:
+        try:
+            text = path.read_text(encoding="utf-8", errors="ignore")
+        except OSError as exc:
+            print(f"[ERROR] {path.name}: {exc}")
+            continue
+        print(f"\n## {path.name}")
+        findings = 0
+        for code, pattern, advice in RULES:
+            if pattern.search(text):
+                findings += 1
+                print(f"[{code}] {advice}")
+        print("status=PASS" if findings == 0 else f"status=FINDINGS count={findings}")
+
+if __name__ == "__main__":
+    main()

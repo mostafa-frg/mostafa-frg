@@ -1,29 +1,30 @@
 # Mostafa Mahmoud
 
-### IT Support | Networking | Linux | Cybersecurity
+IT Support | Networking | Linux | Cybersecurity
 
-I'm an IT enthusiast focused on networking, Linux, system administration, and technical support.
+I work with IT support, networking, Linux, and security labs. I like troubleshooting problems, building small labs, and learning by doing.
 
 ## Skills
 
-- Networking — TCP/IP, DNS, DHCP, VLANs, Routing & Switching
-- Linux — Administration, Troubleshooting & Networking
-- IT Support — Hardware, Software & Network Troubleshooting
-- Cybersecurity — Security Fundamentals & Lab Practice
+- Networking: TCP/IP, DNS, DHCP, VLANs, Routing & Switching
+- Linux: Administration, Troubleshooting, Networking
+- IT Support: Hardware, Software, Windows & Network Troubleshooting
+- Cybersecurity: Security Fundamentals, Network Security, Lab Practice
 - Git & GitHub
 - CCNA-level Networking
 
-## Currently Learning
+## What I'm Working On
 
-- Advanced Networking
-- Linux Administration
-- Cybersecurity
-- Network Security
-- Automation & Scripting
+- Networking and network security
+- Linux administration
+- Cybersecurity labs
+- Scripting and automation
 
 ## Projects
 
-Projects and practical labs will be added here as I build and document them.
+I use this account to keep practical projects, labs, and experiments.
+
+More projects will be added as I build them.
 
 ## Contact
 

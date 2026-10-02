@@ -1,0 +1,4 @@
+name,ip,role
+CORE1,10.0.0.1,core
+DIST1,10.0.0.2,distribution
+ACCESS1,10.0.0.10,access

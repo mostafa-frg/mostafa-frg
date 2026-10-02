@@ -6,7 +6,7 @@
 
 <img src="./profile/terminal.svg" alt="Terminal">
 
-Practical security labs, network engineering tools, Linux administration, and ethical security testing.
+Practical network engineering, security labs, Linux administration, and ethical security testing.
 
 </div>
 
@@ -29,10 +29,14 @@ Practical security labs, network engineering tools, Linux administration, and et
 - [Network Security Lab](cyber-labs/network-security-lab/) — multithreaded TCP service inventory with JSON reporting
 - [Network Monitor](cyber-labs/network-monitor/) — scheduled TCP health monitoring with JSONL events
 - [Subnet Planner](cyber-labs/subnet-planner/) — IPv4 subnet allocation and capacity planning
+- [IPAM Lab](cyber-labs/ipam/) — CSV-backed IPv4 address allocation
+- [VLAN Lab](cyber-labs/vlan-lab/) — access/trunk and VLAN consistency validation
+- [Firewall Rule Validator](cyber-labs/firewall-rule-validator/) — offline ACL overlap and shadowing analysis
 - [Network Config Auditor](cyber-labs/network-config-auditor/) — Cisco-style configuration security checks
 - [Network Automation Lab](cyber-labs/network-automation-lab/) — repeatable IOS-style configuration generation
+- [Topology Builder](cyber-labs/topology-builder/) — CSV-to-Graphviz network topology generation
+- [NetFlow Analyzer](cyber-labs/netflow-parser/) — offline traffic-flow aggregation
 - [DNS & DHCP Lab](cyber-labs/dns-dhcp-lab/) — local UDP/DNS troubleshooting lab
-- [HTTP Security Auditor](cyber-labs/http-security-auditor/) — HTTP security-header assessment
 - [PCAP Analysis Lab](cyber-labs/pcap-analysis/) — offline packet and DNS analysis
 
 ### Enterprise Security
@@ -45,6 +49,7 @@ Practical security labs, network engineering tools, Linux administration, and et
 - [Web Security Lab](cyber-labs/web-security-lab/) — local web-security exercises
 - [API Security Lab](cyber-labs/api-security-lab/) — authentication and authorization testing
 - [CTF Web Security Lab](cyber-labs/ctf-web-lab/) — controlled vulnerable web challenges
+- [HTTP Security Auditor](cyber-labs/http-security-auditor/) — HTTP security-header assessment
 
 ### Blue Team & Reporting
 
@@ -55,11 +60,11 @@ Practical security labs, network engineering tools, Linux administration, and et
 
 Most projects are standalone and use Python's standard library. Projects that require third-party packages include their own `requirements.txt`.
 
-Every security-testing component is designed for localhost, supplied evidence, or systems where explicit authorization exists.
+Every security-testing component is designed for localhost, supplied evidence, offline analysis, or systems where explicit authorization exists.
 
 ## Tools & Technologies
 
-`Linux` `Python` `Bash` `Git` `TCP/IP` `DNS` `DHCP` `VLAN` `Routing` `Network Automation` `Web Security` `SOC`
+`Linux` `Python` `Bash` `Git` `TCP/IP` `IPv4` `DNS` `DHCP` `VLAN` `Routing` `ACL` `IPAM` `Network Automation` `PCAP` `Web Security` `SOC`
 
 <div align="center">
 

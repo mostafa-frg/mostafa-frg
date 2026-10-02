@@ -137,6 +137,12 @@ jobs:
           for f in cyber-labs/mosta-terminal/*.sh; do
             bash -n "$f"
           done
+          bash cyber-labs/mosta-terminal/mosta.sh >/tmp/mosta-help.txt
+          grep -q "Mosta shell helpers loaded." /tmp/mosta-help.txt
+          bash cyber-labs/mosta-terminal/run-network-toolkit.sh --help >/tmp/mosta-net-help.txt
+          grep -q "usage" /tmp/mosta-net-help.txt
+          bash cyber-labs/mosta-terminal/run-route.sh --help >/tmp/mosta-route-help.txt
+          grep -q "usage" /tmp/mosta-route-help.txt
 
       - name: Validate Docker Compose definitions
         run: |

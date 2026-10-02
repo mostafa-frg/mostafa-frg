@@ -54,7 +54,6 @@ jobs:
           python vlan-lab/validate.py vlan-lab/sample_switch.csv
           python firewall-rule-validator/validator.py firewall-rule-validator/sample_rules.csv
           python topology-builder/topology.py topology-builder/sample_links.csv
-          python network-config-auditor/audit.py network-config-auditor/sample_config.txt 2>/dev/null || true
           python network-automation-lab/build.py network-automation-lab/inventory.json --out /tmp/mosta-config
           python active-directory-security-lab/audit.py active-directory-security-lab/sample_users.csv
           python privilege-escalation-lab/check.py --path /etc/passwd

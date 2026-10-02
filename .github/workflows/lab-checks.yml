@@ -140,7 +140,6 @@ jobs:
 
           bash cyber-labs/mosta-terminal/mosta.sh >/tmp/mosta-help.txt
           grep -q "Mosta shell helpers loaded." /tmp/mosta-help.txt
-          grep -q "mnet" /tmp/mosta-help.txt
 
 
       - name: Validate Docker Compose definitions

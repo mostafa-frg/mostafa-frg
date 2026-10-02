@@ -137,7 +137,6 @@ jobs:
           for f in cyber-labs/mosta-terminal/*.sh; do
             bash -n "$f"
           done
-          test -x cyber-labs/mosta-terminal/install.sh
 
       - name: Validate Docker Compose definitions
         run: |

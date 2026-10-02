@@ -1,0 +1,4 @@
+Oct 01 10:00:01 CORE1 %LINK-3-UPDOWN: Interface Gi0/1 changed state to down
+Oct 01 10:00:02 CORE1 %LINEPROTO-5-UPDOWN: Line protocol changed state
+Oct 01 10:01:04 EDGE1 %LINK-3-UPDOWN: Interface Gi0/8 changed state to down
+Oct 01 10:02:10 CORE1 %SYS-5-CONFIG_I: Configured from console

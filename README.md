@@ -6,56 +6,62 @@
 
 <img src="./profile/terminal.svg" alt="Terminal">
 
-Practical network engineering, security labs, Linux administration, and ethical security testing.
+Practical network engineering, security testing, Linux administration, and defensive security labs.
+
+[![Lab Checks](https://github.com/mostafa-frg/mostafa-frg/actions/workflows/lab-checks.yml/badge.svg)](https://github.com/mostafa-frg/mostafa-frg/actions/workflows/lab-checks.yml)
 
 </div>
 
 ---
 
+## About
+
+I build small, testable tools around the work I actually want to do: troubleshooting networks, validating configurations, analyzing security data, and automating repetitive tasks.
+
+The repository is intentionally practical. Most labs take local input or supplied evidence rather than depending on a live production environment.
+
 ## Focus
 
-- Network Engineering & Security
-- Linux Administration
-- Web & API Security
-- SOC / Log Analysis
-- Security Testing
-- Network Automation
+- Network engineering and troubleshooting
+- Linux administration and shell tooling
+- Web and API security
+- SOC and log analysis
+- Security testing in controlled environments
+- Network automation
 
 ## Projects
 
 ### Network Engineering & Security
 
-- [Network Toolkit](cyber-labs/network-toolkit/) — subnet, DNS, TCP connectivity and inventory diagnostics
-- [Network Security Lab](cyber-labs/network-security-lab/) — multithreaded TCP service inventory with JSON reporting
-- [Network Monitor](cyber-labs/network-monitor/) — scheduled TCP health monitoring with JSONL events
+- [Network Toolkit](cyber-labs/network-toolkit/) — subnet, DNS, TCP connectivity, and inventory diagnostics
+- [Network Security Lab](cyber-labs/network-security-lab/) — authorized TCP service inventory with JSON reporting
+- [Network Monitor](cyber-labs/network-monitor/) — periodic TCP health checks with JSONL events
 - [Subnet Planner](cyber-labs/subnet-planner/) — IPv4 subnet allocation and capacity planning
 - [IPAM Lab](cyber-labs/ipam/) — CSV-backed IPv4 address allocation
 - [VLAN Lab](cyber-labs/vlan-lab/) — access/trunk and VLAN consistency validation
-- [Firewall Rule Validator](cyber-labs/firewall-rule-validator/) — offline ACL overlap and shadowing analysis
+- [Firewall Rule Validator](cyber-labs/firewall-rule-validator/) — offline ACL overlap, conflict, and shadowing checks
 - [Network Config Auditor](cyber-labs/network-config-auditor/) — Cisco-style configuration security checks
 - [Network Automation Lab](cyber-labs/network-automation-lab/) — repeatable IOS-style configuration generation
-- [Topology Builder](cyber-labs/topology-builder/) — CSV-to-Graphviz network topology generation
+- [Topology Builder](cyber-labs/topology-builder/) — CSV-to-Graphviz topology generation
 - [NetFlow Analyzer](cyber-labs/netflow-parser/) — offline traffic-flow aggregation
-- [DNS & DHCP Lab](cyber-labs/dns-dhcp-lab/) — local UDP/DNS troubleshooting lab
+- [DNS & DHCP Lab](cyber-labs/dns-dhcp-lab/) — local DNS/DHCP troubleshooting lab
 - [PCAP Analysis Lab](cyber-labs/pcap-analysis/) — offline packet and DNS analysis
-
-
-- [OSPF Lab](cyber-labs/ospf-lab/) — offline router-ID, area and network validation
+- [OSPF Lab](cyber-labs/ospf-lab/) — router-ID, area, and network validation
 - [STP Lab](cyber-labs/stp-lab/) — bridge identity and priority consistency checks
 - [NAT Policy Lab](cyber-labs/nat-lab/) — offline IPv4 NAT policy validation
 - [SNMP Audit](cyber-labs/snmp-audit/) — configuration review for insecure SNMP settings
 - [Syslog Analyzer](cyber-labs/syslog-analyzer/) — network-device syslog aggregation
 - [ACL Policy Lab](cyber-labs/acl-policy-lab/) — offline access-control policy validation
 - [Routing Lab](cyber-labs/routing-lab/) — offline route validation and analysis
-
 - [Network Operations Lab](cyber-labs/network-operations-lab/) — isolated Docker topology with services and health checks
 - [Network Engineering Suite](cyber-labs/network-engineering-suite/) — IP validation, longest-prefix route lookup, and inventory tooling
 - [Network Config Compliance](cyber-labs/config-compliance/) — deterministic Cisco-style configuration compliance checks
 - [Network Incident Triage](cyber-labs/incident-network-triage/) — network event timeline and severity analysis
-### Linux / Termux Security Toolkit
 
-- [Mosta Terminal](cyber-labs/mosta-terminal/) — Linux/Termux launchers with `Mosta` terminal branding and short lab aliases
-- [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) — interfaces, routes, DNS and TCP diagnostics
+### Linux / Termux
+
+- [Mosta Terminal](cyber-labs/mosta-terminal/) — Linux/Termux launchers with `Mosta` terminal branding and short aliases
+- [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) — interfaces, routes, DNS, and TCP diagnostics
 - [Security Tool Catalog](cyber-labs/tool-catalog/) — categorized Linux/Termux security-tool reference
 
 ### Enterprise Security
@@ -73,20 +79,30 @@ Practical network engineering, security labs, Linux administration, and ethical 
 ### Blue Team & Reporting
 
 - [SOC Log Analyzer](cyber-labs/soc-log-analyzer/) — SSH authentication-log analysis
-- [Security Assessment Report Template](cyber-labs/security-report-template/) — report generation and remediation structure
+- [Security Assessment Report Template](cyber-labs/security-report-template/) — repeatable security-report generation
 
-## Running the Labs
+## Validation
 
-Most projects are standalone and use Python's standard library. Projects that require third-party packages include their own `requirements.txt`.
+Every change runs through GitHub Actions. The CI job currently checks:
 
-Every security-testing component is designed for localhost, supplied evidence, offline analysis, or systems where explicit authorization exists.
+- Python compilation and CLI help paths
+- unit and integration tests
+- offline lab fixtures and negative cases
+- PCAP analysis with generated test traffic
+- local HTTP and Flask lab behavior
+- shell syntax and terminal launchers
+- Docker Compose configuration
 
-## Tools & Technologies
+The security labs are scoped to localhost, supplied evidence, offline analysis, or environments where testing is explicitly authorized.
 
-`Linux` `Python` `Bash` `Git` `TCP/IP` `IPv4` `DNS` `DHCP` `VLAN` `Routing` `ACL` `IPAM` `Network Automation` `PCAP` `Web Security` `SOC`
+## Tools
+
+`Linux` `Python` `Bash` `Git` `TCP/IP` `IPv4` `DNS` `DHCP` `VLAN` `Routing` `ACL` `IPAM` `PCAP` `Network Automation` `Web Security` `SOC`
+
+---
 
 <div align="center">
 
-**Learning by doing.**
+**Build it. Test it. Understand it.**
 
 </div>

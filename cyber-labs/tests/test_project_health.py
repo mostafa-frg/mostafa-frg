@@ -117,3 +117,27 @@ def test_network_monitor_rejects_bad_port():
         assert "invalid port" in r.stderr
     finally:
         bad.unlink(missing_ok=True)
+
+def test_offline_lab_fixtures_smoke(tmp_path):
+    cases = [
+        ("ospf-lab/ospf.py", "ospf-lab/sample_ospf.csv"),
+        ("stp-lab/stp.py", "stp-lab/sample_stp.csv"),
+        ("nat-lab/nat.py", "nat-lab/sample_nat.csv"),
+        ("snmp-audit/audit.py", "snmp-audit/sample_snmp.conf"),
+        ("syslog-analyzer/analyze.py", "syslog-analyzer/sample_syslog.log"),
+        ("netflow-parser/flow.py", "netflow-parser/sample_flows.csv"),
+        ("topology-builder/topology.py", "topology-builder/sample_links.csv"),
+        ("incident-network-triage/triage.py", "incident-network-triage/sample_events.csv"),
+        ("network-config-auditor/audit.py", "network-config-auditor/README.md"),
+        ("soc-log-analyzer/analyzer.py", "soc-log-analyzer/sample_auth.log"),
+    ]
+    for script_rel, data_rel in cases:
+        script = ROOT / script_rel
+        data = ROOT / data_rel
+        r = subprocess.run([sys.executable, str(script), str(data)], text=True, capture_output=True)
+        assert r.returncode == 0, f"{script_rel}: {r.stderr}"
+    report = ROOT / "security-report-template" / "report.py"
+    out = tmp_path / "report.md"
+    r = subprocess.run([sys.executable, str(report), "--title", "CI Test", "--output", str(out)], text=True, capture_output=True)
+    assert r.returncode == 0
+    assert out.is_file()

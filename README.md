@@ -39,6 +39,13 @@ Practical network engineering, security labs, Linux administration, and ethical 
 - [DNS & DHCP Lab](cyber-labs/dns-dhcp-lab/) — local UDP/DNS troubleshooting lab
 - [PCAP Analysis Lab](cyber-labs/pcap-analysis/) — offline packet and DNS analysis
 
+
+- [OSPF Lab](cyber-labs/ospf-lab/) — offline router-ID, area and network validation
+- [STP Lab](cyber-labs/stp-lab/) — bridge identity and priority consistency checks
+- [NAT Policy Lab](cyber-labs/nat-lab/) — offline IPv4 NAT policy validation
+- [SNMP Audit](cyber-labs/snmp-audit/) — configuration review for insecure SNMP settings
+- [Syslog Analyzer](cyber-labs/syslog-analyzer/) — network-device syslog aggregation
+
 ### Enterprise Security
 
 - [Active Directory Security Lab](cyber-labs/active-directory-security-lab/) — offline account and privilege auditing

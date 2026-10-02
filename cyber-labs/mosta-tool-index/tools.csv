@@ -1,0 +1,23 @@
+name,alias,platform,category,purpose
+Nmap,mnmap,Linux+Termux,network,authorized service discovery
+Netcat,mnc,Linux+Termux,network,TCP/UDP connectivity
+Tcpdump,mtcpdump,Linux+Termux,packet,packet capture
+TShark,mtshark,Linux+Termux,packet,CLI packet analysis
+Wireshark,mwireshark,Linux,packet,GUI packet analysis
+Scapy,mscapy,Linux+Termux,packet,packet analysis
+Aircrack-ng,maircrack,Linux+Termux,wireless,authorized Wi-Fi auditing
+Kismet,mkismet,Linux,wireless,wireless monitoring
+Burp Suite,mburp,Linux,web,HTTP security testing
+OWASP ZAP,mzap,Linux,web,web security testing
+Nikto,mnikto,Linux+Termux,web,web assessment
+ffuf,mffuf,Linux+Termux,web,content discovery
+dig,mdig,Linux+Termux,dns,DNS diagnostics
+MTR,mmtr,Linux+Termux,network,path diagnostics
+John the Ripper,mjohn,Linux+Termux,audit,offline password auditing
+Hashcat,mhashcat,Linux,password,offline password auditing
+Hydra,mhydra,Linux+Termux,audit,authorized credential testing
+Zeek,mzeek,Linux,monitoring,network security monitoring
+Suricata,msuricata,Linux,monitoring,IDS/IPS
+Metasploit,mmetsploit,Linux,lab,authorized exploitation research
+SQLMap,msqlmap,Linux+Termux,web,authorized SQL injection testing
+SearchSploit,msearchsploit,Linux,reference,local exploit reference search

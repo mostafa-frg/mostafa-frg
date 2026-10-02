@@ -148,25 +148,30 @@ jobs:
           bash cyber-labs/mosta-terminal/run-route.sh validate-ip 10.10.20.15/24 >/tmp/mosta-route.txt
           grep -q "MOSTA" /tmp/mosta-route.txt
 
-          bash cyber-labs/mosta-terminal/run-http-auditor.sh --help >/tmp/mosta-http.txt || true
-          grep -q "MOSTA" /tmp/mosta-http.txt
+          python -m http.server 8765 >/tmp/mosta-launcher-http.log 2>&1 &
+          http_pid=$!
+          trap 'kill $http_pid 2>/dev/null || true' EXIT
+          sleep 1
+          bash cyber-labs/mosta-terminal/run-http-auditor.sh http://127.0.0.1:8765 >/tmp/mosta-http-launcher.txt
+          grep -q "MOSTA" /tmp/mosta-http-launcher.txt
 
-          bash cyber-labs/mosta-terminal/run-pcap.sh --help >/tmp/mosta-pcap.txt || true
+          bash cyber-labs/mosta-terminal/run-pcap.sh /tmp/mosta-smoke.pcap >/tmp/mosta-pcap.txt
           grep -q "MOSTA" /tmp/mosta-pcap.txt
 
-          bash cyber-labs/mosta-terminal/run-soc.sh --help >/tmp/mosta-soc.txt || true
+          bash cyber-labs/mosta-terminal/run-soc.sh cyber-labs/soc-log-analyzer/sample_auth.log >/tmp/mosta-soc.txt
           grep -q "MOSTA" /tmp/mosta-soc.txt
 
-          bash cyber-labs/mosta-terminal/run-config-audit.sh --help >/tmp/mosta-conf.txt || true
+          bash cyber-labs/mosta-terminal/run-config-audit.sh cyber-labs/config-compliance/configs >/tmp/mosta-conf.txt
           grep -q "MOSTA" /tmp/mosta-conf.txt
 
-          bash cyber-labs/mosta-terminal/run-triage.sh --help >/tmp/mosta-triage.txt || true
+          bash cyber-labs/mosta-terminal/run-triage.sh cyber-labs/incident-network-triage/sample_events.csv >/tmp/mosta-triage.txt
           grep -q "MOSTA" /tmp/mosta-triage.txt
 
           tmp_home="$(mktemp -d)"
           HOME="$tmp_home" bash cyber-labs/mosta-terminal/install.sh
-          test -L "$tmp_home/.local/bin/run-network-toolkit"
-          test -L "$tmp_home/.local/bin/mosta-banner"
+          for name in run-network-toolkit run-http-auditor run-pcap run-soc run-config-audit run-route run-triage mosta-banner; do
+            test -L "$tmp_home/.local/bin/$name"
+          done
 
       - name: Validate Docker Compose definitions
         run: |

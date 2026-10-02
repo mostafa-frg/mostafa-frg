@@ -1,0 +1,14 @@
+{
+  "hostname": "EDGE-SW01",
+  "management_ip": "192.168.10.10/24",
+  "gateway": "192.168.10.1",
+  "vlans": [
+    {"id": 10, "name": "USERS"},
+    {"id": 20, "name": "SERVERS"},
+    {"id": 99, "name": "MGMT"}
+  ],
+  "interfaces": [
+    {"name": "GigabitEthernet0/1", "description": "UPLINK"},
+    {"name": "GigabitEthernet0/2", "description": "DESKTOP-01"}
+  ]
+}

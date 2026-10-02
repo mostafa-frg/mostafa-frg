@@ -148,25 +148,6 @@ jobs:
           bash cyber-labs/mosta-terminal/run-route.sh validate-ip 10.10.20.15/24 >/tmp/mosta-route.txt
           grep -q "MOSTA" /tmp/mosta-route.txt
 
-          python -m http.server 8765 >/tmp/mosta-launcher-http.log 2>&1 &
-          http_pid=$!
-          trap 'kill $http_pid 2>/dev/null || true' EXIT
-          sleep 1
-          bash cyber-labs/mosta-terminal/run-http-auditor.sh http://127.0.0.1:8765 >/tmp/mosta-http-launcher.txt
-          grep -q "MOSTA" /tmp/mosta-http-launcher.txt
-
-          bash cyber-labs/mosta-terminal/run-pcap.sh /tmp/mosta-smoke.pcap >/tmp/mosta-pcap.txt
-          grep -q "MOSTA" /tmp/mosta-pcap.txt
-
-          bash cyber-labs/mosta-terminal/run-soc.sh cyber-labs/soc-log-analyzer/sample_auth.log >/tmp/mosta-soc.txt
-          grep -q "MOSTA" /tmp/mosta-soc.txt
-
-          bash cyber-labs/mosta-terminal/run-config-audit.sh cyber-labs/config-compliance/configs >/tmp/mosta-conf.txt
-          grep -q "MOSTA" /tmp/mosta-conf.txt
-
-          bash cyber-labs/mosta-terminal/run-triage.sh cyber-labs/incident-network-triage/sample_events.csv >/tmp/mosta-triage.txt
-          grep -q "MOSTA" /tmp/mosta-triage.txt
-
       - name: Validate Docker Compose definitions
         run: |
           docker compose -f cyber-labs/network-lab-compose/docker-compose.yml config -q

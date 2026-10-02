@@ -18,7 +18,7 @@ def route_lookup(address, filename):
             net = ipaddress.ip_network(row["prefix"], strict=False)
             if target in net:
                 matches.append((net.prefixlen, row))
-    for _, row in sorted(matches, reverse=True):
+    for _, row in sorted(matches, key=lambda item: item[0], reverse=True):
         print(f"match {row['prefix']} via {row['next_hop']} metric={row['metric']}")
 
 def inventory(filename):

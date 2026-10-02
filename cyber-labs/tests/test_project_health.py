@@ -141,3 +141,21 @@ def test_offline_lab_fixtures_smoke(tmp_path):
     r = subprocess.run([sys.executable, str(report), "--title", "CI Test", "--output", str(out)], text=True, capture_output=True)
     assert r.returncode == 0
     assert out.is_file()
+
+
+def test_remaining_network_validators_reject_empty_or_invalid_inputs(tmp_path):
+    cases = [
+        ("acl-policy-lab/acl.py", "action,protocol,source,destination,port\n"),
+        ("active-directory-security-lab/audit.py", "username,enabled,password_never_expires,admin\n"),
+        ("firewall-rule-validator/validator.py", "id,action,protocol,source,destination,dport\n"),
+        ("routing-lab/routing.py", "id,prefix,next_hop,metric\n"),
+        ("vlan-lab/validate.py", "port,mode,allowed,vlan\n"),
+        ("network-monitor/monitor.py", "host,port\n"),
+    ]
+    for rel, content in cases:
+        data = tmp_path / Path(rel).name
+        data.write_text(content, encoding="utf-8")
+        r = subprocess.run([sys.executable, str(ROOT / rel), str(data), "--once"] if rel.endswith("monitor.py")
+                           else [sys.executable, str(ROOT / rel), str(data)],
+                           text=True, capture_output=True)
+        assert r.returncode != 0, f"{rel} accepted empty data"

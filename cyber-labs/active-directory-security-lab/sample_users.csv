@@ -1,0 +1,5 @@
+username,enabled,password_never_expires,admin
+alice,true,false,false
+svc_backup,true,true,false
+administrator,true,true,true
+bob,false,false,false

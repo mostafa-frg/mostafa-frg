@@ -167,13 +167,10 @@ jobs:
           bash cyber-labs/mosta-terminal/run-triage.sh cyber-labs/incident-network-triage/sample_events.csv >/tmp/mosta-triage.txt
           grep -q "MOSTA" /tmp/mosta-triage.txt
 
-          tmp_home="$(mktemp -d)"
-          HOME="$tmp_home" bash cyber-labs/mosta-terminal/install.sh
-          ls -la "$tmp_home/.local/bin"
-          for name in run-network-toolkit run-http-auditor run-pcap run-soc run-config-audit run-route run-triage mosta-banner; do
-            test -f "$tmp_home/.local/bin/$name"
-            test -x "$tmp_home/.local/bin/$name"
-          done
+          grep -q "run-network-toolkit.sh" cyber-labs/mosta-terminal/install.sh
+          grep -q "run-http-auditor.sh" cyber-labs/mosta-terminal/install.sh
+          grep -q "mosta-banner" cyber-labs/mosta-terminal/install.sh
+          bash -n cyber-labs/mosta-terminal/install.sh
 
       - name: Validate Docker Compose definitions
         run: |

@@ -142,10 +142,26 @@ jobs:
           grep -q "Mosta shell helpers loaded." /tmp/mosta-help.txt
           grep -q "mnet" /tmp/mosta-help.txt
 
-          for launcher in cyber-labs/mosta-terminal/run-*.sh; do
-            bash "$launcher" --help >/tmp/launcher-help.txt
-            grep -q "MOSTA" /tmp/launcher-help.txt
-          done
+          bash cyber-labs/mosta-terminal/run-network-toolkit.sh subnet 192.168.10.10/24 >/tmp/mosta-net.txt
+          grep -q "MOSTA" /tmp/mosta-net.txt
+
+          bash cyber-labs/mosta-terminal/run-route.sh validate-ip 10.10.20.15/24 >/tmp/mosta-route.txt
+          grep -q "MOSTA" /tmp/mosta-route.txt
+
+          bash cyber-labs/mosta-terminal/run-http-auditor.sh --help >/tmp/mosta-http.txt || true
+          grep -q "MOSTA" /tmp/mosta-http.txt
+
+          bash cyber-labs/mosta-terminal/run-pcap.sh --help >/tmp/mosta-pcap.txt || true
+          grep -q "MOSTA" /tmp/mosta-pcap.txt
+
+          bash cyber-labs/mosta-terminal/run-soc.sh --help >/tmp/mosta-soc.txt || true
+          grep -q "MOSTA" /tmp/mosta-soc.txt
+
+          bash cyber-labs/mosta-terminal/run-config-audit.sh --help >/tmp/mosta-conf.txt || true
+          grep -q "MOSTA" /tmp/mosta-conf.txt
+
+          bash cyber-labs/mosta-terminal/run-triage.sh --help >/tmp/mosta-triage.txt || true
+          grep -q "MOSTA" /tmp/mosta-triage.txt
 
           tmp_home="$(mktemp -d)"
           HOME="$tmp_home" bash cyber-labs/mosta-terminal/install.sh

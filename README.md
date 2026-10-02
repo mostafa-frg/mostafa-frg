@@ -45,14 +45,16 @@ Practical network engineering, security labs, Linux administration, and ethical 
 - [NAT Policy Lab](cyber-labs/nat-lab/) — offline IPv4 NAT policy validation
 - [SNMP Audit](cyber-labs/snmp-audit/) — configuration review for insecure SNMP settings
 - [Syslog Analyzer](cyber-labs/syslog-analyzer/) — network-device syslog aggregation
+- [ACL Policy Lab](cyber-labs/acl-policy-lab/) — offline access-control policy validation
+- [Routing Lab](cyber-labs/routing-lab/) — offline route validation and analysis
 
 - [Network Operations Lab](cyber-labs/network-operations-lab/) — isolated Docker topology with services and health checks
 - [Network Engineering Suite](cyber-labs/network-engineering-suite/) — IP validation, longest-prefix route lookup, and inventory tooling
 - [Network Config Compliance](cyber-labs/config-compliance/) — deterministic Cisco-style configuration compliance checks
 - [Network Incident Triage](cyber-labs/incident-network-triage/) — network event timeline and severity analysis
-\n### Linux / Termux Security Toolkit
+### Linux / Termux Security Toolkit
 
-- [Mosta Terminal](cyber-labs/mosta-terminal/) — Linux/Termux launcher with `Mosta` prompt and short lab aliases
+- [Mosta Terminal](cyber-labs/mosta-terminal/) — Linux/Termux launchers with `Mosta` terminal branding and short lab aliases
 - [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) — interfaces, routes, DNS and TCP diagnostics
 - [Security Tool Catalog](cyber-labs/tool-catalog/) — categorized Linux/Termux security-tool reference
 

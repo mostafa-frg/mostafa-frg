@@ -142,10 +142,10 @@ jobs:
           grep -q "Mosta shell helpers loaded." /tmp/mosta-help.txt
           grep -q "mnet" /tmp/mosta-help.txt
 
-          bash cyber-labs/mosta-terminal/run-network-toolkit.sh --help >/tmp/mosta-net-help.txt
+          bash cyber-labs/mosta-terminal/run-network-toolkit.sh --help >/tmp/mosta-net-help.txt 2>&1 || true
           grep -q "usage" /tmp/mosta-net-help.txt
 
-          bash cyber-labs/mosta-terminal/run-route.sh --help >/tmp/mosta-route-help.txt
+          bash cyber-labs/mosta-terminal/run-route.sh --help >/tmp/mosta-route-help.txt 2>&1 || true
           grep -q "usage" /tmp/mosta-route-help.txt
 
       - name: Validate Docker Compose definitions

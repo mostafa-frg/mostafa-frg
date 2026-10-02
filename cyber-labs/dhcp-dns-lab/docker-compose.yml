@@ -1,0 +1,27 @@
+services:
+  dns:
+    image: andyshinn/dnsmasq:2.89
+    command: ["--no-daemon","--log-facility=-","--address=/lab.test/10.50.0.10"]
+    networks:
+      labnet:
+        ipv4_address: 10.50.0.10
+    restart: "no"
+
+  client:
+    image: alpine:3.20
+    command: ["sh","-c","sleep infinity"]
+    networks:
+      labnet:
+        ipv4_address: 10.50.0.20
+    dns:
+      - 10.50.0.10
+    depends_on:
+      - dns
+
+networks:
+  labnet:
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 10.50.0.0/24

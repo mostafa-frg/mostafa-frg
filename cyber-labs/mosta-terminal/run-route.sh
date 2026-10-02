@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 BASE="$(cd "$(dirname "$0")/.." && pwd)"
 source "$(dirname "$0")/banner.sh"
-mosta_banner "ROUTING LAB"
-exec python3 "$BASE/routing-lab/routing.py" "$@"
+mosta_banner "NETWORK ENGINEERING SUITE"
+exec python3 "$BASE/network-engineering-suite/suite.py" "$@"

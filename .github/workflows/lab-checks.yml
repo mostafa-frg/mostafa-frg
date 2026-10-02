@@ -170,7 +170,7 @@ jobs:
           tmp_home="$(mktemp -d)"
           HOME="$tmp_home" bash cyber-labs/mosta-terminal/install.sh
           for name in run-network-toolkit run-http-auditor run-pcap run-soc run-config-audit run-route run-triage mosta-banner; do
-            test -L "$tmp_home/.local/bin/$name"
+            test -x "$tmp_home/.local/bin/$name"
           done
 
       - name: Validate Docker Compose definitions

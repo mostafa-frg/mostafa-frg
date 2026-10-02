@@ -93,7 +93,8 @@ jobs:
           python auditor.py http://127.0.0.1:8765 --json /tmp/http-audit.json
           python - <<'PY'
           import json
-          d=json.load(open("/tmp/http-audit.json"))
+          with open("/tmp/http-audit.json", encoding="utf-8") as fh:
+              d = json.load(fh)
           assert d["status"] == 200
           assert "security_checks" in d
           PY
@@ -104,27 +105,26 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import importlib.util
-          from pathlib import Path
 
           def load(path, name):
-              spec=importlib.util.spec_from_file_location(name, path)
-              mod=importlib.util.module_from_spec(spec)
+              spec = importlib.util.spec_from_file_location(name, path)
+              mod = importlib.util.module_from_spec(spec)
               spec.loader.exec_module(mod)
               return mod
 
-          api=load("cyber-labs/api-security-lab/app.py","api_lab")
-          c=api.app.test_client()
+          api = load("cyber-labs/api-security-lab/app.py", "api_lab")
+          c = api.app.test_client()
           assert c.get("/api/user/1").status_code == 401
-          assert c.get("/api/user/1", headers={"Authorization":"Bearer lab-user-token"}).status_code == 200
-          assert c.get("/api/secure-user/2", headers={"Authorization":"Bearer lab-user-token"}).status_code == 403
+          assert c.get("/api/user/1", headers={"Authorization": "Bearer lab-user-token"}).status_code == 200
+          assert c.get("/api/secure-user/2", headers={"Authorization": "Bearer lab-user-token"}).status_code == 403
 
-          web=load("cyber-labs/web-security-lab/app.py","web_lab")
-          c=web.app.test_client()
+          web = load("cyber-labs/web-security-lab/app.py", "web_lab")
+          c = web.app.test_client()
           assert c.get("/").status_code == 200
           assert b"hello" in c.get("/search?q=hello").data
 
-          ctf=load("cyber-labs/ctf-web-lab/app.py","ctf_lab")
-          c=ctf.app.test_client()
+          ctf = load("cyber-labs/ctf-web-lab/app.py", "ctf_lab")
+          c = ctf.app.test_client()
           assert c.get("/profile/1").status_code == 200
           assert c.get("/profile/2").status_code == 200
           print("Flask lab smoke tests passed")
@@ -137,12 +137,20 @@ jobs:
           for f in cyber-labs/mosta-terminal/*.sh; do
             bash -n "$f"
           done
+
           bash cyber-labs/mosta-terminal/mosta.sh >/tmp/mosta-help.txt
           grep -q "Mosta shell helpers loaded." /tmp/mosta-help.txt
-          bash cyber-labs/mosta-terminal/run-network-toolkit.sh --help >/tmp/mosta-net-help.txt
-          grep -q "usage" /tmp/mosta-net-help.txt
-          bash cyber-labs/mosta-terminal/run-route.sh --help >/tmp/mosta-route-help.txt
-          grep -q "usage" /tmp/mosta-route-help.txt
+          grep -q "mnet" /tmp/mosta-help.txt
+
+          for launcher in cyber-labs/mosta-terminal/run-*.sh; do
+            bash "$launcher" --help >/tmp/launcher-help.txt
+            grep -q "MOSTA" /tmp/launcher-help.txt
+          done
+
+          tmp_home="$(mktemp -d)"
+          HOME="$tmp_home" bash cyber-labs/mosta-terminal/install.sh
+          test -L "$tmp_home/.local/bin/run-network-toolkit"
+          test -L "$tmp_home/.local/bin/mosta-banner"
 
       - name: Validate Docker Compose definitions
         run: |

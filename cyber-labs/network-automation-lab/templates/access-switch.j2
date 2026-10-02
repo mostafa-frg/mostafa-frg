@@ -1,0 +1,8 @@
+hostname {{ hostname }}
+!
+interface {{ interface }}
+ description {{ description }}
+ switchport mode access
+ switchport access vlan {{ vlan }}
+ spanning-tree portfast
+!

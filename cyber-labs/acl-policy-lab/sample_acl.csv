@@ -1,0 +1,4 @@
+action,protocol,source,destination,port,log
+allow,tcp,10.10.0.0/16,192.168.10.0/24,443,yes
+deny,tcp,0.0.0.0/0,192.168.10.0/24,23,yes
+allow,tcp,10.10.20.0/24,192.168.10.0/24,443,no

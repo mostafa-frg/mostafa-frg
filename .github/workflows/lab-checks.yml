@@ -18,7 +18,114 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Install lab dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r cyber-labs/pcap-analysis/requirements.txt
+          python -m pip install -r cyber-labs/api-security-lab/requirements.txt
+          python -m pip install -r cyber-labs/web-security-lab/requirements.txt
+          python -m pip install -r cyber-labs/ctf-web-lab/requirements.txt
+
       - name: Compile all Python projects
         run: python -m compileall -q cyber-labs
+
       - name: Run portfolio tests
         run: python -m unittest discover -s cyber-labs/tests -p 'test_*.py' -v
+
+      - name: Smoke test offline network tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cyber-labs
+          python network-toolkit/nettool.py subnet 192.168.10.10/24
+          python subnet-planner/planner.py 10.20.0.0/24 26 27 28
+          python netflow-parser/flow.py netflow-parser/sample_flows.csv
+          python ospf-lab/ospf.py ospf-lab/sample_ospf.csv
+          python stp-lab/stp.py stp-lab/sample_stp.csv
+          python nat-lab/nat.py nat-lab/sample_nat.csv
+          python snmp-audit/audit.py snmp-audit/sample_snmp.conf
+          python syslog-analyzer/analyze.py syslog-analyzer/sample_syslog.log
+          python network-engineering-suite/suite.py validate-ip 10.10.20.15/24
+          python network-engineering-suite/suite.py route-lookup 10.10.20.15 network-engineering-suite/sample_routes.csv
+          python network-engineering-suite/suite.py summarize-inventory network-engineering-suite/inventory.csv
+          python config-compliance/check.py config-compliance/configs
+          python incident-network-triage/triage.py incident-network-triage/sample_events.csv
+          python vlan-lab/validate.py vlan-lab/sample_switch.csv
+          python firewall-rule-validator/validator.py firewall-rule-validator/sample_rules.csv
+          python topology-builder/topology.py topology-builder/sample_links.csv
+          python network-config-auditor/audit.py network-config-auditor/sample_config.txt 2>/dev/null || true
+          python network-automation-lab/build.py network-automation-lab/inventory.json --out /tmp/mosta-config
+          python active-directory-security-lab/audit.py active-directory-security-lab/sample_users.csv
+          python privilege-escalation-lab/check.py --path /etc/passwd
+          python security-report-template/report.py --title "CI Smoke Test" --output /tmp/mosta-report.md
+          python linux-network-toolbox/toolbox.py --help
+
+      - name: Smoke test PCAP analyzer
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cyber-labs/pcap-analysis
+          python - <<'PY'
+          from scapy.all import IP, TCP, UDP, DNS, DNSQR, wrpcap
+          packets = [
+              IP(src="10.0.0.1", dst="10.0.0.2")/TCP(sport=1234,dport=80),
+              IP(src="10.0.0.2", dst="10.0.0.53")/UDP(sport=4000,dport=53)/DNS(rd=1,qd=DNSQR(qname="example.test")),
+          ]
+          wrpcap("/tmp/mosta-smoke.pcap", packets)
+          PY
+          python analyze.py /tmp/mosta-smoke.pcap
+
+      - name: Smoke test HTTP auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cyber-labs/http-security-auditor
+          python -m http.server 8765 >/tmp/mosta-http.log 2>&1 &
+          pid=$!
+          trap 'kill $pid 2>/dev/null || true' EXIT
+          sleep 1
+          python auditor.py http://127.0.0.1:8765 --json /tmp/http-audit.json
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/http-audit.json"))
+          assert d["status"] == 200
+          assert "security_checks" in d
+          PY
+
+      - name: Smoke test local Flask labs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          def load(path, name):
+              spec=importlib.util.spec_from_file_location(name, path)
+              mod=importlib.util.module_from_spec(spec)
+              spec.loader.exec_module(mod)
+              return mod
+
+          api=load("cyber-labs/api-security-lab/app.py","api_lab")
+          c=api.app.test_client()
+          assert c.get("/api/user/1").status_code == 401
+          assert c.get("/api/user/1", headers={"Authorization":"Bearer lab-user-token"}).status_code == 200
+          assert c.get("/api/secure-user/2", headers={"Authorization":"Bearer lab-user-token"}).status_code == 403
+
+          web=load("cyber-labs/web-security-lab/app.py","web_lab")
+          c=web.app.test_client()
+          assert c.get("/").status_code == 200
+          assert b"hello" in c.get("/search?q=hello").data
+
+          ctf=load("cyber-labs/ctf-web-lab/app.py","ctf_lab")
+          c=ctf.app.test_client()
+          assert c.get("/profile/1").status_code == 200
+          assert c.get("/profile/2").status_code == 200
+          print("Flask lab smoke tests passed")
+          PY
+
+      - name: Validate Docker Compose definitions
+        run: |
+          docker compose -f cyber-labs/network-lab-compose/docker-compose.yml config -q
+          docker compose -f cyber-labs/network-operations-lab/docker-compose.yml config -q

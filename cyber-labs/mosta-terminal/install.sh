@@ -17,9 +17,11 @@ launchers=(
 )
 
 for f in "${launchers[@]}"; do
-  ln -sf "$BASE/$f" "$BIN/${f%.sh}"
+  cp -f "$BASE/$f" "$BIN/${f%.sh}"
+  chmod +x "$BIN/${f%.sh}"
 done
-ln -sf "$BASE/banner.sh" "$BIN/mosta-banner"
+cp -f "$BASE/banner.sh" "$BIN/mosta-banner"
+chmod +x "$BIN/mosta-banner"
 
 for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
   [ -f "$rc" ] || continue

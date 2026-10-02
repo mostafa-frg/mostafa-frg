@@ -50,7 +50,13 @@ Practical network engineering, security labs, Linux administration, and ethical 
 - [Network Engineering Suite](cyber-labs/network-engineering-suite/) — IP validation, longest-prefix route lookup, and inventory tooling
 - [Network Config Compliance](cyber-labs/config-compliance/) — deterministic Cisco-style configuration compliance checks
 - [Network Incident Triage](cyber-labs/incident-network-triage/) — network event timeline and severity analysis
-\n### Enterprise Security
+\n### Linux / Termux Security Toolkit
+
+- [Mosta Terminal](cyber-labs/mosta-terminal/) — Linux/Termux launcher with `Mosta` prompt and short lab aliases
+- [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) — interfaces, routes, DNS and TCP diagnostics
+- [Security Tool Catalog](cyber-labs/tool-catalog/) — categorized Linux/Termux security-tool reference
+
+### Enterprise Security
 
 - [Active Directory Security Lab](cyber-labs/active-directory-security-lab/) — offline account and privilege auditing
 - [Privilege Escalation Lab](cyber-labs/privilege-escalation-lab/) — Linux privilege-boundary checks

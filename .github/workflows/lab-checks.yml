@@ -26,6 +26,7 @@ jobs:
           python -m pip install -r cyber-labs/api-security-lab/requirements.txt
           python -m pip install -r cyber-labs/web-security-lab/requirements.txt
           python -m pip install -r cyber-labs/ctf-web-lab/requirements.txt
+          python -m pip install pytest
 
       - name: Compile all Python projects
         run: python -m compileall -q cyber-labs

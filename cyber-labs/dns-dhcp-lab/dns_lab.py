@@ -1,17 +1,39 @@
 #!/usr/bin/env python3
-import argparse,socket,json,time
+import argparse
+import json
+import socket
+import time
 
-def serve(host,port):
- s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.bind((host,port))
- print(f"DNS lab listening on {host}:{port}")
- try:
-  while True:
-   data,addr=s.recvfrom(4096)
-   reply={"source":addr[0],"bytes":len(data),"received":time.time()}
-   s.sendto(json.dumps(reply).encode(),addr)
-   print(reply)
- except KeyboardInterrupt: pass
- finally: s.close()
+def serve(host: str, port: int) -> None:
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        sock.settimeout(1.0)
+        sock.bind((host, port))
+        print(f"DNS lab listening on {host}:{port}")
+        try:
+            while True:
+                try:
+                    data, addr = sock.recvfrom(4096)
+                except socket.timeout:
+                    continue
+                reply = {"source": addr[0], "bytes": len(data), "received": time.time()}
+                sock.sendto(json.dumps(reply).encode("utf-8"), addr)
+                print(reply)
+        except KeyboardInterrupt:
+            print("\nStopped.")
 
-p=argparse.ArgumentParser(); p.add_argument("--host",default="127.0.0.1"); p.add_argument("--port",type=int,default=53535)
-a=p.parse_args(); serve(a.host,a.port)
+def main():
+    p = argparse.ArgumentParser(description="Local UDP transport lab; not a real DNS/DHCP server.")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=53535)
+    a = p.parse_args()
+    if not 1 <= a.port <= 65535:
+        p.error("--port must be 1-65535")
+    if not a.host.strip():
+        p.error("--host cannot be empty")
+    try:
+        serve(a.host, a.port)
+    except OSError as exc:
+        p.error(f"cannot start UDP lab: {exc}")
+
+if __name__ == "__main__":
+    main()

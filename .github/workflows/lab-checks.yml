@@ -56,6 +56,11 @@ jobs:
           python firewall-rule-validator/validator.py firewall-rule-validator/sample_rules.csv
           python topology-builder/topology.py topology-builder/sample_links.csv
           python network-automation-lab/build.py network-automation-lab/inventory.json --out /tmp/mosta-config
+          python acl-policy-lab/acl.py acl-policy-lab/sample_acl.csv
+          python routing-lab/routing.py routing-lab/sample_routes.csv
+          python ipam/ipam.py init 10.40.0.0/24
+          python ipam/ipam.py add 10.40.0.0/24 ci-test
+          python ipam/ipam.py list
           python active-directory-security-lab/audit.py active-directory-security-lab/sample_users.csv
           python privilege-escalation-lab/check.py --path /etc/passwd
           python security-report-template/report.py --title "CI Smoke Test" --output /tmp/mosta-report.md
@@ -125,7 +130,17 @@ jobs:
           print("Flask lab smoke tests passed")
           PY
 
+      - name: Validate shell launchers
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in cyber-labs/mosta-terminal/*.sh; do
+            bash -n "$f"
+          done
+          test -x cyber-labs/mosta-terminal/install.sh
+
       - name: Validate Docker Compose definitions
         run: |
           docker compose -f cyber-labs/network-lab-compose/docker-compose.yml config -q
           docker compose -f cyber-labs/network-operations-lab/docker-compose.yml config -q
+          docker compose -f cyber-labs/dhcp-dns-lab/docker-compose.yml config -q

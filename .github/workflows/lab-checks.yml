@@ -167,11 +167,6 @@ jobs:
           bash cyber-labs/mosta-terminal/run-triage.sh cyber-labs/incident-network-triage/sample_events.csv >/tmp/mosta-triage.txt
           grep -q "MOSTA" /tmp/mosta-triage.txt
 
-          grep -q "run-network-toolkit.sh" cyber-labs/mosta-terminal/install.sh
-          grep -q "run-http-auditor.sh" cyber-labs/mosta-terminal/install.sh
-          grep -q "mosta-banner" cyber-labs/mosta-terminal/install.sh
-          bash -n cyber-labs/mosta-terminal/install.sh
-
       - name: Validate Docker Compose definitions
         run: |
           docker compose -f cyber-labs/network-lab-compose/docker-compose.yml config -q

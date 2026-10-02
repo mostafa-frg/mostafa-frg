@@ -1,0 +1,5 @@
+port,mode,vlan,allowed
+Gi0/1,access,10,
+Gi0/2,access,20,
+Gi0/24,trunk,,10;20;30
+Gi0/23,trunk,,10;20;30

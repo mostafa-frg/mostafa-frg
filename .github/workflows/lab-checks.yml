@@ -1,4 +1,5 @@
-name: lab-checks
+name: Lab Checks
+
 on:
   push:
     paths:
@@ -7,14 +8,17 @@ on:
   pull_request:
     paths:
       - "cyber-labs/**"
+      - ".github/workflows/lab-checks.yml"
 
 jobs:
-  python-compile:
+  python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
-      - name: Compile Python labs
+          python-version: "3.12"
+      - name: Compile all Python projects
         run: python -m compileall -q cyber-labs
+      - name: Run portfolio tests
+        run: python -m unittest discover -s cyber-labs/tests -p 'test_*.py' -v

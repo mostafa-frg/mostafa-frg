@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-BASE="$(cd "$(dirname "$0")" && pwd)"
+BASE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 ROOT="$(cd "$BASE/.." && pwd)"
 BIN="$HOME/.local/bin"
 pass=0; fail=0; warn=0

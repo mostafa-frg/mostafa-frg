@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -euo pipefail
+BASE="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$BASE/.." && pwd)"
+source "$BASE/banner.sh"
+mosta_banner "LINUX NETWORK TOOLBOX"
+exec python3 "$ROOT/linux-network-toolbox/toolbox.py" "$@"

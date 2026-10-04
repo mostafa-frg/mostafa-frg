@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+BASE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
+source "$BASE/banner.sh"
+mosta_banner "MOSTA EXTERNAL TOOLS"
+cat <<'EOF'
+Core command wrappers:
+  mnmap        Nmap
+  mnc          Netcat
+  mdig         dig
+  mtcpdump     tcpdump
+  msocat       socat
+  mtracepath   tracepath
+  mtraceroute  traceroute
+  mwhois       whois
+  mcurl        curl
+  mwget        wget
+  mssh         OpenSSH
+
+Install/update the core Termux set with:
+  mosta-external-install
+
+For Android limitations, use:
+  mosta-doctor
+EOF

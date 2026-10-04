@@ -4,7 +4,7 @@ BASE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 source "$BASE/banner.sh"
 mosta_banner "MOSTA EXTERNAL TOOLS"
 cat <<'EOF'
-Core command wrappers:
+Core network commands:
   mnmap        Nmap
   mnc          Netcat
   mdig         dig
@@ -17,9 +17,26 @@ Core command wrappers:
   mwget        wget
   mssh         OpenSSH
 
-Install/update the core Termux set with:
-  mosta-external-install
+Optional security / analysis commands:
+  mtshark      TShark
+  mwireshark   Wireshark
+  mscapy       Scapy
+  maircrack    Aircrack-ng
+  mkismet      Kismet
+  mnikto       Nikto
+  mffuf        ffuf
+  mmtr         MTR
+  mjohn        John the Ripper
+  mhashcat     Hashcat
+  mhydra       Hydra
+  mzeek        Zeek
+  msuricata    Suricata
+  mmetsploit   Metasploit
+  msqlmap      SQLMap
+  msearchsploit SearchSploit
+  mburp        Burp Suite
+  mzap         OWASP ZAP
 
-For Android limitations, use:
-  mosta-doctor
+All wrappers pass arguments to the real executable. Availability is checked at runtime.
+Use mosta-doctor for the installed core set.
 EOF

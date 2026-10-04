@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+set -euo pipefail
+NAME="$(basename "$0")"
+case "$NAME" in
+  mnmap) tool="nmap"; label="NMAP" ;;
+  mnc) tool="netcat-openbsd"; label="NETCAT" ;;
+  mdig) tool="dig"; label="DIG" ;;
+  mtcpdump) tool="tcpdump"; label="TCPDUMP" ;;
+  msocat) tool="socat"; label="SOCAT" ;;
+  mtracepath) tool="tracepath"; label="TRACEPATH" ;;
+  mtraceroute) tool="traceroute"; label="TRACEROUTE" ;;
+  mwhois) tool="whois"; label="WHOIS" ;;
+  mcurl) tool="curl"; label="CURL" ;;
+  mwget) tool="wget"; label="WGET" ;;
+  mssh) tool="ssh"; label="OPENSSH" ;;
+  *) echo "Unknown Mosta external command: $NAME" >&2; exit 2 ;;
+esac
+command -v "$tool" >/dev/null 2>&1 || {
+  printf '%s\n' "ERROR: $tool is not installed. Run mosta-external-install on Termux."
+  exit 127
+}
+printf '\n========================================\n'
+printf '                 MOSTA\n'
+printf '              %s\n' "$label"
+printf '========================================\n\n'
+exec "$tool" "$@"

@@ -12,14 +12,18 @@ if command -v python3 >/dev/null 2>&1; then pyver="$(python3 -c 'import sys; pri
 if command -v git >/dev/null 2>&1; then ok "Git"; else bad "Git is not installed"; fi
 if [ -d "$ROOT" ]; then ok "Mosta repository layout"; else bad "Repository layout not found"; fi
 if [ -d "$BIN" ]; then ok "Local bin directory"; else note "$BIN does not exist yet"; fi
-for name in run-network-toolkit run-http-auditor run-pcap run-soc run-config-audit run-route run-triage mosta-banner mosta-doctor mnet mhttp mpcap msoc mconf mroute mtriage mtool; do
+for name in run-network-toolkit run-http-auditor run-pcap run-soc run-config-audit run-route run-triage mosta-banner mosta-doctor mosta mnet mhttp mpcap msoc mconf mroute mtriage mtool mosta-tools mosta-external-install; do
   if command -v "$name" >/dev/null 2>&1; then ok "$name"; else note "$name is not installed in PATH"; fi
 done
 if command -v python3 >/dev/null 2>&1; then
   if python3 -c 'import importlib.util,sys; sys.exit(0 if all(importlib.util.find_spec(m) for m in ("flask","scapy")) else 1)'; then ok "Python lab dependencies (Flask + Scapy)"; else note "Optional Python lab dependencies are incomplete (Flask/Scapy)"; fi
 fi
-for tool in nmap nc dig tcpdump tshark; do
-  if command -v "$tool" >/dev/null 2>&1; then ok "$tool available"; else note "$tool not installed (external tool)"; fi
+for tool in nmap netcat-openbsd dig tcpdump socat tracepath traceroute whois curl wget ssh; do
+  if command -v "$tool" >/dev/null 2>&1; then ok "$tool available"; else note "$tool not installed"; fi
 done
-if [ "$fail" -eq 0 ]; then printf '\nPASS: %d checks, %d optional notices.\n' "$pass" "$warn"; exit 0; fi
+if [ -f "/data/data/com.termux/files/usr/bin/pkg" ]; then
+  note "Termux: Android permissions can restrict raw packet capture and privileged scans"
+  note "tshark/mtr may require additional repositories/root capabilities"
+fi
+if [ "$fail" -eq 0 ]; then printf '\nPASS: %d checks, %d notices.\n' "$pass" "$warn"; exit 0; fi
 printf '\nFAIL: %d failed, %d passed, %d notices.\n' "$fail" "$pass" "$warn"; exit 1

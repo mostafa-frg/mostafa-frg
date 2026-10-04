@@ -152,7 +152,8 @@ jobs:
           fake_bin="$(mktemp -d)"
           printf '%s\n' '#!/usr/bin/env bash' 'printf "fake nmap\\n"' >"$fake_bin/nmap"
           chmod +x "$fake_bin/nmap"
-          PATH="$fake_bin:$PATH" bash cyber-labs/mosta-terminal/mosta-external --version | grep -q "MOSTA"
+          ln -s "$PWD/cyber-labs/mosta-terminal/mosta-external" "$fake_bin/mnmap"
+          PATH="$fake_bin:$PATH" "$fake_bin/mnmap" --version | grep -q "MOSTA"
           rm -rf "$fake_bin" "$tmp_home"
 
       - name: Validate Docker Compose definitions

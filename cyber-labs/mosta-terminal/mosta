@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+BASE="$(cd "$(dirname "$0")" && pwd)"
+source "$BASE/banner.sh"
+mosta_banner "MOSTA TOOLKIT"
+cat <<'EOF'
+Available commands:
+  mnet     Network Toolkit
+  mhttp    HTTP Security Auditor
+  mpcap    PCAP Analysis
+  msoc     SOC Log Analyzer
+  mconf    Network Config Compliance
+  mroute   Network Engineering Suite
+  mtriage  Network Incident Triage
+  mtool    Linux Network Toolbox
+  mosta-doctor  Installation and dependency health check
+EOF

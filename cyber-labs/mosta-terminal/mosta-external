@@ -6,17 +6,35 @@ case "$NAME" in
   mnc) tool="netcat-openbsd"; label="NETCAT" ;;
   mdig) tool="dig"; label="DIG" ;;
   mtcpdump) tool="tcpdump"; label="TCPDUMP" ;;
+  mtshark) tool="tshark"; label="TSHARK" ;;
+  mwireshark) tool="wireshark"; label="WIRESHARK" ;;
+  mscapy) tool="scapy"; label="SCAPY" ;;
   msocat) tool="socat"; label="SOCAT" ;;
   mtracepath) tool="tracepath"; label="TRACEPATH" ;;
   mtraceroute) tool="traceroute"; label="TRACEROUTE" ;;
+  mmtr) tool="mtr"; label="MTR" ;;
   mwhois) tool="whois"; label="WHOIS" ;;
   mcurl) tool="curl"; label="CURL" ;;
   mwget) tool="wget"; label="WGET" ;;
   mssh) tool="ssh"; label="OPENSSH" ;;
+  maircrack) tool="aircrack-ng"; label="AIRCRACK-NG" ;;
+  mkismet) tool="kismet"; label="KISMET" ;;
+  mnikto) tool="nikto"; label="NIKTO" ;;
+  mffuf) tool="ffuf"; label="FFUF" ;;
+  mjohn) tool="john"; label="JOHN THE RIPPER" ;;
+  mhashcat) tool="hashcat"; label="HASHCAT" ;;
+  mhydra) tool="hydra"; label="HYDRA" ;;
+  mzeek) tool="zeek"; label="ZEEK" ;;
+  msuricata) tool="suricata"; label="SURICATA" ;;
+  mmetsploit) tool="msfconsole"; label="METASPLOIT" ;;
+  msqlmap) tool="sqlmap"; label="SQLMAP" ;;
+  msearchsploit) tool="searchsploit"; label="SEARCHSPLOIT" ;;
+  mburp) tool="burpsuite"; label="BURP SUITE" ;;
+  mzap) tool="zaproxy"; label="OWASP ZAP" ;;
   *) echo "Unknown Mosta external command: $NAME" >&2; exit 2 ;;
 esac
 command -v "$tool" >/dev/null 2>&1 || {
-  printf '%s\n' "ERROR: $tool is not installed. Run mosta-external-install on Termux."
+  printf '%s\n' "ERROR: $tool is not installed on this system."
   exit 127
 }
 printf '\n========================================\n'

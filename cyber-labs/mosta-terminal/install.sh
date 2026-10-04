@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-BASE="$(cd "$(dirname "$0")" && pwd)"
+BASE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 ROOT="$(cd "$BASE/.." && pwd)"
 BIN="$HOME/.local/bin"
 if [ -f "/data/data/com.termux/files/usr/bin/pkg" ]; then
@@ -10,18 +10,16 @@ if [ -f "/data/data/com.termux/files/usr/bin/pkg" ]; then
 fi
 command -v python3 >/dev/null 2>&1 || { printf '%s\n' "ERROR: python3 is required." >&2; exit 1; }
 command -v bash >/dev/null 2>&1 || { printf '%s\n' "ERROR: bash is required." >&2; exit 1; }
+command -v readlink >/dev/null 2>&1 || { printf '%s\n' "ERROR: readlink is required." >&2; exit 1; }
 mkdir -p "$BIN"
 launchers=(run-network-toolkit.sh run-http-auditor.sh run-pcap.sh run-soc.sh run-config-audit.sh run-route.sh run-triage.sh)
 commands=(mosta mosta-doctor.sh mnet mhttp mpcap msoc mconf mroute mtriage mtool)
 for f in "${launchers[@]}"; do
-  cp -f "$BASE/$f" "$BIN/${f%.sh}"
-  chmod +x "$BIN/${f%.sh}"
+  ln -sfn "$BASE/$f" "$BIN/${f%.sh}"
 done
-cp -f "$BASE/banner.sh" "$BIN/mosta-banner"
-chmod +x "$BIN/mosta-banner"
+ln -sfn "$BASE/banner.sh" "$BIN/mosta-banner"
 for f in "${commands[@]}"; do
-  cp -f "$BASE/$f" "$BIN/${f%.sh}"
-  chmod +x "$BIN/${f%.sh}"
+  ln -sfn "$BASE/$f" "$BIN/${f%.sh}"
 done
 if command -v python3 >/dev/null 2>&1; then
   while IFS= read -r req; do

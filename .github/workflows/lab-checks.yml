@@ -149,7 +149,11 @@ jobs:
           mnet subnet 192.168.50.10/24 | grep -q "Network: 192.168.50.0"
           mosta | grep -q "mosta-doctor"
           mosta-doctor
-          rm -rf "$tmp_home"
+          fake_bin="$(mktemp -d)"
+          printf '%s\n' '#!/usr/bin/env bash' 'printf "fake nmap\\n"' >"$fake_bin/nmap"
+          chmod +x "$fake_bin/nmap"
+          PATH="$fake_bin:$PATH" bash cyber-labs/mosta-terminal/mosta-external --version | grep -q "MOSTA"
+          rm -rf "$fake_bin" "$tmp_home"
 
       - name: Validate Docker Compose definitions
         run: |

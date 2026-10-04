@@ -21,9 +21,12 @@ fi
 for tool in nmap netcat-openbsd dig tcpdump socat tracepath traceroute whois curl wget ssh; do
   if command -v "$tool" >/dev/null 2>&1; then ok "$tool available"; else note "$tool not installed"; fi
 done
+for tool in tshark wireshark scapy aircrack-ng kismet nikto ffuf mtr john hashcat hydra zeek suricata msfconsole sqlmap searchsploit burpsuite zaproxy; do
+  if command -v "$tool" >/dev/null 2>&1; then ok "optional: $tool"; else note "optional: $tool not installed"; fi
+done
 if [ -f "/data/data/com.termux/files/usr/bin/pkg" ]; then
   note "Termux: Android permissions can restrict raw packet capture and privileged scans"
-  note "tshark/mtr may require additional repositories/root capabilities"
+  note "Some optional tools require root, root-repo, or a full Linux environment"
 fi
 if [ "$fail" -eq 0 ]; then printf '\nPASS: %d checks, %d notices.\n' "$pass" "$warn"; exit 0; fi
 printf '\nFAIL: %d failed, %d passed, %d notices.\n' "$fail" "$pass" "$warn"; exit 1

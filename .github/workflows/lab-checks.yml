@@ -130,17 +130,26 @@ jobs:
           print("Flask lab smoke tests passed")
           PY
 
-      - name: Validate shell launchers
+      - name: Validate shell launchers and installer
         shell: bash
         run: |
           set -euo pipefail
           for f in cyber-labs/mosta-terminal/*.sh; do
             bash -n "$f"
           done
-
           bash cyber-labs/mosta-terminal/mosta.sh >/tmp/mosta-help.txt
           grep -q "Mosta shell helpers loaded." /tmp/mosta-help.txt
-
+          test -x cyber-labs/mosta-terminal/install.sh || chmod +x cyber-labs/mosta-terminal/install.sh
+          tmp_home="$(mktemp -d)"
+          HOME="$tmp_home" bash cyber-labs/mosta-terminal/install.sh
+          export HOME="$tmp_home"
+          export PATH="$HOME/.local/bin:$PATH"
+          test -L "$HOME/.local/bin/mnet"
+          test -L "$HOME/.local/bin/run-network-toolkit"
+          mnet subnet 192.168.50.10/24 | grep -q "Network: 192.168.50.0"
+          mosta | grep -q "mosta-doctor"
+          mosta-doctor
+          rm -rf "$tmp_home"
 
       - name: Validate Docker Compose definitions
         run: |

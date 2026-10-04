@@ -1,33 +1,40 @@
 #!/usr/bin/env bash
 set -euo pipefail
-
 BASE="$(cd "$(dirname "$0")" && pwd)"
+ROOT="$(cd "$BASE/.." && pwd)"
 BIN="$HOME/.local/bin"
-
+if [ -f "/data/data/com.termux/files/usr/bin/pkg" ]; then
+  printf '%s\n' "Termux detected."
+  pkg update -y
+  pkg install -y python git
+fi
+command -v python3 >/dev/null 2>&1 || { printf '%s\n' "ERROR: python3 is required." >&2; exit 1; }
+command -v bash >/dev/null 2>&1 || { printf '%s\n' "ERROR: bash is required." >&2; exit 1; }
 mkdir -p "$BIN"
-
-launchers=(
-  run-network-toolkit.sh
-  run-http-auditor.sh
-  run-pcap.sh
-  run-soc.sh
-  run-config-audit.sh
-  run-route.sh
-  run-triage.sh
-)
-
+launchers=(run-network-toolkit.sh run-http-auditor.sh run-pcap.sh run-soc.sh run-config-audit.sh run-route.sh run-triage.sh)
+commands=(mosta mosta-doctor.sh mnet mhttp mpcap msoc mconf mroute mtriage mtool)
 for f in "${launchers[@]}"; do
   cp -f "$BASE/$f" "$BIN/${f%.sh}"
   chmod +x "$BIN/${f%.sh}"
 done
 cp -f "$BASE/banner.sh" "$BIN/mosta-banner"
 chmod +x "$BIN/mosta-banner"
-
+for f in "${commands[@]}"; do
+  cp -f "$BASE/$f" "$BIN/${f%.sh}"
+  chmod +x "$BIN/${f%.sh}"
+done
+if command -v python3 >/dev/null 2>&1; then
+  while IFS= read -r req; do
+    [ -z "$req" ] && continue
+    printf '%s\n' "Installing Python dependencies from $req"
+    python3 -m pip install -r "$ROOT/$req"
+  done < <(find "$ROOT" -mindepth 2 -maxdepth 2 -name requirements.txt -print | sed "s#^$ROOT/##" | sort)
+fi
 for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
   [ -f "$rc" ] || continue
   line='export PATH="$HOME/.local/bin:$PATH"'
   grep -Fqx "$line" "$rc" || printf '%s\n' "$line" >> "$rc"
 done
-
-printf '%s\n' "Installed Mosta launchers to $BIN"
-printf '%s\n' "Restart the shell or reload your shell rc file."
+printf '\n%s\n' "Mosta installation completed."
+printf '%s\n' "Reload your shell, then run: mosta-doctor"
+printf '%s\n' "Main commands: mosta, mnet, mhttp, mpcap, msoc, mconf, mroute, mtriage, mtool"

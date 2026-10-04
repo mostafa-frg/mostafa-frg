@@ -1,46 +1,93 @@
-# Mosta Terminal Branding
+# Mosta Terminal
 
-Professional-style Linux/Termux launchers for the repository labs.
+A practical Linux/Termux command layer for the repository labs and selected native networking tools.
 
-The upstream tool or project name is preserved. MOSTA is only the terminal branding shown above it.
+Mosta is branding only. The real upstream command names remain unchanged.
 
 ## Requirements
 
-- Linux or Termux
+- Termux on Android or a Linux shell
 - Bash
-- Python 3.10+ for Python-based labs
-- Project-specific dependencies listed in each lab requirements.txt
+- Python 3.10+
+- Git
+- Python dependencies are installed from each lab requirements.txt
+
+Termux packages are managed with pkg. The official Termux repositories provide packages such as Nmap, DNS utilities, and netcat variants. Android permissions can still limit privileged packet operations.
 
 ## Installation
 
 From the repository root:
 
     cd cyber-labs/mosta-terminal
-    chmod +x *.sh
+    chmod +x install.sh
     ./install.sh
 
-The installer supports both Bash and Zsh when their rc files already exist.
+The installer:
 
-## Launchers
+1. Detects Termux.
+2. Installs Python and Git if needed.
+3. Installs the repository Python dependencies.
+4. Installs the core Termux networking set on Termux.
+5. Creates symlinked commands under ~/.local/bin.
+6. Adds ~/.local/bin to existing Bash/Zsh rc files.
+7. Leaves a health check at mosta-doctor.
 
-Each launcher prints the branding header and then executes the real project:
+Reload the shell after installation.
 
-- run-network-toolkit
-- run-http-auditor
-- run-pcap
-- run-soc
-- run-config-audit
-- run-route
-- run-triage
+## Mosta commands
+
+    mosta
+    mosta-doctor
+
+    mnet
+    mhttp
+    mpcap
+    msoc
+    mconf
+    mroute
+    mtriage
+    mtool
+
+Native networking tools are exposed with Mosta branding:
+
+    mnmap
+    mnc
+    mdig
+    mtcpdump
+    msocat
+    mtracepath
+    mtraceroute
+    mwhois
+    mcurl
+    mwget
+    mssh
+
+The wrapper passes arguments directly to the real executable.
 
 Example:
 
-    run-network-toolkit subnet 192.168.10.0/24
+    mnmap --version
 
-For a project with third-party dependencies, install that project's requirements first:
+The banner is added before the real Nmap output; Nmap itself is not renamed or reimplemented.
 
-    python3 -m pip install -r ../pcap-analysis/requirements.txt
+## External tool installation
+
+On Termux, the core set can be installed or refreshed with:
+
+    mosta-external-install
+
+The core set is deliberately limited to portable networking and administration utilities. Tools requiring root, additional repositories, GUI components, or device-specific Android privileges are not falsely marked as installed.
+
+For example, tshark/Wireshark-related functionality and mtr can involve additional Termux repositories or Android/root limitations, so they are treated separately rather than forced into the base installer.
+
+## Validation
+
+Run:
+
+    mosta-doctor
+
+The health check verifies the repository, Python, Git, Mosta commands, Python lab dependencies, and the core external networking tools. On Termux it also reports Android-specific privilege limitations.
 
 ## Design rule
 
-The launchers do not rename, replace, or reimplement upstream security tools. They only provide terminal branding and invoke the selected authorized lab or tool.
+The Mosta layer is an execution and installation layer. It does not rename, replace, or reimplement Nmap, Netcat, tcpdump, Scapy, or other upstream tools. Security testing should remain limited to systems and networks you own or are explicitly authorized to test.

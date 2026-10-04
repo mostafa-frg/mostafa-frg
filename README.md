@@ -64,6 +64,19 @@ The repository is intentionally practical. Most labs take local input or supplie
 - [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) — interfaces, routes, DNS, and TCP diagnostics
 - [Security Tool Catalog](cyber-labs/tool-catalog/) — categorized Linux/Termux security-tool reference
 
+### Termux Quick Start
+
+The repository can be installed as a native Mosta command layer on Termux:
+
+```bash
+cd cyber-labs/mosta-terminal
+chmod +x install.sh
+./install.sh
+mosta-doctor
+```
+
+Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtriage`, and `mtool`. Native networking tools are exposed through `mnmap`, `mnc`, `mdig`, `mtcpdump`, and related Mosta aliases.
+
 ### Enterprise Security
 
 - [Active Directory Security Lab](cyber-labs/active-directory-security-lab/) — offline account and privilege auditing

@@ -14,6 +14,9 @@ command -v readlink >/dev/null 2>&1 || { printf '%s\n' "ERROR: readlink is requi
 mkdir -p "$BIN"
 launchers=(run-network-toolkit.sh run-http-auditor.sh run-pcap.sh run-soc.sh run-config-audit.sh run-route.sh run-triage.sh)
 commands=(mosta mosta-doctor.sh mnet mhttp mpcap msoc mconf mroute mtriage mtool)
+for f in "${launchers[@]}" "${commands[@]}" banner.sh; do
+  chmod +x "$BASE/$f"
+done
 for f in "${launchers[@]}"; do
   ln -sfn "$BASE/$f" "$BIN/${f%.sh}"
 done

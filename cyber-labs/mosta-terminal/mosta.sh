@@ -14,6 +14,7 @@ mhelp() {
   printf '%s\n' "  mroute   Network Engineering Suite"
   printf '%s\n' "  mtriage  Network Incident Triage"
   printf '%s\n' "  mtool    Linux Network Toolbox"
+  printf '%s\n' "  mfim     File Integrity Monitor"
   printf '%s\n' "  mvlan    VLAN Lab"
   printf '%s\n' "  mfw      Firewall Rule Validator"
   printf '%s\n' "  mospf    OSPF Lab"
@@ -49,6 +50,7 @@ msoc(){ mrun "SOC LOG ANALYZER" python3 "$ROOT/soc-log-analyzer/analyzer.py" "$@
 mconf(){ mrun "NETWORK CONFIG COMPLIANCE" python3 "$ROOT/config-compliance/check.py" "$@"; }
 mroute(){ mrun "NETWORK ENGINEERING SUITE" python3 "$ROOT/network-engineering-suite/suite.py" "$@"; }
 mtriage(){ mrun "NETWORK INCIDENT TRIAGE" python3 "$ROOT/incident-network-triage/triage.py" "$@"; }
+mfim(){ mrun "FILE INTEGRITY MONITOR" python3 "$ROOT/file-integrity-monitor/fim.py" "$@"; }
 mtool(){ mrun "LINUX NETWORK TOOLBOX" python3 "$ROOT/linux-network-toolbox/toolbox.py" "$@"; }
 mvlan(){ mrun "VLAN LAB" python3 "$ROOT/vlan-lab/validate.py" "$@"; }
 mfw(){ mrun "FIREWALL RULE VALIDATOR" python3 "$ROOT/firewall-rule-validator/validator.py" "$@"; }

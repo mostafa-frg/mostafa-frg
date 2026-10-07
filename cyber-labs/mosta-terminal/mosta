@@ -13,6 +13,7 @@ Available commands:
   mroute   Network Engineering Suite
   mtriage  Network Incident Triage
   mtool    Linux Network Toolbox
+  mfim     File Integrity Monitor
   mvlan    VLAN Lab
   mfw      Firewall Rule Validator
   mospf    OSPF Lab

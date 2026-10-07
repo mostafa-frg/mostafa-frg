@@ -7,6 +7,7 @@ Store verified screenshots captured from real CLI execution here.
 - `02-normalized-output.png` — normalized JSON/JSONL output
 - `03-mixed-input.png` — multiple supported input formats
 - `04-error-handling.png` — invalid/malformed input handling
+- `05-detection-pipeline.png` — normalized records flowing into detection alerts
 
 ## Format
 - PNG preferred

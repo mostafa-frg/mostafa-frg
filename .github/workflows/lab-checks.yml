@@ -156,8 +156,8 @@ jobs:
           printf '%s\n' '#!/usr/bin/env bash' 'printf "fake nmap\\n"' >"$fake_bin/nmap"
           chmod +x "$fake_bin/nmap"
           ln -s "$PWD/cyber-labs/mosta-terminal/mosta-external" "$fake_bin/mnmap"
-          PATH="$fake_bin:$PATH" "$fake_bin/mnmap" --version > /tmp/mosta-external-test.txt
-          grep -q "MOSTA" /tmp/mosta-external-test.txt
+          MOSTA_BANNER=always PATH="$fake_bin:$PATH" "$fake_bin/mnmap" --version > /tmp/mosta-external-test.txt 2>&1
+          grep -q "Network & Security Toolkit" /tmp/mosta-external-test.txt
           rm -rf "$fake_bin" "$tmp_home"
 
       - name: Validate Docker Compose definitions

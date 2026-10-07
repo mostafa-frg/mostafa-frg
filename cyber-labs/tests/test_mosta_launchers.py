@@ -38,8 +38,10 @@ def test_installed_lab_commands_run(tmp_path):
     for cmd in LAB_COMMANDS:
         link = tmp_path / ".local" / "bin" / cmd
         assert link.is_symlink(), f"{cmd} not installed"
-        r = subprocess.run([cmd, "--help"], env=env, text=True, capture_output=True, timeout=30)
-        assert "MOSTA" in r.stdout, f"{cmd}: no Mosta banner ({r.stderr[-200:]})"
+        r = subprocess.run([cmd, "--help"], env=dict(env, MOSTA_BANNER="always"), text=True, capture_output=True, timeout=30)
+        assert "Network & Security Toolkit" in r.stderr, f"{cmd}: no Mosta banner ({r.stderr[-200:]})"
+        assert r.stderr.count("Network & Security Toolkit") == 1, f"{cmd}: banner drawn twice"
+        assert "Network & Security Toolkit" not in r.stdout, f"{cmd}: banner leaked to stdout"
 
 
 def test_mosta_lists_all_lab_commands():

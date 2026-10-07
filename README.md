@@ -65,6 +65,17 @@ The repository is intentionally practical. Most labs take local input or supplie
 - [Security Tool Catalog](cyber-labs/tool-catalog/) — categorized Linux/Termux security-tool reference
 - [Mosta Tool Index](cyber-labs/mosta-tool-index/) — upstream tool to Mosta alias map (`mnmap`, `mmasscan`, `mdnsrecon`, ...)
 
+### Quick Start (any Linux / macOS / Termux)
+
+```bash
+git clone https://github.com/mostafa-frg/mostafa-frg.git
+cd mostafa-frg/cyber-labs/mosta-terminal
+./install.sh && mosta-doctor
+mnet subnet 192.168.10.10/24     # every tool opens with the MOSTA banner
+```
+
+The graphic banner is drawn on stderr only in an interactive terminal, so pipes, JSON output and scripts stay clean. Set `MOSTA_BANNER=never` to hide it, `MOSTA_BANNER=always` to force it, or `NO_COLOR=1` to disable colors.
+
 ### Termux Quick Start
 
 The repository can be installed as a native Mosta command layer on Termux:

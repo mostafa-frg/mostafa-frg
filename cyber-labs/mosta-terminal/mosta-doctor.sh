@@ -7,7 +7,8 @@ pass=0; fail=0; warn=0
 ok(){ printf '[✓] %s\n' "$1"; pass=$((pass+1)); }
 bad(){ printf '[✗] %s\n' "$1"; fail=$((fail+1)); }
 note(){ printf '[!] %s\n' "$1"; warn=$((warn+1)); }
-printf '\n========================================\n                 MOSTA\n              SYSTEM CHECK\n========================================\n\n'
+source "$BASE/banner.sh"
+mosta_banner "SYSTEM CHECK"
 if command -v python3 >/dev/null 2>&1; then pyver="$(python3 -c 'import sys; print(str(sys.version_info.major)+"."+str(sys.version_info.minor))')"; ok "Python $pyver"; else bad "python3 is not installed"; fi
 if command -v git >/dev/null 2>&1; then ok "Git"; else bad "Git is not installed"; fi
 if [ -d "$ROOT" ]; then ok "Mosta repository layout"; else bad "Repository layout not found"; fi

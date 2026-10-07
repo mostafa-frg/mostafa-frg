@@ -1,3 +1,11 @@
+try:  # Mosta start-up banner (optional; shown only on an interactive terminal)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "common"))
+    import mosta_banner as _mosta_banner
+    _mosta_banner.show("API SECURITY LAB")
+except Exception:
+    pass
 from flask import Flask,request,jsonify
 app=Flask(__name__)
 USERS={"1":{"id":"1","name":"Alice","role":"user"},"2":{"id":"2","name":"Bob","role":"admin"}}

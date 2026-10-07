@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+try:  # Mosta start-up banner (optional; shown only on an interactive terminal)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "common"))
+    import mosta_banner as _mosta_banner
+    _mosta_banner.show("NETWORK CONFIG AUDITOR")
+except Exception:
+    pass
 import argparse,re
 RULES=[("TELNET_VTY",r"transport input telnet","Use SSH for VTY management"),("HTTP_SERVER",r"^\s*ip http server\s*$","Disable cleartext HTTP management"),("NO_SECRET",r"^\s*enable password\s+","Prefer enable secret"),("SNMP_PUBLIC",r"snmp-server community\s+(public|private)\b","Replace default SNMP communities")]
 def main():

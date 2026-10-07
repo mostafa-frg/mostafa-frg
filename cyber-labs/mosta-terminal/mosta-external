@@ -44,8 +44,6 @@ command -v "$tool" >/dev/null 2>&1 || {
   printf '%s\n' "ERROR: $tool is not installed on this system."
   exit 127
 }
-printf '\n========================================\n'
-printf '                 MOSTA\n'
-printf '              %s\n' "$label"
-printf '========================================\n\n'
+source "$(cd "$(dirname "$(readlink -f "$0")")" && pwd)/banner.sh"
+mosta_banner "$label"
 exec "$tool" "$@"

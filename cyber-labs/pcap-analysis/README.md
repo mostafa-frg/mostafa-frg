@@ -17,4 +17,5 @@ Only analyze captures you own or are authorized to inspect.
 ```bash
 pip install -r requirements.txt
 python3 analyze.py capture.pcap
+python3 analyze.py --demo      # try it with a generated sample capture
 ```

@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+try:  # Mosta start-up banner (optional; shown only on an interactive terminal)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "common"))
+    import mosta_banner as _mosta_banner
+    _mosta_banner.show("IPAM LAB")
+except Exception:
+    pass
 import argparse,csv,ipaddress,os
 
 DB=os.path.join(os.path.dirname(os.path.abspath(__file__)), "allocations.csv")

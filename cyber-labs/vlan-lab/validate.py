@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+try:  # Mosta start-up banner (optional; shown only on an interactive terminal)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "common"))
+    import mosta_banner as _mosta_banner
+    _mosta_banner.show("VLAN LAB")
+except Exception:
+    pass
 import argparse,csv
 def vlan_set(value):
  result=set()

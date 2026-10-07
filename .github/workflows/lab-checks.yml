@@ -69,6 +69,7 @@ jobs:
           python security-report-template/report.py --title "CI Smoke Test" --output /tmp/mosta-report.md
           python linux-network-toolbox/toolbox.py --help
           python file-integrity-monitor/fim.py --help
+          python detection-rules-engine/engine.py --validate-only detection-rules-engine/sample_rules.json detection-rules-engine/sample_events.jsonl
 
       - name: Smoke test PCAP analyzer
         shell: bash

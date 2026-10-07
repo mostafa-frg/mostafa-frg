@@ -1,0 +1,11 @@
+[
+  {"id": "SSH-BRUTE", "title": "SSH brute force", "level": "high", "tags": ["attack.t1110"],
+   "match": {"all": [{"field": "event", "op": "eq", "value": "ssh_failed"}]},
+   "threshold": {"count": 5, "window": 300, "group_by": ["src_ip"]}},
+  {"id": "ROOT-LOGIN", "title": "Successful root login from outside 10.0.0.0/8", "level": "critical", "tags": ["attack.t1078"],
+   "match": {"all": [{"field": "event", "op": "eq", "value": "ssh_accepted"}, {"field": "user", "op": "eq", "value": "root"}, {"field": "src_ip", "op": "regex", "value": "^(?!10\\.)"}]}},
+  {"id": "SUSP-CMD", "title": "Suspicious download-and-execute command", "level": "medium", "tags": ["attack.t1059"],
+   "match": {"all": [{"field": "process.cmdline", "op": "regex", "value": "(curl|wget).*\\|\\s*(sh|bash)"}]}},
+  {"id": "ADMIN-ADD", "title": "User added to admin group", "level": "high", "tags": ["attack.t1098"],
+   "match": {"any": [{"field": "event", "op": "eq", "value": "group_member_added"}], "all": [{"field": "group", "op": "in", "value": ["sudo", "wheel", "Administrators"]}]}}
+]

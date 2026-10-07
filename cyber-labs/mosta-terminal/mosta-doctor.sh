@@ -13,7 +13,7 @@ if command -v python3 >/dev/null 2>&1; then pyver="$(python3 -c 'import sys; pri
 if command -v git >/dev/null 2>&1; then ok "Git"; else bad "Git is not installed"; fi
 if [ -d "$ROOT" ]; then ok "Mosta repository layout"; else bad "Repository layout not found"; fi
 if [ -d "$BIN" ]; then ok "Local bin directory"; else note "$BIN does not exist yet"; fi
-for name in run-network-toolkit run-http-auditor run-pcap run-soc run-config-audit run-route run-triage run-fim run-vlan run-firewall run-ospf run-stp run-nat run-acl run-snmp run-syslog run-flow run-ipam run-subnet run-topology run-ad-audit run-privcheck run-report run-cfg-audit run-dns-lab run-monitor run-scan run-automation mosta-banner mosta-doctor mosta mnet mhttp mpcap msoc mconf mroute mtriage mtool mfim mvlan mfw mospf mstp mnat macl msnmp msyslog mflow mipam msubnet mtopo mad mpriv mreport mcfg mdns mmon mscan mauto mosta-tools mosta-external-install; do
+for name in run-network-toolkit run-http-auditor run-pcap run-soc run-config-audit run-route run-triage run-fim run-detect run-vlan run-firewall run-ospf run-stp run-nat run-acl run-snmp run-syslog run-flow run-ipam run-subnet run-topology run-ad-audit run-privcheck run-report run-cfg-audit run-dns-lab run-monitor run-scan run-automation mosta-banner mosta-doctor mosta mnet mhttp mpcap msoc mconf mroute mtriage mtool mfim mdet mvlan mfw mospf mstp mnat macl msnmp msyslog mflow mipam msubnet mtopo mad mpriv mreport mcfg mdns mmon mscan mauto mosta-tools mosta-external-install; do
   if command -v "$name" >/dev/null 2>&1; then ok "$name"; else note "$name is not installed in PATH"; fi
 done
 if command -v python3 >/dev/null 2>&1; then

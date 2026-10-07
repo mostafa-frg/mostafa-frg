@@ -17,7 +17,7 @@ Practical network engineering, security testing, Linux administration, and defen
 ![Python](https://img.shields.io/badge/Python-3.8%2B%20(static%20check)-3776AB?logo=python&logoColor=white)
 ![Platform](https://img.shields.io/badge/Linux-tested-2ea44f)
 ![Termux](https://img.shields.io/badge/Termux-supported%20(not%20yet%20tested)-yellow)
-![Tools](https://img.shields.io/badge/30%20CLI%20tools%20%2B%203%20web%20labs-0ea5e9)
+![Tools](https://img.shields.io/badge/31%20CLI%20tools%20%2B%203%20web%20labs-0ea5e9)
 ![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20unittest-8b5cf6)
 ![License](https://img.shields.io/badge/use-authorized%20only-orange)
 
@@ -91,6 +91,7 @@ The repository is intentionally practical. Most labs take local input or supplie
 | [Network Config Compliance](cyber-labs/config-compliance/) | deterministic Cisco-style configuration compliance checks | `mconf` |
 | [Network Incident Triage](cyber-labs/incident-network-triage/) | network event timeline and severity analysis | `mtriage` |
 | [File Integrity Monitor](cyber-labs/file-integrity-monitor/) | SHA-256 baseline and tamper detection (added/removed/modified/permissions, optional HMAC) | `mfim` |
+| [Detection Rules Engine](cyber-labs/detection-rules-engine/) | JSON detection rules over JSONL logs: conditions, thresholds, grouping, severity and ATT&CK tags | `mdet` |
 
 ### Linux / Termux
 
@@ -144,7 +145,7 @@ Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtri
 
 ## What is verified (and what is not)
 
-- **Verified:** 30 pytest tests and the unittest suite pass; every CLI runs on sample data; the three Flask labs serve requests; shell launchers install and run from a clean `HOME` and virtualenv on Linux (tested with Python 3.13).
+- **Verified:** 35 pytest tests and the unittest suite pass; every CLI runs on sample data; the three Flask labs serve requests; shell launchers install and run from a clean `HOME` and virtualenv on Linux (tested with Python 3.13).
 - **Static check only:** compatibility with Python 3.8-3.12 (no syntax newer than 3.8 is used, but older interpreters were not run).
 - **Not tested:** real Termux/Android devices and macOS. The installer uses `readlink -f`, which stock macOS does not provide, so macOS is not claimed as supported.
 - **CI:** the workflow is defined in `.github/workflows/lab-checks.yml`; check the badge above for the live result.

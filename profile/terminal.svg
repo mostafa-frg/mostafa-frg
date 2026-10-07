@@ -19,9 +19,9 @@
 <g font-family="monospace" font-size="15">
 <rect x="520" y="70" width="350" height="250" rx="10" fill="#0d1117" stroke="#30363d"/>
 <text x="540" y="100" fill="#8b949e">repository facts</text>
-<text x="540" y="132" fill="#c9d1d9">30  <tspan fill="#8b949e">command-line tools</tspan></text>
+<text x="540" y="132" fill="#c9d1d9">31  <tspan fill="#8b949e">command-line tools</tspan></text>
 <text x="540" y="160" fill="#c9d1d9">3   <tspan fill="#8b949e">local web labs (Flask)</tspan></text>
-<text x="540" y="188" fill="#c9d1d9">30  <tspan fill="#8b949e">pytest tests</tspan></text>
+<text x="540" y="188" fill="#c9d1d9">31  <tspan fill="#8b949e">pytest tests</tspan></text>
 <text x="540" y="216" fill="#c9d1d9">3   <tspan fill="#8b949e">Docker Compose labs</tspan></text>
 <text x="540" y="244" fill="#c9d1d9">3.8+ <tspan fill="#8b949e">Python (static check)</tspan></text>
 <text x="540" y="278" fill="#3fb950">tested on Linux</text>

@@ -16,7 +16,7 @@ LAB_COMMANDS = {
     "mpriv": "privilege-escalation-lab/check.py", "mreport": "security-report-template/report.py",
     "mcfg": "network-config-auditor/audit.py", "mdns": "dns-dhcp-lab/dns_lab.py",
     "mmon": "network-monitor/monitor.py", "mscan": "network-security-lab/scanner.py",
-    "mauto": "network-automation-lab/build.py", "mfim": "file-integrity-monitor/fim.py",
+    "mauto": "network-automation-lab/build.py", "mfim": "file-integrity-monitor/fim.py", "mdet": "detection-rules-engine/engine.py",
 }
 
 

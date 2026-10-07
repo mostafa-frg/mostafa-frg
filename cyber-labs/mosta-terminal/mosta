@@ -13,5 +13,25 @@ Available commands:
   mroute   Network Engineering Suite
   mtriage  Network Incident Triage
   mtool    Linux Network Toolbox
+  mvlan    VLAN Lab
+  mfw      Firewall Rule Validator
+  mospf    OSPF Lab
+  mstp     STP Lab
+  mnat     NAT Policy Lab
+  macl     ACL Policy Lab
+  msnmp    SNMP Audit
+  msyslog  Syslog Analyzer
+  mflow    NetFlow Analyzer
+  mipam    IPAM Lab
+  msubnet  Subnet Planner
+  mtopo    Topology Builder
+  mad      Active Directory Security Lab
+  mpriv    Privilege Escalation Lab
+  mreport  Security Report Template
+  mcfg     Network Config Auditor
+  mdns     DNS & DHCP Lab
+  mmon     Network Monitor
+  mscan    Network Security Lab (authorized targets only)
+  mauto    Network Automation Lab
   mosta-doctor  Installation and dependency health check
 EOF

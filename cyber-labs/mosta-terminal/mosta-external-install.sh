@@ -10,7 +10,7 @@ mkdir -p "$BIN"
 pkg update -y
 pkg install -y nmap netcat-openbsd dnsutils tracepath traceroute tcpdump socat curl wget openssh whois
 chmod +x "$BASE/mosta-external"
-for name in mnmap mnc mdig mtcpdump msocat mtracepath mtraceroute mwhois mcurl mwget mssh; do
+for name in mnmap mnc mdig mtcpdump msocat mtracepath mtraceroute mwhois mcurl mwget mssh mnslookup mss; do
   ln -sfn "$BASE/mosta-external" "$BIN/$name"
 done
 printf '\n%s\n' "Core Termux network tools installed."

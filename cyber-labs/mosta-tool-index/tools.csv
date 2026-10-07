@@ -21,3 +21,17 @@ Suricata,msuricata,Linux,monitoring,IDS/IPS
 Metasploit,mmetsploit,Linux,lab,authorized exploitation research
 SQLMap,msqlmap,Linux+Termux,web,authorized SQL injection testing
 SearchSploit,msearchsploit,Linux,reference,local exploit reference search
+Socat,msocat,Linux+Termux,network,relay and socket diagnostics
+traceroute,mtraceroute,Linux+Termux,network,path diagnostics
+tracepath,mtracepath,Linux+Termux,network,path MTU diagnostics
+whois,mwhois,Linux+Termux,dns,domain registration lookup
+curl,mcurl,Linux+Termux,web,HTTP requests
+wget,mwget,Linux+Termux,web,file retrieval
+OpenSSH,mssh,Linux+Termux,remote,secure remote shell
+Masscan,mmasscan,Linux+Termux,network,authorized high-speed port discovery
+WhatWeb,mwhatweb,Linux,web,web technology fingerprinting
+wifite,mwifite,Linux,wireless,authorized Wi-Fi auditing automation
+dnsrecon,mdnsrecon,Linux+Termux,dns,DNS enumeration for authorized domains
+dnsenum,mdnsenum,Linux,dns,DNS enumeration for authorized domains
+nslookup,mnslookup,Linux+Termux,dns,DNS lookup
+ss (iproute2),mss,Linux,network,socket statistics

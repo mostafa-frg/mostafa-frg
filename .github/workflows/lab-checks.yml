@@ -34,6 +34,9 @@ jobs:
       - name: Run portfolio tests
         run: python -m unittest discover -s cyber-labs/tests -p 'test_*.py' -v
 
+      - name: Run pytest suites
+        run: python -m pytest -q cyber-labs/tests
+
       - name: Smoke test offline network tools
         shell: bash
         run: |

@@ -31,6 +31,13 @@ case "$NAME" in
   msearchsploit) tool="searchsploit"; label="SEARCHSPLOIT" ;;
   mburp) tool="burpsuite"; label="BURP SUITE" ;;
   mzap) tool="zaproxy"; label="OWASP ZAP" ;;
+  mmasscan) tool="masscan"; label="MASSCAN" ;;
+  mwhatweb) tool="whatweb"; label="WHATWEB" ;;
+  mwifite) tool="wifite"; label="WIFITE" ;;
+  mdnsrecon) tool="dnsrecon"; label="DNSRECON" ;;
+  mdnsenum) tool="dnsenum"; label="DNSENUM" ;;
+  mnslookup) tool="nslookup"; label="NSLOOKUP" ;;
+  mss) tool="ss"; label="SS" ;;
   *) echo "Unknown Mosta external command: $NAME" >&2; exit 2 ;;
 esac
 command -v "$tool" >/dev/null 2>&1 || {

@@ -63,6 +63,7 @@ The repository is intentionally practical. Most labs take local input or supplie
 - [Mosta Terminal](cyber-labs/mosta-terminal/) — Linux/Termux launchers with `Mosta` terminal branding and short aliases
 - [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) — interfaces, routes, DNS, and TCP diagnostics
 - [Security Tool Catalog](cyber-labs/tool-catalog/) — categorized Linux/Termux security-tool reference
+- [Mosta Tool Index](cyber-labs/mosta-tool-index/) — upstream tool to Mosta alias map (`mnmap`, `mmasscan`, `mdnsrecon`, ...)
 
 ### Termux Quick Start
 
@@ -75,7 +76,7 @@ chmod +x install.sh
 mosta-doctor
 ```
 
-Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtriage`, and `mtool`. Native networking tools are exposed through `mnmap`, `mnc`, `mdig`, `mtcpdump`, and related Mosta aliases.
+Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtriage`, and `mtool`. Every lab also has a short command: `mvlan`, `mfw`, `mospf`, `mstp`, `mnat`, `macl`, `msnmp`, `msyslog`, `mflow`, `mipam`, `msubnet`, `mtopo`, `mad`, `mpriv`, `mreport`, `mcfg`, `mdns`, `mmon`, `mscan`, and `mauto`. Native networking tools are exposed through `mnmap`, `mnc`, `mdig`, `mtcpdump`, and related Mosta aliases.
 
 ### Enterprise Security
 
@@ -99,7 +100,7 @@ Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtri
 Every change runs through GitHub Actions. The CI job currently checks:
 
 - Python compilation and CLI help paths
-- unit and integration tests
+- unit and integration tests (unittest and pytest)
 - offline lab fixtures and negative cases
 - PCAP analysis with generated test traffic
 - local HTTP and Flask lab behavior

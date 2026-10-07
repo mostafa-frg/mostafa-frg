@@ -12,6 +12,36 @@ Practical network engineering, security testing, Linux administration, and defen
 
 </div>
 
+<div align="center">
+
+![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?logo=python&logoColor=white)
+![Platform](https://img.shields.io/badge/Linux%20%7C%20macOS%20%7C%20Termux-supported-2ea44f)
+![Tools](https://img.shields.io/badge/CLI%20tools-32-0ea5e9)
+![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20unittest-8b5cf6)
+![License](https://img.shields.io/badge/use-authorized%20only-orange)
+
+</div>
+
+---
+
+## Preview
+
+Every tool opens with the Mosta banner in an interactive terminal:
+
+```text
+   __  __  ___  ____ _____  _
+  |  \/  |/ _ \/ ___|_   _|/ \
+  | |\/| | | | \___ \ | | / _ \
+  | |  | | |_| |___) || |/ ___ \
+  |_|  |_|\___/|____/ |_/_/   \_\
+╭──────────────────────────────────────╮
+│ ▸ NETWORK TOOLKIT                    │
+│ Network & Security Toolkit · v1.1.0  │
+│ by Mostafa Mahmoud                   │
+│ ⚠ Authorized use only                │
+╰──────────────────────────────────────╯
+```
+
 ---
 
 ## About

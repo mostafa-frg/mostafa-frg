@@ -14,9 +14,10 @@ Practical network engineering, security testing, Linux administration, and defen
 
 <div align="center">
 
-![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?logo=python&logoColor=white)
-![Platform](https://img.shields.io/badge/Linux%20%7C%20macOS%20%7C%20Termux-supported-2ea44f)
-![Tools](https://img.shields.io/badge/CLI%20tools-32-0ea5e9)
+![Python](https://img.shields.io/badge/Python-3.8%2B%20(static%20check)-3776AB?logo=python&logoColor=white)
+![Platform](https://img.shields.io/badge/Linux-tested-2ea44f)
+![Termux](https://img.shields.io/badge/Termux-supported%20(not%20yet%20tested)-yellow)
+![Tools](https://img.shields.io/badge/29%20CLI%20tools%20%2B%203%20web%20labs-0ea5e9)
 ![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20unittest-8b5cf6)
 ![License](https://img.shields.io/badge/use-authorized%20only-orange)
 
@@ -26,7 +27,7 @@ Practical network engineering, security testing, Linux administration, and defen
 
 ## Preview
 
-Every tool opens with the Mosta banner in an interactive terminal:
+Every Python tool and `m*` command opens with the Mosta banner in an interactive terminal:
 
 ```text
    __  __  ___  ____ _____  _
@@ -95,7 +96,7 @@ The repository is intentionally practical. Most labs take local input or supplie
 - [Security Tool Catalog](cyber-labs/tool-catalog/) — categorized Linux/Termux security-tool reference
 - [Mosta Tool Index](cyber-labs/mosta-tool-index/) — upstream tool to Mosta alias map (`mnmap`, `mmasscan`, `mdnsrecon`, ...)
 
-### Quick Start (any Linux / macOS / Termux)
+### Quick Start (Linux)
 
 ```bash
 git clone https://github.com/mostafa-frg/mostafa-frg.git
@@ -136,9 +137,16 @@ Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtri
 - [SOC Log Analyzer](cyber-labs/soc-log-analyzer/) — SSH authentication-log analysis
 - [Security Assessment Report Template](cyber-labs/security-report-template/) — repeatable security-report generation
 
+## What is verified (and what is not)
+
+- **Verified:** 24 pytest tests and the unittest suite pass; every CLI runs on sample data; the three Flask labs serve requests; shell launchers install and run from a clean `HOME` and virtualenv on Linux (tested with Python 3.13).
+- **Static check only:** compatibility with Python 3.8-3.12 (no syntax newer than 3.8 is used, but older interpreters were not run).
+- **Not tested:** real Termux/Android devices and macOS. The installer uses `readlink -f`, which stock macOS does not provide, so macOS is not claimed as supported.
+- **CI:** the workflow is defined in `.github/workflows/lab-checks.yml`; check the badge above for the live result.
+
 ## Validation
 
-Every change runs through GitHub Actions. The CI job currently checks:
+The GitHub Actions workflow is configured to check:
 
 - Python compilation and CLI help paths
 - unit and integration tests (unittest and pytest)

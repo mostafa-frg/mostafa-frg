@@ -22,7 +22,7 @@ A small offline security-log normalization tool that converts common JSON/JSONL,
 
 The project can feed normalized records directly into the repository's Detection Rules Engine:
 
-    python pipeline.py INPUT.log ../detection-rules-engine/sample_rules.json -o normalized.jsonl
+    python pipeline.py INPUT.log RULES.json -o normalized.jsonl
 
 The pipeline keeps the normalized output schema unchanged. It supplies a compatible `time` value to the detection engine in memory when a record already contains a timestamp.
 

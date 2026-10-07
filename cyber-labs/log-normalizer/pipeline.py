@@ -7,7 +7,7 @@ import importlib.util
 import json
 import sys
 from pathlib import Path
-
+from typing import Optional, Tuple, List, Dict, Any
 
 HERE = Path(__file__).resolve().parent
 ENGINE_PATH = HERE.parent / "detection-rules-engine" / "engine.py"
@@ -22,14 +22,14 @@ def load_engine():
     return module
 
 
-def run_pipeline(input_path: Path, rules_path: Path, output_path: Path | None = None):
+def run_pipeline(
+    input_path: Path, rules_path: Path, output_path: Optional[Path] = None
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     from log_normalizer import normalize_file
 
     engine = load_engine()
     records = normalize_file(input_path)
 
-    # The detection engine accepts either time or timestamp. Keep the normalized
-    # schema intact and add the compatible 'time' field only in pipeline memory.
     events = []
     for record in records:
         event = dict(record)
@@ -57,9 +57,7 @@ def main(argv=None) -> int:
     )
     parser.add_argument("input", help="Raw log file")
     parser.add_argument("rules", help="Detection rules JSON file")
-    parser.add_argument(
-        "-o", "--output", help="Write normalized JSONL to this file"
-    )
+    parser.add_argument("-o", "--output", help="Write normalized JSONL to this file")
     parser.add_argument("--json", action="store_true", help="Machine-readable output")
     args = parser.parse_args(argv)
 

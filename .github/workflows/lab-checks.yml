@@ -71,6 +71,16 @@ jobs:
           python file-integrity-monitor/fim.py --help
           python detection-rules-engine/engine.py --validate-only detection-rules-engine/sample_rules.json detection-rules-engine/sample_events.jsonl
 
+      - name: Test log normalizer and detection pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cyber-labs/log-normalizer
+          python -m unittest discover -s tests -p 'test_*.py' -v
+          printf '%s\n' '{"event":"authentication","action":"failed","user":"demo","src_ip":"192.0.2.10"}' > /tmp/mosta-normalizer.jsonl
+          python log_normalizer.py /tmp/mosta-normalizer.jsonl >/tmp/mosta-normalized.jsonl
+          test -s /tmp/mosta-normalized.jsonl
+
       - name: Smoke test PCAP analyzer
         shell: bash
         run: |

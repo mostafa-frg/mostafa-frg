@@ -92,6 +92,7 @@ The repository is intentionally practical. Most labs take local input or supplie
 | [Network Incident Triage](cyber-labs/incident-network-triage/) | network event timeline and severity analysis | `mtriage` |
 | [File Integrity Monitor](cyber-labs/file-integrity-monitor/) | SHA-256 baseline and tamper detection (added/removed/modified/permissions, optional HMAC) | `mfim` |
 | [Detection Rules Engine](cyber-labs/detection-rules-engine/) | JSON detection rules over JSONL logs: conditions, thresholds, grouping, severity and ATT&CK tags | `mdet` |
+| [Log Normalizer](cyber-labs/log-normalizer/) | offline normalization of JSON/JSONL, syslog and authentication records with a detection-pipeline integration | — |
 
 ### Linux / Termux
 

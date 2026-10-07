@@ -1,0 +1,5 @@
+Oct  8 01:12:01 web01 sshd[1842]: Failed password for admin from 192.0.2.44 port 55221 ssh2
+Oct  8 01:12:20 web01 sshd[1842]: Failed password for admin from 192.0.2.44 port 55222 ssh2
+Oct  8 01:12:39 web01 sshd[1842]: Failed password for admin from 192.0.2.44 port 55223 ssh2
+Oct  8 01:13:00 web01 sshd[1842]: Failed password for admin from 192.0.2.44 port 55224 ssh2
+{"time":"2026-10-08T01:13:20Z","event_type":"authentication","action":"failed","user":"admin","src_ip":"192.0.2.44","src_port":55225,"message":"Failed password"}

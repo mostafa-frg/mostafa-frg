@@ -64,37 +64,41 @@ The repository is intentionally practical. Most labs take local input or supplie
 
 ### Network Engineering & Security
 
-- [Network Toolkit](cyber-labs/network-toolkit/) — subnet, DNS, TCP connectivity, and inventory diagnostics
-- [Network Security Lab](cyber-labs/network-security-lab/) — authorized TCP service inventory with JSON reporting
-- [Network Monitor](cyber-labs/network-monitor/) — periodic TCP health checks with JSONL events
-- [Subnet Planner](cyber-labs/subnet-planner/) — IPv4 subnet allocation and capacity planning
-- [IPAM Lab](cyber-labs/ipam/) — CSV-backed IPv4 address allocation
-- [VLAN Lab](cyber-labs/vlan-lab/) — access/trunk and VLAN consistency validation
-- [Firewall Rule Validator](cyber-labs/firewall-rule-validator/) — offline ACL overlap, conflict, and shadowing checks
-- [Network Config Auditor](cyber-labs/network-config-auditor/) — Cisco-style configuration security checks
-- [Network Automation Lab](cyber-labs/network-automation-lab/) — repeatable IOS-style configuration generation
-- [Topology Builder](cyber-labs/topology-builder/) — CSV-to-Graphviz topology generation
-- [NetFlow Analyzer](cyber-labs/netflow-parser/) — offline traffic-flow aggregation
-- [DNS & DHCP Lab](cyber-labs/dns-dhcp-lab/) — local DNS/DHCP troubleshooting lab
-- [PCAP Analysis Lab](cyber-labs/pcap-analysis/) — offline packet and DNS analysis
-- [OSPF Lab](cyber-labs/ospf-lab/) — router-ID, area, and network validation
-- [STP Lab](cyber-labs/stp-lab/) — bridge identity and priority consistency checks
-- [NAT Policy Lab](cyber-labs/nat-lab/) — offline IPv4 NAT policy validation
-- [SNMP Audit](cyber-labs/snmp-audit/) — configuration review for insecure SNMP settings
-- [Syslog Analyzer](cyber-labs/syslog-analyzer/) — network-device syslog aggregation
-- [ACL Policy Lab](cyber-labs/acl-policy-lab/) — offline access-control policy validation
-- [Routing Lab](cyber-labs/routing-lab/) — offline route validation and analysis
-- [Network Operations Lab](cyber-labs/network-operations-lab/) — isolated Docker topology with services and health checks
-- [Network Engineering Suite](cyber-labs/network-engineering-suite/) — IP validation, longest-prefix route lookup, and inventory tooling
-- [Network Config Compliance](cyber-labs/config-compliance/) — deterministic Cisco-style configuration compliance checks
-- [Network Incident Triage](cyber-labs/incident-network-triage/) — network event timeline and severity analysis
+| Project | What it does | Command |
+|---|---|---|
+| [Network Toolkit](cyber-labs/network-toolkit/) | subnet, DNS, TCP connectivity, and inventory diagnostics | `mnet` |
+| [Network Security Lab](cyber-labs/network-security-lab/) | authorized TCP service inventory with JSON reporting | `mscan` |
+| [Network Monitor](cyber-labs/network-monitor/) | periodic TCP health checks with JSONL events | `mmon` |
+| [Subnet Planner](cyber-labs/subnet-planner/) | IPv4 subnet allocation and capacity planning | `msubnet` |
+| [IPAM Lab](cyber-labs/ipam/) | CSV-backed IPv4 address allocation | `mipam` |
+| [VLAN Lab](cyber-labs/vlan-lab/) | access/trunk and VLAN consistency validation | `mvlan` |
+| [Firewall Rule Validator](cyber-labs/firewall-rule-validator/) | offline ACL overlap, conflict, and shadowing checks | `mfw` |
+| [Network Config Auditor](cyber-labs/network-config-auditor/) | Cisco-style configuration security checks | `mcfg` |
+| [Network Automation Lab](cyber-labs/network-automation-lab/) | repeatable IOS-style configuration generation | `mauto` |
+| [Topology Builder](cyber-labs/topology-builder/) | CSV-to-Graphviz topology generation | `mtopo` |
+| [NetFlow Analyzer](cyber-labs/netflow-parser/) | offline traffic-flow aggregation | `mflow` |
+| [DNS & DHCP Lab](cyber-labs/dns-dhcp-lab/) | local DNS/DHCP troubleshooting lab | `mdns` |
+| [PCAP Analysis Lab](cyber-labs/pcap-analysis/) | offline packet and DNS analysis | `mpcap` |
+| [OSPF Lab](cyber-labs/ospf-lab/) | router-ID, area, and network validation | `mospf` |
+| [STP Lab](cyber-labs/stp-lab/) | bridge identity and priority consistency checks | `mstp` |
+| [NAT Policy Lab](cyber-labs/nat-lab/) | offline IPv4 NAT policy validation | `mnat` |
+| [SNMP Audit](cyber-labs/snmp-audit/) | configuration review for insecure SNMP settings | `msnmp` |
+| [Syslog Analyzer](cyber-labs/syslog-analyzer/) | network-device syslog aggregation | `msyslog` |
+| [ACL Policy Lab](cyber-labs/acl-policy-lab/) | offline access-control policy validation | `macl` |
+| [Routing Lab](cyber-labs/routing-lab/) | offline route validation and analysis | — |
+| [Network Operations Lab](cyber-labs/network-operations-lab/) | isolated Docker topology with services and health checks | — |
+| [Network Engineering Suite](cyber-labs/network-engineering-suite/) | IP validation, longest-prefix route lookup, and inventory tooling | `mroute` |
+| [Network Config Compliance](cyber-labs/config-compliance/) | deterministic Cisco-style configuration compliance checks | `mconf` |
+| [Network Incident Triage](cyber-labs/incident-network-triage/) | network event timeline and severity analysis | `mtriage` |
 
 ### Linux / Termux
 
-- [Mosta Terminal](cyber-labs/mosta-terminal/) — Linux/Termux launchers with `Mosta` terminal branding and short aliases
-- [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) — interfaces, routes, DNS, and TCP diagnostics
-- [Security Tool Catalog](cyber-labs/tool-catalog/) — categorized Linux/Termux security-tool reference
-- [Mosta Tool Index](cyber-labs/mosta-tool-index/) — upstream tool to Mosta alias map (`mnmap`, `mmasscan`, `mdnsrecon`, ...)
+| Project | What it does | Command |
+|---|---|---|
+| [Mosta Terminal](cyber-labs/mosta-terminal/) | Linux/Termux launchers with `Mosta` terminal branding and short aliases | — |
+| [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) | interfaces, routes, DNS, and TCP diagnostics | `mtool` |
+| [Security Tool Catalog](cyber-labs/tool-catalog/) | categorized Linux/Termux security-tool reference | — |
+| [Mosta Tool Index](cyber-labs/mosta-tool-index/) | upstream tool to Mosta alias map (`mnmap`, `mmasscan`, `mdnsrecon`, ...) | — |
 
 ### Quick Start (Linux)
 

@@ -1,5 +1,9 @@
 # File Integrity Monitor
 
+![demo](docs/demo.png)
+
+*Real run: baseline, then an added, a removed and a modified file.*
+
 Records a SHA-256 baseline of a directory and reports files that were **added, removed, modified**, or had their **permissions changed**. Read-only and offline; standard library only.
 
 ## Use

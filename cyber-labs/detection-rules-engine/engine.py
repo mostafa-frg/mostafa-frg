@@ -163,7 +163,7 @@ def _alert(rule, group, count, lines, ts):
 def read_events(path):
     events, bad = [], 0
     try:
-        with open(path, encoding="utf-8") as fh:
+        with (sys.stdin if path == "-" else open(path, encoding="utf-8")) as fh:
             for n, line in enumerate(fh, 1):
                 line = line.strip()
                 if not line:
@@ -185,7 +185,7 @@ def read_events(path):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Run JSON detection rules over JSONL logs (offline)")
     ap.add_argument("rules", help="JSON rules file")
-    ap.add_argument("logs", help="JSONL log file (one JSON object per line)")
+    ap.add_argument("logs", help="JSONL log file (one JSON object per line), or - for stdin")
     ap.add_argument("--min-level", choices=list(LEVELS), default="info")
     ap.add_argument("--json", action="store_true", help="machine-readable output")
     ap.add_argument("--validate-only", action="store_true", help="only validate the rules file")

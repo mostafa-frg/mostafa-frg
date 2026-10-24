@@ -1,5 +1,9 @@
 # Detection Rules Engine
 
+![demo](docs/demo.png)
+
+*Real run on the bundled sample rules and events (`--min-level high`).*
+
 Runs JSON detection rules over JSONL logs, offline. Rules can match single events or require a **threshold** (N matches inside a time window, grouped by fields) before alerting; rules carry a severity and ATT&CK-style tags. Standard library only.
 
 ## Run

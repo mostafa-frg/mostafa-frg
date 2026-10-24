@@ -15,6 +15,7 @@ Available commands:
   mtool    Linux Network Toolbox
   mfim     File Integrity Monitor
   mdet     Detection Rules Engine
+  mlog     Log Ingest
   mvlan    VLAN Lab
   mfw      Firewall Rule Validator
   mospf    OSPF Lab

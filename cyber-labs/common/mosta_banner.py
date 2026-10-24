@@ -52,7 +52,7 @@ def render(tool, color=False):
     accent, warn = ("\033[1;36m", "\033[33m") if color else ("", "")
     uni = _unicode_ok()
     tl, tr, bl, br, h, v = ("\u256d", "\u256e", "\u2570", "\u256f", "\u2500", "\u2502") if uni else ("+", "+", "+", "+", "-", "|")
-    bullet, dot, sign = ("\u25b8", "\u00b7", "\u26a0") if uni else (">", "-", "!")
+    bullet, dot, sign = (">", "\u00b7", "!") if uni else (">", "-", "!")
     width = 38
     tool = tool if len(tool) <= width - 4 else tool[: width - 7] + "..."
     rows = [

@@ -17,6 +17,9 @@ mhelp() {
   printf '%s\n' "  mfim     File Integrity Monitor"
   printf '%s\n' "  mdet     Detection Rules Engine"
   printf '%s\n' "  mlog     Log Ingest"
+  printf '%s\n' "  mnorm    Log Normalizer (JSON/syslog/SSH to JSONL)"
+  printf '%s\n' "  mpipe    Log Normalizer + Detection pipeline"
+  printf '%s\n' "  mrt      Routing Lab"
   printf '%s\n' "  mvlan    VLAN Lab"
   printf '%s\n' "  mfw      Firewall Rule Validator"
   printf '%s\n' "  mospf    OSPF Lab"
@@ -55,6 +58,9 @@ mtriage(){ mrun "NETWORK INCIDENT TRIAGE" python3 "$ROOT/incident-network-triage
 mfim(){ mrun "FILE INTEGRITY MONITOR" python3 "$ROOT/file-integrity-monitor/fim.py" "$@"; }
 mdet(){ mrun "DETECTION RULES ENGINE" python3 "$ROOT/detection-rules-engine/engine.py" "$@"; }
 mlog(){ mrun "LOG INGEST" python3 "$ROOT/log-ingest/lognorm.py" "$@"; }
+mnorm(){ mrun "LOG NORMALIZER" python3 "$ROOT/log-normalizer/log_normalizer.py" "$@"; }
+mpipe(){ mrun "LOG PIPELINE" python3 "$ROOT/log-normalizer/pipeline.py" "$@"; }
+mrt(){ mrun "ROUTING LAB" python3 "$ROOT/routing-lab/routing.py" "$@"; }
 mtool(){ mrun "LINUX NETWORK TOOLBOX" python3 "$ROOT/linux-network-toolbox/toolbox.py" "$@"; }
 mvlan(){ mrun "VLAN LAB" python3 "$ROOT/vlan-lab/validate.py" "$@"; }
 mfw(){ mrun "FIREWALL RULE VALIDATOR" python3 "$ROOT/firewall-rule-validator/validator.py" "$@"; }

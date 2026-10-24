@@ -89,14 +89,14 @@ The repository is intentionally practical. Most labs take local input or supplie
 | [SNMP Audit](cyber-labs/snmp-audit/) | configuration review for insecure SNMP settings | `msnmp` |
 | [Syslog Analyzer](cyber-labs/syslog-analyzer/) | network-device syslog aggregation | `msyslog` |
 | [ACL Policy Lab](cyber-labs/acl-policy-lab/) | offline access-control policy validation | `macl` |
-| [Routing Lab](cyber-labs/routing-lab/) | offline route validation and analysis | — |
+| [Routing Lab](cyber-labs/routing-lab/) | offline route validation and analysis | `mrt` |
 | [Network Operations Lab](cyber-labs/network-operations-lab/) | isolated Docker topology with services and health checks | — |
 | [Network Engineering Suite](cyber-labs/network-engineering-suite/) | IP validation, longest-prefix route lookup, and inventory tooling | `mroute` |
 | [Network Config Compliance](cyber-labs/config-compliance/) | deterministic Cisco-style configuration compliance checks | `mconf` |
 | [Network Incident Triage](cyber-labs/incident-network-triage/) | network event timeline and severity analysis | `mtriage` |
 | [File Integrity Monitor](cyber-labs/file-integrity-monitor/) | SHA-256 baseline and tamper detection (added/removed/modified/permissions, optional HMAC) | `mfim` |
 | [Detection Rules Engine](cyber-labs/detection-rules-engine/) | JSON detection rules over JSONL logs: conditions, thresholds, grouping, severity and ATT&CK tags | `mdet` |
-| [Log Normalizer](cyber-labs/log-normalizer/) | offline normalization of JSON/JSONL, syslog and authentication records with a detection-pipeline integration | — |
+| [Log Normalizer](cyber-labs/log-normalizer/) | offline normalization of JSON/JSONL, syslog and authentication records with a detection-pipeline integration | `mnorm`, `mpipe` |
 | [Log Ingest](cyber-labs/log-ingest/) | SSH, web-access and syslog lines (with years/time zones handled) to structured JSONL, summaries and an HTML report; pipes into the rules engine | `mlog` |
 
 ### Linux / Termux
@@ -151,7 +151,7 @@ Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtri
 
 ## What is verified (and what is not)
 
-- **Verified:** 42 pytest tests (plus the Log Normalizer's 5 unittest tests) pass; every CLI runs on sample data; the three Flask labs serve requests; shell launchers install and run from a clean `HOME` and virtualenv on Linux (tested with Python 3.13).
+- **Verified:** 42 pytest tests (plus the Log Normalizer's 7 unittest tests) pass; every CLI runs on sample data; the three Flask labs serve requests; shell launchers install and run from a clean `HOME` and virtualenv on Linux (tested with Python 3.13).
 - **Static check only:** compatibility with Python 3.8-3.12 (no syntax newer than 3.8 is used, but older interpreters were not run).
 - **Not tested:** real Termux/Android devices and macOS. The installer uses `readlink -f`, which stock macOS does not provide, so macOS is not claimed as supported.
 - **CI:** the workflow is defined in `.github/workflows/lab-checks.yml`; check the badge above for the live result.

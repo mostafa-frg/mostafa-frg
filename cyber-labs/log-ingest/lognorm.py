@@ -32,12 +32,22 @@ SSH_OK = re.compile(r"Accepted (?P<method>\S+) for (?P<user>\S+) from (?P<ip>\S+
 SSH_INVALID = re.compile(r"Invalid user (?P<user>\S*) from (?P<ip>\S+)(?: port (?P<port>\d+))?")
 
 
+_DAY_CACHE = {}
+
+
 def syslog_time(m, year, offset):
-    try:
-        dt = datetime(year, MONTHS[m["mon"]], int(m["day"]), *map(int, m["time"].split(":")), tzinfo=timezone(timedelta(hours=offset)))
-    except (ValueError, KeyError):
+    key = (year, offset, m["mon"], m["day"])
+    base = _DAY_CACHE.get(key)
+    if base is None:
+        try:
+            base = datetime(year, MONTHS[m["mon"]], int(m["day"]), tzinfo=timezone(timedelta(hours=offset))).timestamp()
+        except (ValueError, KeyError):
+            base = False                      # impossible date (e.g. Feb 30): remember it, never retry
+        _DAY_CACHE[key] = base
+    if base is False:
         return None
-    return dt.timestamp()
+    t = m["time"]
+    return base + int(t[0:2]) * 3600 + int(t[3:5]) * 60 + int(t[6:8])
 
 
 def parse_auth(line, year, offset):

@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 """End-to-end offline pipeline: raw logs -> normalized JSONL -> detection alerts."""
 from __future__ import annotations
+try:  # Mosta start-up banner (optional; shown only on an interactive terminal)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.path.insert(0, str(_Path(__file__).resolve().parents[1] / "common"))
+    import mosta_banner as _mosta_banner
+    _mosta_banner.show("LOG PIPELINE")
+except Exception:
+    pass
 
 import argparse
 import importlib.util
@@ -23,12 +31,12 @@ def load_engine():
 
 
 def run_pipeline(
-    input_path: Path, rules_path: Path, output_path: Optional[Path] = None
+    input_path: Path, rules_path: Path, output_path: Optional[Path] = None, year: Optional[int] = None, tz_offset: float = 0.0
 ) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     from log_normalizer import normalize_file
 
     engine = load_engine()
-    records = normalize_file(input_path)
+    records = normalize_file(input_path, year, tz_offset)
 
     events = []
     for record in records:
@@ -59,6 +67,8 @@ def main(argv=None) -> int:
     parser.add_argument("rules", help="Detection rules JSON file")
     parser.add_argument("-o", "--output", help="Write normalized JSONL to this file")
     parser.add_argument("--json", action="store_true", help="Machine-readable output")
+    parser.add_argument("--year", type=int, default=None, help="year for syslog timestamps (default: current year)")
+    parser.add_argument("--tz-offset", type=float, default=0.0, help="hours from UTC for syslog timestamps (default 0)")
     args = parser.parse_args(argv)
 
     input_path = Path(args.input)
@@ -72,7 +82,7 @@ def main(argv=None) -> int:
 
     try:
         records, alerts = run_pipeline(
-            input_path, rules_path, Path(args.output) if args.output else None
+            input_path, rules_path, Path(args.output) if args.output else None, args.year, args.tz_offset
         )
     except (OSError, ValueError, RuntimeError) as exc:
         print(f"pipeline: {exc}", file=sys.stderr)

@@ -16,6 +16,9 @@ Available commands:
   mfim     File Integrity Monitor
   mdet     Detection Rules Engine
   mlog     Log Ingest
+  mnorm    Log Normalizer (JSON/syslog/SSH to JSONL)
+  mpipe    Log Normalizer + Detection pipeline
+  mrt      Routing Lab
   mvlan    VLAN Lab
   mfw      Firewall Rule Validator
   mospf    OSPF Lab

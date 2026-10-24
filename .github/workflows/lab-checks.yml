@@ -81,6 +81,9 @@ jobs:
           printf '%s\n' '{"event":"authentication","action":"failed","user":"demo","src_ip":"192.0.2.10"}' > /tmp/mosta-normalizer.jsonl
           python log_normalizer.py /tmp/mosta-normalizer.jsonl >/tmp/mosta-normalized.jsonl
           test -s /tmp/mosta-normalized.jsonl
+          for i in 1 2 3 4 5 6; do echo "Oct  8 01:12:0$i web1 sshd[1]: Failed password for root from 203.0.113.9 port 400$i ssh2"; done > /tmp/mosta-bf.log
+          set +e; python pipeline.py /tmp/mosta-bf.log sample_rules.json --year 2026 | tee /tmp/mosta-pipeline.txt; set -e
+          grep -q "Alerts: 1" /tmp/mosta-pipeline.txt
 
       - name: Smoke test PCAP analyzer
         shell: bash

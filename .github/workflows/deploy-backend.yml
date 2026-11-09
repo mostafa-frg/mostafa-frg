@@ -25,7 +25,7 @@ jobs:
           import sqlite3
           db = sqlite3.connect(':memory:')
           db.executescript(open('backend/migrations/0001_init.sql', encoding='utf-8').read())
-          assert db.execute(\"SELECT name FROM sqlite_master WHERE type='index' AND name='idx_single_admin'\").fetchone()
+          assert any(row[1] == "idx_single_admin" for row in db.execute("PRAGMA index_list(users)"))
           print('D1 migration schema passed.')
           PY
           test -s backend/migrations/0001_init.sql

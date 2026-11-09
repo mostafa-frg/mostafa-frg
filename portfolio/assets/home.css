@@ -166,3 +166,38 @@
     @media(max-width:620px){.nav-extras{margin-left:auto;margin-right:8px}.theme-btn,.quick-btn{padding:7px;font-size:8px}.project-tools{align-items:stretch}.project-search{width:100%}.system-map{grid-template-columns:1fr}.map-node{min-height:135px}.floating-top{right:14px;bottom:14px}}
 
 .lime-text{color:var(--lime)}
+
+/* MOSTA 3.1 — visual refinement */
+:root{--ease-out:cubic-bezier(.2,.75,.25,1)}
+::selection{background:var(--lime);color:#11170d}
+:focus-visible{outline:2px solid var(--lime)!important;outline-offset:4px}
+body{background-image:radial-gradient(ellipse at 78% 8%,rgba(139,190,62,.08),transparent 34%),radial-gradient(ellipse at 8% 62%,rgba(95,128,63,.05),transparent 36%)}
+.brand-mark{font-size:0!important;color:transparent!important;border:0!important;width:42px!important;height:42px!important;margin:0!important;background:url("mosta-mark.svg") center/contain no-repeat;filter:drop-shadow(0 4px 14px rgba(199,243,107,.15));transition:transform .4s var(--ease-out),filter .4s}
+.brand:hover .brand-mark{transform:rotate(-7deg) scale(1.08);filter:drop-shadow(0 6px 20px rgba(199,243,107,.35))}
+.brand{gap:10px;letter-spacing:.2em}
+.topbar{transition:background .3s,border-color .3s,box-shadow .3s}
+.topbar.scrolled{box-shadow:0 12px 36px rgba(0,0,0,.22)}
+.hero{isolation:isolate;overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(199,243,107,.027) 1px,transparent 1px),linear-gradient(90deg,rgba(199,243,107,.027) 1px,transparent 1px);background-size:54px 54px;mask-image:linear-gradient(to bottom,black,transparent 92%)}
+.hero h1{max-width:850px;text-wrap:balance}
+.hero h1 span{text-shadow:0 0 42px rgba(199,243,107,.14)}
+.visual-frame{border-radius:50%;box-shadow:0 0 100px rgba(199,243,107,.08),inset 0 0 55px rgba(199,243,107,.04);transition:transform .25s var(--ease-out)}
+.core{box-shadow:0 0 0 10px rgba(199,243,107,.04),0 0 55px rgba(199,243,107,.18);animation:mostaPulse 4.8s ease-in-out infinite}
+@keyframes mostaPulse{0%,100%{box-shadow:0 0 0 9px rgba(199,243,107,.025),0 0 35px rgba(199,243,107,.1)}50%{box-shadow:0 0 0 17px rgba(199,243,107,.05),0 0 65px rgba(199,243,107,.24)}}
+.cap,.project,.map-node{transition:transform .32s var(--ease-out),border-color .32s,background .32s,box-shadow .32s}
+.cap:hover,.project:hover,.map-node:hover{box-shadow:0 18px 44px rgba(0,0,0,.22),0 0 0 1px rgba(199,243,107,.08)}
+.cap-mark,.project-icon{transition:transform .32s var(--ease-out),color .32s}
+.cap:hover .cap-mark,.project:hover .project-icon{transform:translateY(-4px) rotate(-7deg);color:var(--lime)}
+.btn,.filter-btn,.theme-btn,.quick-btn,.lab-tab{transition:transform .22s var(--ease-out),border-color .22s,color .22s,background .22s,box-shadow .22s}
+.btn:hover{transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.2)}
+.lab-shell{border-radius:8px;overflow:hidden;box-shadow:0 25px 75px rgba(0,0,0,.28),0 0 0 1px rgba(199,243,107,.06)}
+.lab-tab[aria-selected=true]{box-shadow:inset 0 -2px var(--lime)}
+.contact-links a span:last-child{transition:transform .25s}
+.contact-links a:hover span:last-child{transform:translate(4px,-4px)}
+.palette{border-radius:12px;overflow:hidden;animation:paletteIn .22s var(--ease-out)}
+@keyframes paletteIn{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+.floating-top{border-radius:50%;box-shadow:0 8px 25px rgba(0,0,0,.2)}
+.skip-link{position:fixed;top:8px;left:8px;z-index:100;padding:10px 14px;background:var(--lime);color:#111;transform:translateY(-150%);transition:transform .2s}
+.skip-link:focus{transform:translateY(0)}
+@media(max-width:620px){.brand-mark{width:35px!important;height:35px!important}.hero:before{background-size:38px 38px}.visual-frame{box-shadow:0 0 55px rgba(199,243,107,.07)}}
+@media(prefers-reduced-motion:reduce){.core{animation:none!important}.brand-mark,.btn,.cap,.project,.map-node{transition:none!important}}

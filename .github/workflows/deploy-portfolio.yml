@@ -39,6 +39,46 @@ jobs:
           test -s portfolio/assets/site.js
           test -s portfolio/assets/mosta-mark.svg
           for page in projects systems security lab about contact 404; do test -s "portfolio/$page.html"; done
+      - name: Validate JavaScript and local page links
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check portfolio/assets/home.js
+          node --check portfolio/assets/site.js
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          root = Path("portfolio")
+          class Audit(HTMLParser):
+              def __init__(self, path):
+                  super().__init__(convert_charrefs=True)
+                  self.path = path
+                  self.errors = []
+              def handle_starttag(self, tag, attrs):
+                  a = dict(attrs)
+                  if tag == "a" and a.get("target") == "_blank":
+                      rel = set(a.get("rel", "").lower().split())
+                      if not {"noopener", "noreferrer"} <= rel:
+                          self.errors.append(f"external target missing rel protections: {a.get('href')}")
+                  for key in ("href", "src"):
+                      value = a.get(key, "").strip()
+                      if not value or value.startswith(("#", "https://", "http://", "mailto:", "tel:", "data:")):
+                          continue
+                      if value.startswith("javascript:"):
+                          self.errors.append(f"javascript URL: {value}")
+                          continue
+                      target = (self.path.parent / value.split("#", 1)[0].split("?", 1)[0]).resolve()
+                      if not target.is_file():
+                          self.errors.append(f"missing local {key}: {value}")
+          failures = []
+          for page in sorted(root.glob("*.html")):
+              audit = Audit(page)
+              audit.feed(page.read_text(encoding="utf-8"))
+              failures.extend(f"{page}: {e}" for e in audit.errors)
+          if failures:
+              raise SystemExit("\n".join(failures))
+          print("Portfolio HTML links and external target protections passed.")
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload portfolio

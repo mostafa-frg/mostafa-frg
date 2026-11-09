@@ -1,0 +1,40 @@
+name: Deploy MOSTA platform
+on:
+  push:
+    branches: [main]
+    paths: ["backend/**", "portfolio/**", ".github/workflows/deploy-backend.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mosta-platform
+  cancel-in-progress: true
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: |
+          node --check backend/src/index.js
+          node --check portfolio/assets/auth.js
+          node --check portfolio/assets/dashboard.js
+          test -s backend/migrations/0001_init.sql
+          test -s portfolio/auth.html
+          test -s portfolio/dashboard.html
+  deploy:
+    needs: validate
+    if: github.ref == 'refs/heads/main' && vars.CLOUDFLARE_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - run: npm install
+        working-directory: backend
+      - run: npm run deploy
+        working-directory: backend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

@@ -1,0 +1,2 @@
+# Copy to .dev.vars. Never commit real secrets.
+ADMIN_BOOTSTRAP_TOKEN=replace-with-a-long-random-one-time-value

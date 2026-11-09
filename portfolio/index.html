@@ -159,6 +159,50 @@
     @media(max-width:850px){.hero{min-height:auto;padding:140px 0 90px}.hero-grid{grid-template-columns:1fr;gap:30px}.visual{min-height:390px}.visual-frame{width:min(100%,420px)}.hero h1{font-size:clamp(54px,12vw,84px)}.about-grid{grid-template-columns:1fr;gap:28px}.cap-grid{grid-template-columns:repeat(2,1fr)}.contact-grid{grid-template-columns:1fr;gap:35px}.section-head{align-items:start;flex-direction:column}.section-head p{max-width:500px}}
     @media(max-width:620px){.wrap{width:min(100% - 32px,var(--max))}.nav{height:66px}.menu-btn{display:block}.navlinks{display:none;position:absolute;top:65px;left:0;right:0;padding:18px 24px 24px;background:#141712;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;gap:0}.navlinks.open{display:flex}.navlinks a{padding:13px 0;border-bottom:1px solid var(--line)}.nav-cta{display:none}.hero{padding-top:125px}.hero h1{font-size:clamp(48px,14vw,70px)}.hero-lead{font-size:14px}.hero-meta{gap:13px;flex-wrap:wrap;margin-top:35px}.visual{min-height:320px}.side-note{right:0;bottom:12px;font-size:8px}.core{width:92px;height:92px;font-size:34px}.section-head h2{font-size:42px}section{padding:82px 0}.about-foot{grid-template-columns:1fr}.about-foot div{padding:16px 18px}.cap-grid,.projects-grid{grid-template-columns:1fr}.cap{min-height:175px}.project{min-height:310px;padding:22px}.lab-content{grid-template-columns:1fr}.lab-tabs{border-right:0;border-bottom:1px solid var(--line);flex-direction:row;overflow-x:auto;padding:10px}.lab-tab{white-space:nowrap}.terminal{padding:18px;font-size:10px;min-height:210px}.lab-note{flex-direction:column;gap:6px}.contact h2{font-size:54px}.footer-inner{flex-direction:column;gap:8px}}
     @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}.reveal{opacity:1;transform:none}}
+
+    /* MOSTA 2.0 — interaction layer */
+    .theme-btn,.quick-btn{background:transparent;border:1px solid var(--line);color:var(--muted);padding:9px 12px;font:10px var(--mono);letter-spacing:.08em;cursor:pointer;transition:.2s}
+    .theme-btn:hover,.quick-btn:hover{color:var(--lime);border-color:var(--lime)}
+    body[data-theme="light"]{--bg:#f2f4ed;--panel:#fff;--panel2:#e8ecdf;--ink:#171b13;--muted:#626b5c;--line:rgba(24,35,18,.16);--lime:#557d16;--lime2:#41620f}
+    body[data-theme="light"] .topbar{background:rgba(242,244,237,.86)}
+    body[data-theme="light"] .capabilities,body[data-theme="light"] .lab{background:#e9ede3}
+    body[data-theme="light"] .lab-shell{background:#151912}
+    body[data-theme="light"] .lab-bar,body[data-theme="light"] .terminal{color:#dce5d2}
+    body[data-theme="light"] .visual-frame{background:radial-gradient(circle at 50% 48%,rgba(85,125,22,.10),transparent 48%),linear-gradient(145deg,rgba(0,0,0,.025),transparent 60%)}
+    body[data-theme="light"] .project{background:#fff}
+    .nav-extras{display:flex;gap:7px}
+    .project-tools{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:-18px 0 22px}
+    .project-filters{display:flex;gap:7px;flex-wrap:wrap}
+    .filter-btn{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 12px;font:9px var(--mono);letter-spacing:.08em;cursor:pointer}
+    .filter-btn[aria-pressed="true"],.filter-btn:hover{border-color:var(--lime);color:var(--lime);background:rgba(199,243,107,.06)}
+    .project-search{min-width:min(100%,240px);background:var(--panel);border:1px solid var(--line);color:var(--ink);padding:10px 13px;font:11px var(--mono);outline:none}
+    .project-search:focus{border-color:var(--lime)}
+    .project-count{color:var(--muted);font:9px var(--mono);letter-spacing:.1em}
+    .project[hidden]{display:none}
+    .map-section{background:linear-gradient(180deg,var(--bg),#171a15 55%,var(--bg));border-block:1px solid var(--line)}
+    .system-map{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;position:relative}
+    .map-node{position:relative;border:1px solid var(--line);background:rgba(255,255,255,.018);padding:22px;min-height:160px;transition:.25s}
+    .map-node:hover{border-color:var(--lime);transform:translateY(-4px)}
+    .map-node small{font:9px var(--mono);color:var(--lime);letter-spacing:.13em}
+    .map-node h3{font-size:18px;margin:17px 0 8px;letter-spacing:-.04em}
+    .map-node p{font-size:11px;color:var(--muted);margin:0;line-height:1.8}
+    .map-node:after{content:"↗";position:absolute;right:17px;top:16px;color:var(--lime);font:14px var(--mono)}
+    .map-foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-top:16px;color:var(--muted);font:9px var(--mono);letter-spacing:.08em}
+    .palette-backdrop{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.72);backdrop-filter:blur(8px);display:none;align-items:flex-start;justify-content:center;padding:14vh 18px 20px}
+    .palette-backdrop.open{display:flex}
+    .palette{width:min(560px,100%);background:var(--panel);border:1px solid var(--lime);box-shadow:0 30px 100px rgba(0,0,0,.45)}
+    .palette-head{display:flex;align-items:center;gap:12px;padding:15px;border-bottom:1px solid var(--line)}
+    .palette-head input{width:100%;background:transparent;border:0;outline:0;color:var(--ink);font:13px var(--mono)}
+    .palette-items{padding:8px;display:grid;gap:4px}
+    .palette-item{display:flex;justify-content:space-between;align-items:center;background:transparent;border:0;color:var(--ink);padding:13px;text-align:left;font:11px var(--mono);cursor:pointer}
+    .palette-item:hover,.palette-item:focus{background:rgba(199,243,107,.09);color:var(--lime);outline:0}
+    .palette-item span:last-child{color:var(--muted);font-size:9px}
+    .palette-hint{border-top:1px solid var(--line);padding:10px 15px;color:var(--muted);font:9px var(--mono)}
+    .floating-top{position:fixed;right:22px;bottom:22px;z-index:25;width:42px;height:42px;border:1px solid var(--lime);background:var(--panel);color:var(--lime);cursor:pointer;opacity:0;pointer-events:none;transform:translateY(8px);transition:.2s}
+    .floating-top.show{opacity:1;pointer-events:auto;transform:none}
+    @media(max-width:850px){.system-map{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:620px){.nav-extras{margin-left:auto;margin-right:8px}.theme-btn,.quick-btn{padding:7px;font-size:8px}.project-tools{align-items:stretch}.project-search{width:100%}.system-map{grid-template-columns:1fr}.map-node{min-height:135px}.floating-top{right:14px;bottom:14px}}
+
   </style>
 </head>
 <body>
@@ -167,9 +211,9 @@
     <div class="wrap nav">
       <a class="brand" href="#home" aria-label="MOSTA home"><span class="brand-mark">M/</span><span>MOSTA</span></a>
       <nav class="navlinks" id="navlinks" aria-label="Main navigation">
-        <a href="#about">PROFILE</a><a href="#focus">FOCUS</a><a href="#work">WORK</a><a href="#lab">LAB</a>
+        <a href="#about">PROFILE</a><a href="#focus">FOCUS</a><a href="#map">MAP</a><a href="#work">WORK</a><a href="#lab">LAB</a>
       </nav>
-      <a class="nav-cta" href="#contact">LET'S CONNECT ↗</a>
+      <div class="nav-extras"><button class="theme-btn" id="themeToggle" type="button" aria-label="Toggle color theme">◐ THEME</button><button class="quick-btn" id="openPalette" type="button" aria-label="Open quick navigation">⌕ QUICK FIND</button></div><a class="nav-cta" href="#contact">LET'S CONNECT ↗</a>
       <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation" aria-expanded="false">MENU</button>
     </div>
   </header>
@@ -232,20 +276,44 @@
       </div>
     </section>
 
+
+    <section class="map-section" id="map">
+      <div class="wrap">
+        <div class="section-head reveal"><div><div class="eyebrow">03 / SYSTEM MAP</div><h2>Connected disciplines.<br>One practical mindset.</h2></div><p>A visual index of the technical areas represented in this portfolio. Explore each area through the related projects and practical notes.</p></div>
+        <div class="system-map">
+          <a class="map-node reveal" href="#work"><small>01 / OPERATIONS</small><h3>IT Support</h3><p>Troubleshooting · Diagnostics · Windows</p></a>
+          <a class="map-node reveal" href="#work"><small>02 / CONNECTIVITY</small><h3>Networking</h3><p>TCP/IP · IPv4 · DNS · Routing</p></a>
+          <a class="map-node reveal" href="#work"><small>03 / ENVIRONMENT</small><h3>Linux Systems</h3><p>Shell · CLI · Termux · Automation</p></a>
+          <a class="map-node reveal" href="#work"><small>04 / DEFENSE</small><h3>Security Labs</h3><p>Integrity · Logs · Detection · Auditing</p></a>
+        </div>
+        <div class="map-foot"><span>TECHNICAL KNOWLEDGE MAP / 01</span><span>SELECT A DOMAIN TO EXPLORE RELATED WORK ↗</span></div>
+      </div>
+    </section>
+
     <section id="work">
       <div class="wrap">
         <div class="section-head reveal"><div><div class="eyebrow">03 / SELECTED WORK</div><h2>Built to be useful.</h2></div><p>A selection from my public technical repository. Each project links to its source so the implementation can be inspected directly.</p></div>
+        <div class="project-tools reveal">
+          <div class="project-filters" role="group" aria-label="Filter projects">
+            <button class="filter-btn" type="button" data-filter="all" aria-pressed="true">ALL WORK</button>
+            <button class="filter-btn" type="button" data-filter="networking" aria-pressed="false">NETWORKING</button>
+            <button class="filter-btn" type="button" data-filter="linux" aria-pressed="false">LINUX</button>
+            <button class="filter-btn" type="button" data-filter="security" aria-pressed="false">SECURITY</button>
+          </div>
+          <input class="project-search" id="projectSearch" type="search" placeholder="Search projects..." aria-label="Search projects">
+          <span class="project-count" id="projectCount" aria-live="polite">4 PROJECTS</span>
+        </div>
         <div class="projects-grid">
-          <a class="project reveal" href="https://github.com/mostafa-frg/mostafa-frg/tree/main/cyber-labs/mosta-terminal" target="_blank" rel="noreferrer">
+          <a class="project reveal" data-category="linux networking" data-search="mosta terminal bash python linux termux launchers health checks" href="https://github.com/mostafa-frg/mostafa-frg/tree/main/cyber-labs/mosta-terminal" target="_blank" rel="noreferrer">
             <div class="project-top"><span>01 / LINUX · TERMUX</span><span class="project-icon">⌁</span></div><h3>Mosta Terminal</h3><p>A practical command layer for Linux and Termux that brings consistent MOSTA branding, launchers, health checks, and short aliases to selected networking and lab tools.</p><div class="tags"><span class="tag">BASH</span><span class="tag">PYTHON</span><span class="tag">LINUX</span><span class="tag">TERMUX</span></div><div class="project-link"><span>Inspect repository</span><span>↗</span></div>
           </a>
-          <a class="project reveal" href="https://github.com/mostafa-frg/mostafa-frg/tree/main/cyber-labs/file-integrity-monitor" target="_blank" rel="noreferrer">
+          <a class="project reveal" data-category="security linux" data-search="file integrity monitor sha256 hmac defensive security python" href="https://github.com/mostafa-frg/mostafa-frg/tree/main/cyber-labs/file-integrity-monitor" target="_blank" rel="noreferrer">
             <div class="project-top"><span>02 / DEFENSIVE SECURITY</span><span class="project-icon">◈</span></div><h3>File Integrity Monitor</h3><p>Creates SHA-256 directory baselines and reports added, removed, modified files, and permission changes. Optional HMAC-SHA256 protects the baseline against unauthorized edits.</p><div class="tags"><span class="tag">PYTHON</span><span class="tag">SHA-256</span><span class="tag">HMAC</span><span class="tag">CLI</span></div><div class="project-link"><span>Inspect repository</span><span>↗</span></div>
           </a>
-          <a class="project reveal" href="https://github.com/mostafa-frg/mostafa-frg/tree/main/cyber-labs/network-toolkit" target="_blank" rel="noreferrer">
+          <a class="project reveal" data-category="networking" data-search="network toolkit ipv4 subnet dns tcp python" href="https://github.com/mostafa-frg/mostafa-frg/tree/main/cyber-labs/network-toolkit" target="_blank" rel="noreferrer">
             <div class="project-top"><span>03 / NETWORKING</span><span class="project-icon">⌘</span></div><h3>Network Toolkit</h3><p>A Python utility for IPv4 subnet calculations, DNS lookups, TCP connectivity checks, and CSV-based network inventory summaries.</p><div class="tags"><span class="tag">PYTHON</span><span class="tag">TCP/IP</span><span class="tag">DNS</span><span class="tag">IPV4</span></div><div class="project-link"><span>Inspect repository</span><span>↗</span></div>
           </a>
-          <a class="project reveal" href="https://github.com/mostafa-frg/mostafa-frg/tree/main/cyber-labs/log-ingest" target="_blank" rel="noreferrer">
+          <a class="project reveal" data-category="security linux" data-search="log ingest detection ssh web syslog jsonl python" href="https://github.com/mostafa-frg/mostafa-frg/tree/main/cyber-labs/log-ingest" target="_blank" rel="noreferrer">
             <div class="project-top"><span>04 / LOG ANALYSIS</span><span class="project-icon">▥</span></div><h3>Log Ingest & Detection</h3><p>An offline pipeline that normalizes SSH, web access, and syslog records into JSONL, then feeds structured events into configurable detection rules.</p><div class="tags"><span class="tag">PYTHON</span><span class="tag">JSONL</span><span class="tag">LOGS</span><span class="tag">DETECTION</span></div><div class="project-link"><span>Inspect repository</span><span>↗</span></div>
           </a>
         </div>
@@ -284,6 +352,24 @@
       </div>
     </section>
   </main>
+
+  <div class="palette-backdrop" id="paletteBackdrop" role="dialog" aria-modal="true" aria-label="Quick navigation">
+    <div class="palette">
+      <div class="palette-head"><span class="mono" style="color:var(--lime)">⌕</span><input id="paletteSearch" type="search" placeholder="Search a section or action..." autocomplete="off" aria-label="Search navigation"></div>
+      <div class="palette-items" id="paletteItems">
+        <button class="palette-item" data-target="#about"><span>Open profile</span><span>PROFILE ↗</span></button>
+        <button class="palette-item" data-target="#focus"><span>Explore technical focus</span><span>FOCUS ↗</span></button>
+        <button class="palette-item" data-target="#map"><span>Open system map</span><span>MAP ↗</span></button>
+        <button class="palette-item" data-target="#work"><span>Browse selected projects</span><span>WORK ↗</span></button>
+        <button class="palette-item" data-target="#lab"><span>Launch interactive lab</span><span>LAB ↗</span></button>
+        <button class="palette-item" data-target="#contact"><span>Contact / Connect</span><span>CONTACT ↗</span></button>
+        <button class="palette-item" data-action="theme"><span>Switch color theme</span><span>DISPLAY</span></button>
+      </div>
+      <div class="palette-hint">ESC TO CLOSE · CTRL / ⌘ + K TO OPEN</div>
+    </div>
+  </div>
+  <button class="floating-top" id="backTop" type="button" aria-label="Back to top">↑</button>
+
   <footer><div class="wrap footer-inner"><span>© <span id="year">2026</span> MOSTA / MOSTA TECHNICAL IDENTITY</span><span>BUILT WITH CURIOSITY · VERIFIED BY SOURCE</span><a href="#home">BACK TO TOP ↑</a></div></footer>
 
   <script>
@@ -301,6 +387,70 @@
       logs:{command:'mlog normalize sample_auth.log',output:'[demo] Parsing sample authentication records...\nParsed events: 18\nssh_failed: 14\nssh_accepted: 2\nssh_invalid_user: 2\nNext step: pass JSONL events to the detection rules engine.\nIllustrative output only — no log file was read.'}
     };
     document.querySelectorAll('.lab-tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.lab-tab').forEach(b=>b.setAttribute('aria-selected','false'));btn.setAttribute('aria-selected','true');const demo=demos[btn.dataset.demo];document.getElementById('command').textContent=demo.command;document.getElementById('output').textContent=demo.output}));
+
+    // Project discovery filters
+    const projectCards=[...document.querySelectorAll('.project[data-category]')];
+    const filterButtons=[...document.querySelectorAll('.filter-btn')];
+    const projectSearch=document.getElementById('projectSearch');
+    const projectCount=document.getElementById('projectCount');
+    let activeFilter='all';
+    const filterProjects=()=>{
+      const term=(projectSearch?.value||'').trim().toLowerCase();
+      let shown=0;
+      projectCards.forEach(card=>{
+        const categories=(card.dataset.category||'').split(' ');
+        const haystack=((card.dataset.search||'')+' '+card.innerText).toLowerCase();
+        const visible=(activeFilter==='all'||categories.includes(activeFilter))&&(!term||haystack.includes(term));
+        card.hidden=!visible;
+        if(visible)shown++;
+      });
+      if(projectCount)projectCount.textContent=shown+' / '+projectCards.length+' PROJECTS';
+    };
+    filterButtons.forEach(btn=>btn.addEventListener('click',()=>{
+      activeFilter=btn.dataset.filter;
+      filterButtons.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+      filterProjects();
+    }));
+    projectSearch?.addEventListener('input',filterProjects);
+
+    // Theme preference is stored locally in this browser only
+    const themeToggle=document.getElementById('themeToggle');
+    const savedTheme=(()=>{try{return localStorage.getItem('mosta-theme')}catch(e){return null}})();
+    if(savedTheme==='light'||savedTheme==='dark')document.body.dataset.theme=savedTheme;
+    const syncThemeLabel=()=>{if(themeToggle)themeToggle.textContent=document.body.dataset.theme==='light'?'☼ LIGHT':'◐ DARK'};
+    syncThemeLabel();
+    themeToggle?.addEventListener('click',()=>{
+      document.body.dataset.theme=document.body.dataset.theme==='light'?'dark':'light';
+      try{localStorage.setItem('mosta-theme',document.body.dataset.theme)}catch(e){}
+      syncThemeLabel();
+    });
+
+    // Quick navigation palette
+    const backdrop=document.getElementById('paletteBackdrop');
+    const openPalette=document.getElementById('openPalette');
+    const paletteSearch=document.getElementById('paletteSearch');
+    const paletteItems=[...document.querySelectorAll('.palette-item')];
+    const showPalette=()=>{backdrop.classList.add('open');paletteSearch.value='';paletteItems.forEach(x=>x.hidden=false);setTimeout(()=>paletteSearch.focus(),30)};
+    const hidePalette=()=>backdrop.classList.remove('open');
+    openPalette?.addEventListener('click',showPalette);
+    backdrop?.addEventListener('click',e=>{if(e.target===backdrop)hidePalette()});
+    paletteSearch?.addEventListener('input',()=>{
+      const q=paletteSearch.value.toLowerCase().trim();
+      paletteItems.forEach(item=>item.hidden=!item.innerText.toLowerCase().includes(q));
+    });
+    paletteItems.forEach(item=>item.addEventListener('click',()=>{
+      if(item.dataset.action==='theme')themeToggle?.click();
+      else if(item.dataset.target)document.querySelector(item.dataset.target)?.scrollIntoView({behavior:'smooth'});
+      hidePalette();
+    }));
+    document.addEventListener('keydown',e=>{
+      if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();showPalette()}
+      if(e.key==='Escape')hidePalette();
+    });
+    const backTop=document.getElementById('backTop');
+    backTop?.addEventListener('click',()=>scrollTo({top:0,behavior:'smooth'}));
+    addEventListener('scroll',()=>backTop?.classList.toggle('show',scrollY>650),{passive:true});
+
     const sections=[...document.querySelectorAll('main section[id]')],links=[...document.querySelectorAll('.navlinks a')];
     const navObserver=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id))}}),{rootMargin:'-35% 0px -55% 0px'});
     sections.forEach(s=>navObserver.observe(s));

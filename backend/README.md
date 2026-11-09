@@ -14,10 +14,10 @@ Cloudflare Worker API + D1 database. The Worker serves the existing portfolio as
 ## First deployment
 1. Create D1: npx wrangler d1 create mosta-platform
 2. Replace database_id in wrangler.jsonc with the returned ID.
-3. Add GitHub Actions secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
+3. Add GitHub Actions secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID. The token needs Workers Scripts Editor access for this Worker and D1 Editor access for this database. If the Worker or D1 resource has not been created yet, create it in the Cloudflare dashboard first (or use the corresponding Admin permission only for initial provisioning).
 4. Set the Worker secret: npx wrangler secret put ADMIN_BOOTSTRAP_TOKEN
 5. Deploy from this folder: npm install && npm run deploy
-6. Open the Worker URL. Create the first admin using the one-time bootstrap token, then sign in.
-7. Remove/rotate the bootstrap secret after setup.
+6. In GitHub repository Settings → Secrets and variables → Actions → Variables, add `CLOUDFLARE_DEPLOY_ENABLED=true` to enable the guarded deploy job. Without this variable, CI validates the code but deliberately skips deployment.\n7. Open the Worker URL. Create the first admin using the one-time bootstrap token, then sign in.
+8. Remove/rotate the bootstrap secret after setup.
 
 Never commit tokens or passwords. GitHub is the source repository/CI system, not the API runtime. Live deployment requires Cloudflare account resources and secrets.

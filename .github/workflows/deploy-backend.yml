@@ -20,6 +20,14 @@ jobs:
           node --check backend/src/index.js
           node --check portfolio/assets/auth.js
           node --check portfolio/assets/dashboard.js
+          node -e "JSON.parse(require('fs').readFileSync('backend/wrangler.jsonc','utf8'))"
+          python3 - <<'PY'
+          import sqlite3
+          db = sqlite3.connect(':memory:')
+          db.executescript(open('backend/migrations/0001_init.sql', encoding='utf-8').read())
+          assert db.execute(\"SELECT name FROM sqlite_master WHERE type='index' AND name='idx_single_admin'\").fetchone()
+          print('D1 migration schema passed.')
+          PY
           test -s backend/migrations/0001_init.sql
           test -s portfolio/auth.html
           test -s portfolio/dashboard.html

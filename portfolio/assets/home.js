@@ -103,3 +103,42 @@
     sections.forEach(s=>navObserver.observe(s));
 /* MOSTA 3.1 interaction polish */
 (()=>{const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;const visual=document.querySelector('.visual-frame');if(visual&&!reduce&&matchMedia('(pointer:fine)').matches){visual.parentElement.addEventListener('pointermove',e=>{const r=visual.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;visual.style.transform='perspective(900px) rotateY('+(x*5)+'deg) rotateX('+(-y*5)+'deg)'});visual.parentElement.addEventListener('pointerleave',()=>visual.style.transform='')}if(!('IntersectionObserver'in window))document.querySelectorAll('.reveal').forEach(x=>x.classList.add('visible'));const b=document.getElementById('paletteBackdrop'),i=document.getElementById('paletteSearch');document.addEventListener('keydown',e=>{if(e.key==='Escape'&&b?.classList.contains('open')){b.classList.remove('open');document.getElementById('openPalette')?.focus()}});document.getElementById('openPalette')?.addEventListener('click',()=>setTimeout(()=>i?.focus(),50))})();
+
+/* MOSTA 4.0 — lightweight, pointer-aware interactions */
+(()=>{'use strict';
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const fine=matchMedia('(pointer:fine)').matches;
+ const hero=document.querySelector('.hero');
+ if(hero&&fine&&!reduce){
+  hero.addEventListener('pointermove',e=>{
+   const r=hero.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+   hero.style.setProperty('--pointer-x',(x*100).toFixed(1)+'%');
+   hero.style.setProperty('--pointer-y',(y*100).toFixed(1)+'%');
+  },{passive:true});
+ }
+ if(fine&&!reduce){
+  document.querySelectorAll('.project,.cap').forEach(card=>{
+   card.addEventListener('pointermove',e=>{
+    const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    card.style.transform='perspective(850px) translateY(-4px) rotateX('+(-y*2.2).toFixed(2)+'deg) rotateY('+(x*2.2).toFixed(2)+'deg)';
+    card.style.setProperty('--glow-x',(x*100+50).toFixed(1)+'%');
+    card.style.setProperty('--glow-y',(y*100+50).toFixed(1)+'%');
+   },{passive:true});
+   card.addEventListener('pointerleave',()=>{card.style.transform=''});
+  });
+  document.querySelectorAll('.hero-actions .btn').forEach(btn=>{
+   btn.addEventListener('pointermove',e=>{
+    const r=btn.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    btn.style.transform='translate('+ (x*3).toFixed(1)+'px,'+(y*3).toFixed(1)+'px)';
+   },{passive:true});
+   btn.addEventListener('pointerleave',()=>{btn.style.transform=''});
+  });
+ }
+ // Close the mobile navigation after Escape and restore focus to its trigger.
+ document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+   const nav=document.getElementById('navlinks'),button=document.getElementById('menuBtn');
+   if(nav?.classList.contains('open')){nav.classList.remove('open');button?.setAttribute('aria-expanded','false');button?.focus()}
+  }
+ });
+})();

@@ -62,3 +62,27 @@ body[data-theme=light] .search,body[data-theme=light] .field,body[data-theme=lig
 body[data-theme=light] .notice{color:#3d4b2e}
 @media(max-width:680px){.brand-mark{width:35px!important;height:35px!important}.to-top{right:14px;bottom:14px}}
 @media(prefers-reduced-motion:reduce){.reveal-on-scroll{opacity:1;transform:none;transition:none}.brand-mark,.card,.btn,.filter{transition:none!important}}
+
+/* MOSTA 4.0 — shared page finish */
+:root{--motion:cubic-bezier(.18,.78,.22,1)}
+.brand{gap:11px;font-weight:800;letter-spacing:.2em}
+.brand-mark{width:45px!important;height:45px!important;border:0!important;background:url("mosta-mark.svg") center/contain no-repeat!important;font-size:0!important;color:transparent!important;transform:none!important;filter:drop-shadow(0 5px 16px rgba(199,243,107,.2));transition:transform .42s var(--motion),filter .42s}
+.brand:hover .brand-mark{transform:translateY(-2px) rotate(-5deg) scale(1.06)!important;filter:drop-shadow(0 8px 24px rgba(199,243,107,.4))}
+.top{background:rgba(12,15,11,.84);backdrop-filter:blur(16px);border-bottom-color:rgba(199,243,107,.1)}
+.top.scrolled{box-shadow:0 12px 38px rgba(0,0,0,.3);border-color:rgba(199,243,107,.2)}
+.hero{background-image:linear-gradient(rgba(199,243,107,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(199,243,107,.035) 1px,transparent 1px),radial-gradient(ellipse at 80% 20%,rgba(199,243,107,.1),transparent 45%);background-size:48px 48px,48px 48px,auto}
+.hero h1{letter-spacing:-.075em;text-wrap:balance}
+.hero em{background:linear-gradient(100deg,#eaffc0,#c7f36b 55%,#8dbb3c);background-clip:text;-webkit-background-clip:text;color:transparent}
+.navlinks a{position:relative}
+.navlinks a:after{content:"";position:absolute;left:0;right:100%;bottom:-5px;height:1px;background:var(--lime);transition:right .25s var(--motion)}
+.navlinks a:hover:after,.navlinks a.active:after{right:0}
+.card,.panel{position:relative;overflow:hidden;transition:transform .3s var(--motion),border-color .3s,box-shadow .3s}
+.card:hover,.panel:hover{transform:translateY(-4px);box-shadow:0 20px 48px rgba(0,0,0,.25),0 0 25px rgba(199,243,107,.035)}
+.btn,.filter,.menu{transition:transform .22s var(--motion),border-color .22s,background .22s,color .22s}
+.btn:hover,.filter:hover{transform:translateY(-2px)}
+.theme-switch{border:1px solid var(--line);background:transparent;color:var(--muted);padding:8px 10px;font:9px var(--mono);cursor:pointer}
+.theme-switch:hover{border-color:var(--lime);color:var(--lime)}
+body[data-theme=light] .top{background:rgba(242,244,237,.94)}
+body[data-theme=light] .hero{background-color:#edf1e5}
+@media(max-width:680px){.brand-mark{width:39px!important;height:39px!important}}
+@media(prefers-reduced-motion:reduce){.brand-mark,.card,.btn,.filter{transition:none!important}}

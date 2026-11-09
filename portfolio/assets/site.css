@@ -28,3 +28,37 @@ body[data-theme=light] .search,body[data-theme=light] .field,body[data-theme=lig
 body[data-theme=light] .notice{color:#3d4b2e}
 @media(max-width:680px){.brand-mark{width:35px!important;height:35px!important}.navlinks{box-shadow:0 18px 30px rgba(0,0,0,.25)}.to-top{right:14px;bottom:14px}}
 @media(prefers-reduced-motion:reduce){.reveal-on-scroll{opacity:1;transform:none;transition:none}.brand-mark,.card,.btn{transition:none!important}}
+
+/* MOSTA 3.2 visual system */
+:root{--motion:cubic-bezier(.2,.75,.25,1)}
+::selection{background:var(--lime);color:#10150c}
+:focus-visible{outline:2px solid var(--lime);outline-offset:4px}
+.brand-mark{border:0!important;background:url("mosta-mark.svg") center/contain no-repeat!important;width:40px!important;height:40px!important;transform:none!important;font-size:0!important;color:transparent!important;filter:drop-shadow(0 5px 15px rgba(199,243,107,.16));transition:transform .4s var(--motion),filter .4s}
+.brand:hover .brand-mark{transform:rotate(-7deg) scale(1.08)!important;filter:drop-shadow(0 7px 22px rgba(199,243,107,.38))}
+.hero{isolation:isolate;overflow:hidden;background-image:linear-gradient(rgba(199,243,107,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(199,243,107,.028) 1px,transparent 1px),radial-gradient(ellipse at 80% 20%,rgba(199,243,107,.08),transparent 45%);background-size:48px 48px,48px 48px,auto}
+.hero h1{max-width:900px;text-wrap:balance}
+.card,.panel{border-radius:7px;transition:transform .3s var(--motion),border-color .3s,box-shadow .3s}
+.card:hover,.panel:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,0,0,.22);border-color:rgba(199,243,107,.4)}
+.theme-switch{background:transparent;border:1px solid var(--line);color:var(--muted);padding:8px 10px;font:9px var(--mono);cursor:pointer;white-space:nowrap;transition:all .22s var(--motion)}
+.theme-switch:hover{border-color:var(--lime);color:var(--lime)}
+.top-progress{position:fixed;top:0;left:0;width:0;height:2px;background:var(--lime);z-index:60;box-shadow:0 0 10px rgba(199,243,107,.55)}
+.to-top{position:fixed;right:20px;bottom:20px;z-index:25;width:42px;height:42px;border-radius:50%;border:1px solid var(--lime);background:var(--panel);color:var(--lime);opacity:0;pointer-events:none;transform:translateY(8px);transition:.25s;cursor:pointer}
+.to-top.show{opacity:1;pointer-events:auto;transform:none}
+.reveal-on-scroll{opacity:0;transform:translateY(16px);transition:opacity .6s var(--motion),transform .6s var(--motion)}
+.reveal-on-scroll.visible{opacity:1;transform:none}
+.palette-backdrop{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.68);backdrop-filter:blur(8px);display:grid;place-items:start center;padding:15vh 18px 20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.palette-backdrop.open{opacity:1;pointer-events:auto}
+.palette-dialog{width:min(560px,100%);background:var(--panel);border:1px solid var(--line);box-shadow:0 30px 100px rgba(0,0,0,.5);border-radius:12px;overflow:hidden}
+.palette-input{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:19px 20px;color:var(--ink);font:14px var(--mono);outline:none}
+.palette-list{max-height:45vh;overflow:auto;padding:8px}
+.palette-link{display:flex;justify-content:space-between;padding:12px 14px;color:var(--muted);font:11px var(--mono);border-radius:6px}
+.palette-link:hover,.palette-link:focus{background:rgba(199,243,107,.09);color:var(--lime)}
+.palette-link[hidden]{display:none}
+.skip-link{position:fixed;top:8px;left:8px;z-index:110;padding:10px 14px;background:var(--lime);color:#111;transform:translateY(-150%);transition:transform .2s}
+.skip-link:focus{transform:translateY(0)}
+body[data-theme=light]{color-scheme:light;--bg:#f2f4ed;--panel:#fff;--ink:#171b13;--muted:#626b5c;--line:rgba(24,35,18,.16);--lime:#557d16}
+body[data-theme=light] .top{background:rgba(242,244,237,.94)}
+body[data-theme=light] .search,body[data-theme=light] .field,body[data-theme=light] .result{background:#fff;color:#171b13}
+body[data-theme=light] .notice{color:#3d4b2e}
+@media(max-width:680px){.brand-mark{width:35px!important;height:35px!important}.to-top{right:14px;bottom:14px}}
+@media(prefers-reduced-motion:reduce){.reveal-on-scroll{opacity:1;transform:none;transition:none}.brand-mark,.card,.btn,.filter{transition:none!important}}

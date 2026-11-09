@@ -1,15 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
-<title id="title">MOSTA — Network Monogram</title>
-<desc id="desc">A custom geometric M monogram built from connected network paths, in lime on a graphite shield.</desc>
-<defs>
- <linearGradient id="field" x1="12" y1="8" x2="116" y2="120" gradientUnits="userSpaceOnUse"><stop stop-color="#20291b"/><stop offset="1" stop-color="#0b100b"/></linearGradient>
- <linearGradient id="mark" x1="27" y1="29" x2="100" y2="101" gradientUnits="userSpaceOnUse"><stop stop-color="#efffc9"/><stop offset=".48" stop-color="#c7f36b"/><stop offset="1" stop-color="#83b82e"/></linearGradient>
- <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="3.2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-</defs>
-<path d="M31 5.5h66L122.5 31v66L97 122.5H31L5.5 97V31L31 5.5Z" fill="url(#field)" stroke="#c7f36b" stroke-opacity=".68" stroke-width="1.7"/>
-<path d="M31 14h66l17 17v66l-17 17H31L14 97V31l17-17Z" fill="none" stroke="#dfffaa" stroke-opacity=".12"/>
-<path d="M23 91V37c0-4 5-6 8-3l33 37 33-37c3-3 8-1 8 3v54H89V57L67 82c-2 2-5 2-7 0L38 57v34H23Z" fill="url(#mark)" filter="url(#glow)"/>
-<path d="M17 24 29 32M111 24 99 32M17 104l12-8M111 104 99 96" fill="none" stroke="#c7f36b" stroke-opacity=".72" stroke-width="1.6" stroke-linecap="round"/>
-<g fill="#f1ffd9" stroke="#15200f" stroke-width="2.5"><circle cx="15" cy="19" r="5.5"/><circle cx="113" cy="19" r="5.5"/><circle cx="15" cy="109" r="5.5"/><circle cx="113" cy="109" r="5.5"/></g>
-<circle cx="64" cy="64" r="53" fill="none" stroke="#c7f36b" stroke-opacity=".08" stroke-dasharray="1 7"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t d"><title id="t">MOSTA symbol</title><desc id="d">An original geometric M monogram formed from connected circuit paths.</desc><defs><linearGradient id="g" x1="18" y1="16" x2="108" y2="112" gradientUnits="userSpaceOnUse"><stop stop-color="#eaffc5"/><stop offset=".48" stop-color="#b8ff3b"/><stop offset="1" stop-color="#55d9f2"/></linearGradient><filter id="f" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><path d="M64 5 112 32v64l-48 27L16 96V32L64 5Z" fill="#0b151d" stroke="#b8ff3b" stroke-opacity=".72" stroke-width="2"/><path d="M29 91V38q0-7 7-7 4 0 7 4l21 27 21-27q3-4 7-4 7 0 7 7v53H83V55L69 73q-5 6-10 0L45 55v36H29Z" fill="url(#g)" filter="url(#f)"/><path d="M9 23h15M104 23h15M9 105h15M104 105h15" stroke="#55d9f2" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="23" r="4" fill="#55d9f2"/><circle cx="120" cy="23" r="4" fill="#55d9f2"/><circle cx="8" cy="105" r="4" fill="#55d9f2"/><circle cx="120" cy="105" r="4" fill="#55d9f2"/><path d="M64 15v14M64 99v14" stroke="#b8ff3b" stroke-opacity=".45" stroke-width="1.5"/></svg>

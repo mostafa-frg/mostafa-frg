@@ -30,12 +30,24 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
+      - name: Validate portfolio assets
+        run: |
+          test -s portfolio/index.html
+          test -s portfolio/assets/home.css
+          test -s portfolio/assets/home.js
+          test -s portfolio/assets/site.css
+          test -s portfolio/assets/site.js
+          test -s portfolio/assets/mosta-mark.svg
+          for page in projects systems security lab about contact 404; do test -s "portfolio/$page.html"; done
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload portfolio
         uses: actions/upload-pages-artifact@v3
         with:
           path: "./portfolio"
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}

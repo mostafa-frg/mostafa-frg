@@ -1,48 +1,121 @@
 name: Deploy MOSTA platform
+
 on:
   push:
     branches: [main]
-    paths: ["backend/**", "portfolio/**", ".github/workflows/deploy-backend.yml"]
+    paths:
+      - "backend/**"
+      - "portfolio/**"
+      - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
+
 permissions:
   contents: read
+
 concurrency:
   group: mosta-platform
   cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: 22}
-      - run: |
+        with:
+          node-version: 22
+      - name: Validate application files
+        run: |
+          set -euo pipefail
           node --check backend/src/index.js
           node --check portfolio/assets/auth.js
           node --check portfolio/assets/dashboard.js
+          node --check portfolio/assets/site.js
+          node --check portfolio/assets/home.js
           node -e "JSON.parse(require('fs').readFileSync('backend/wrangler.jsonc','utf8'))"
+          test -s portfolio/index.html
+          test -s portfolio/auth.html
+          test -s portfolio/dashboard.html
+          test -s backend/migrations/0001_init.sql
           python3 - <<'PY'
           import sqlite3
           db = sqlite3.connect(':memory:')
           db.executescript(open('backend/migrations/0001_init.sql', encoding='utf-8').read())
-          assert any(row[1] == "idx_single_admin" for row in db.execute("PRAGMA index_list(users)"))
-          print('D1 migration schema passed.')
+          tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+          required = {'users','sessions','auth_attempts','tool_access','audit_logs'}
+          assert required <= tables, f"Missing tables: {required - tables}"
+          indexes = {r[1] for r in db.execute("PRAGMA index_list(users)")}
+          assert 'idx_single_admin' in indexes, "Single-admin constraint missing"
+          assert not list(db.execute("PRAGMA foreign_key_check")), "Foreign-key check failed"
+          print("D1 schema validation passed.")
           PY
-          test -s backend/migrations/0001_init.sql
-          test -s portfolio/auth.html
-          test -s portfolio/dashboard.html
+
   deploy:
     needs: validate
-    if: github.ref == 'refs/heads/main' && vars.CLOUDFLARE_DEPLOY_ENABLED == 'true'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: 22}
-      - run: npm install
-        working-directory: backend
-      - run: npm run deploy
-        working-directory: backend
+        with:
+          node-version: 22
+      - name: Check Cloudflare credentials
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Add CLOUDFLARE_API_TOKEN in GitHub Actions secrets."; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Add CLOUDFLARE_ACCOUNT_ID in GitHub Actions secrets."; exit 1; }
+      - name: Install Wrangler
+        run: npm install --no-audit --no-fund
+        working-directory: backend
+      - name: Ensure D1 database exists
+        id: d1
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database"
+          headers=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json")
+          response="$(curl -fsS "$api" "${headers[@]}")"
+          db_id="$(jq -r '[.result[]? | select(.name == "mosta-platform")][0].uuid // empty' <<< "$response")"
+          if [ -z "$db_id" ]; then
+            response="$(curl -fsS -X POST "$api" "${headers[@]}" --data '{"name":"mosta-platform"}')"
+            db_id="$(jq -er '.result.uuid' <<< "$response")"
+            echo "Created D1 database mosta-platform."
+          else
+            echo "Using existing D1 database mosta-platform."
+          fi
+          node - "$db_id" <<'NODE'
+          const fs = require('node:fs');
+          const id = process.argv[2];
+          if (!id || id.length < 20) throw new Error('Cloudflare returned an invalid D1 database ID.');
+          const config = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8'));
+          config.d1_databases[0].database_id = id;
+          fs.writeFileSync('wrangler.deploy.json', JSON.stringify(config, null, 2) + '\n');
+          NODE
+      - name: Apply D1 migrations
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler d1 migrations apply DB --remote --config wrangler.deploy.json
+        working-directory: backend
+      - name: Configure initial administrator bootstrap token (optional)
+        if: ${{ secrets.ADMIN_BOOTSTRAP_TOKEN != '' }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          ADMIN_BOOTSTRAP_TOKEN: ${{ secrets.ADMIN_BOOTSTRAP_TOKEN }}
+        run: printf '%s' "$ADMIN_BOOTSTRAP_TOKEN" | npx wrangler secret put ADMIN_BOOTSTRAP_TOKEN --config wrangler.deploy.json
+        working-directory: backend
+      - name: Deploy Worker and static portfolio
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler deploy --config wrangler.deploy.json
+        working-directory: backend

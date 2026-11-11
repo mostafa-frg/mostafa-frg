@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mosta-platform
+  group: mosta-platform-deploy-v2
   cancel-in-progress: true
 
 jobs:

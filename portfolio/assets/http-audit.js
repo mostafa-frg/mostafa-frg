@@ -50,29 +50,13 @@
 
   var SAMPLE = ['HTTP/2 200', 'content-type: text/html', 'server: nginx/1.18.0', 'x-powered-by: Express', 'content-security-policy: default-src \'self\'; script-src \'self\' \'unsafe-inline\'', 'set-cookie: sid=abc123; Path=/'].join('\n');
 
-  function el(t, c, x) { var n = document.createElement(t); if (c) n.className = c; if (x !== undefined) n.textContent = x; return n; }
-
   function mount(card) {
-    var ta = el('textarea', 'field ca-input'); ta.rows = 8; ta.spellcheck = false;
-    ta.setAttribute('aria-label', 'Paste HTTP response headers'); ta.placeholder = 'Paste response headers (e.g. from curl -I). Analysed locally; nothing is fetched or uploaded.';
-    var lab = el('label', 'meta'); var cb = el('input', ''); cb.type = 'checkbox'; cb.checked = true; lab.append(cb, ' These headers came from an HTTPS response');
-    var run = el('button', 'btn primary', 'AUDIT HEADERS'); run.type = 'button';
-    var sample = el('button', 'btn', 'LOAD SAMPLE'); sample.type = 'button';
-    var row = el('div', 'ca-actions'); row.append(run, sample);
-    var out = el('div', 'ca-out'); out.setAttribute('role', 'status'); out.setAttribute('aria-live', 'polite');
-    card.append(ta, lab, row, out);
-    sample.addEventListener('click', function () { ta.value = SAMPLE; });
-    run.addEventListener('click', function () {
-      var r = audit(ta.value, cb.checked), nodes = [];
-      if (r.empty) { out.replaceChildren(el('p', 'notice status-error', 'No headers found. Paste lines like "Name: value".')); return; }
-      nodes.push(el('p', 'meta', r.count + ' finding' + (r.count === 1 ? '' : 's')));
-      if (!r.count) nodes.push(el('p', 'notice status-ok', 'No configured checks triggered. This does not prove the site is secure.'));
-      r.findings.forEach(function (f) {
-        var it = el('article', 'ca-finding ca-' + f.severity);
-        it.append(el('span', 'pill', f.severity.toUpperCase()), el('strong', '', f.id + ' — ' + f.title), el('p', '', 'Fix: ' + f.fix)); nodes.push(it);
-      });
-      nodes.push(el('p', 'meta', 'Heuristic checks only. Review results against your own policy.'));
-      out.replaceChildren.apply(out, nodes);
+    root.MostaAuditUI.mount(card, {
+      title: 'MOSTA HTTP Header Audit', runLabel: 'AUDIT HEADERS', inputLabel: 'Paste HTTP response headers',
+      placeholder: 'Paste response headers, e.g. from curl -I (Ctrl+Enter to run). Analysed locally; nothing is fetched or uploaded.',
+      sample: SAMPLE, option: { label: 'These headers came from an HTTPS response', checked: true },
+      emptyMessage: 'No headers found. Paste lines like "Name: value".',
+      run: function (text, https) { return audit(text, https); }
     });
   }
 

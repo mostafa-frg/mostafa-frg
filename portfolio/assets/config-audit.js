@@ -73,38 +73,12 @@
     'line vty 0 4', ' transport input telnet', ' login local', '!', 'end'
   ].join('\n');
 
-  function el(tag, cls, txt) { var n = document.createElement(tag); if (cls) n.className = cls; if (txt !== undefined) n.textContent = txt; return n; }
-
   function mount(card) {
-    var ta = el('textarea', 'field ca-input');
-    ta.rows = 8; ta.spellcheck = false; ta.setAttribute('aria-label', 'Paste a Cisco-style configuration');
-    ta.placeholder = 'Paste a configuration here. It is analysed in your browser and never uploaded.';
-    var file = el('input', 'field'); file.type = 'file'; file.accept = '.txt,.cfg,.conf,.log'; file.setAttribute('aria-label', 'Or choose a configuration file');
-    var run = el('button', 'btn primary', 'AUDIT CONFIG'); run.type = 'button';
-    var sample = el('button', 'btn', 'LOAD SAMPLE'); sample.type = 'button';
-    var out = el('div', 'ca-out'); out.setAttribute('role', 'status'); out.setAttribute('aria-live', 'polite');
-    var row = el('div', 'ca-actions'); row.append(run, sample);
-    card.append(ta, file, row, out);
-
-    file.addEventListener('change', function () {
-      var f = file.files && file.files[0]; if (!f) return;
-      if (f.size > 512 * 1024) { out.replaceChildren(el('p', 'notice status-error', 'File is larger than 512 KB.')); return; }
-      var r = new FileReader(); r.onload = function () { ta.value = String(r.result); }; r.readAsText(f);
-    });
-    sample.addEventListener('click', function () { ta.value = SAMPLE; });
-    run.addEventListener('click', function () {
-      if (!ta.value.trim()) { out.replaceChildren(el('p', 'notice status-error', 'Paste or load a configuration first.')); return; }
-      var res = audit(ta.value), nodes = [];
-      nodes.push(el('p', 'meta', res.findings.length + ' finding' + (res.findings.length === 1 ? '' : 's') + ' · ' + res.lineCount + ' lines checked'));
-      if (!res.findings.length) nodes.push(el('p', 'notice status-ok', 'No configured checks triggered. This does not prove the device is secure.'));
-      res.findings.forEach(function (f) {
-        var item = el('article', 'ca-finding ca-' + f.severity);
-        item.append(el('span', 'pill', f.severity.toUpperCase()), el('strong', '', f.id + ' — ' + f.title), el('p', '', 'Fix: ' + f.fix));
-        if (f.lines.length) item.append(el('small', '', 'Line' + (f.lines.length > 1 ? 's' : '') + ': ' + f.lines.join(', ')));
-        nodes.push(item);
-      });
-      nodes.push(el('p', 'meta', 'Heuristic checks only. Review results against your own policy.'));
-      out.replaceChildren.apply(out, nodes);
+    root.MostaAuditUI.mount(card, {
+      title: 'MOSTA Config Audit', runLabel: 'AUDIT CONFIG', inputLabel: 'Paste a Cisco-style configuration',
+      placeholder: 'Paste a configuration here (Ctrl+Enter to run). It is analysed in your browser and never uploaded.',
+      accept: '.txt,.cfg,.conf,.log', sample: SAMPLE, emptyMessage: 'Nothing to audit.',
+      run: function (text) { var r = audit(text); return { count: r.findings.length, findings: r.findings, meta: r.lineCount + ' lines checked' }; }
     });
   }
 

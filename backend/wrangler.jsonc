@@ -1,6 +1,6 @@
 {
   "$schema":"https://raw.githubusercontent.com/cloudflare/workers-sdk/main/packages/wrangler/config-schema.json",
-  "name":"mosta-platform",
+  "name":"mostafa-frg",
   "main":"src/index.js",
   "compatibility_date":"2026-11-09",
   "workers_dev":true,

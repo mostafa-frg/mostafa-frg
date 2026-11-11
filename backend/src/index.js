@@ -2,8 +2,9 @@ const COOKIE="__Host-mosta_session",SESSION=604800,ITER=100000;
 const TOOLS=[
 {id:"subnet-calculator",name:"IPv4 Subnet Calculator",group:"Networking",mode:"browser",description:"Calculate IPv4 network boundaries and host ranges."},
 {id:"sha256-local",name:"Local SHA-256",group:"File Integrity",mode:"browser",description:"Hash files locally; file contents never leave the browser."},
+{id:"config-audit",name:"Config Audit",group:"Networking",mode:"browser",description:"Paste a Cisco-style configuration and review common management-security issues. Runs in your browser; nothing is uploaded."},
 {id:"log-review",name:"Log Review",group:"Security Operations",mode:"planned",description:"Reserved for a bounded log-analysis workflow."},
-{id:"http-audit",name:"HTTP Security Audit",group:"Web Security",mode:"planned",description:"Reserved until SSRF and abuse protections are implemented."},
+{id:"http-audit",name:"HTTP Header Audit",group:"Web Security",mode:"browser",description:"Paste response headers you captured and review security headers and cookie flags. Runs in your browser; the platform never fetches URLs."},
 {id:"pcap-analysis",name:"PCAP Analysis",group:"Network Analysis",mode:"planned",description:"Reserved for isolated, size-limited packet analysis."},
 {id:"network-inventory",name:"Network Inventory",group:"Networking",mode:"planned",description:"Reserved for authorized inventory workflows."}];
 const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}});

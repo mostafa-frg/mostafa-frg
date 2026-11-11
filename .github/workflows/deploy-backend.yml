@@ -112,12 +112,12 @@ jobs:
           ADMIN_BOOTSTRAP_TOKEN: ${{ secrets.ADMIN_BOOTSTRAP_TOKEN }}
         run: |
           set -euo pipefail
-          if [ -z "$ADMIN_BOOTSTRAP_TOKEN" ]; then
-            echo "::error::ADMIN_BOOTSTRAP_TOKEN is missing from Repository Actions secrets. Add it before deploying."
-            exit 1
+          if [ -n "$ADMIN_BOOTSTRAP_TOKEN" ]; then
+            echo "Bootstrap token is present; configuring it on Worker mostafa-frg."
+            printf '%s' "$ADMIN_BOOTSTRAP_TOKEN" | npx wrangler secret put ADMIN_BOOTSTRAP_TOKEN --config wrangler.deploy.json
+          else
+            echo "ADMIN_BOOTSTRAP_TOKEN is not set; skipping one-time administrator bootstrap secret."
           fi
-          echo "Bootstrap token is present; configuring it on Worker mostafa-frg."
-          printf '%s' "$ADMIN_BOOTSTRAP_TOKEN" | npx wrangler secret put ADMIN_BOOTSTRAP_TOKEN --config wrangler.deploy.json
         working-directory: backend
       - name: Deploy Worker and static portfolio
         env:

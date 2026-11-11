@@ -1,51 +1,50 @@
 # MOSTA Portfolio
 
-A lightweight, responsive, single-page portfolio for Mostafa Mahmoud.
+A lightweight, responsive, multi-page technical portfolio for Mostafa Mahmoud.
+
+## Live sites
+
+- **Primary platform:** https://mostafa-frg.frh7977.workers.dev/
+- **Public static mirror:** https://mostafa-frg.github.io/mostafa-frg/
+
+The Cloudflare Worker serves the portfolio and the same-origin API backed by D1. The GitHub Pages copy is a static mirror; its Platform Access link and direct authentication/dashboard URLs forward to the Worker. This keeps session cookies and API calls on one origin.
 
 ## Preview locally
 
-Open `index.html` in a browser. No build step or package installation is required.
+Open `index.html` in a browser. No build step or package installation is required. Browser-only tools can be tested locally; authentication and the dashboard require the deployed Worker and D1 database.
 
-## Deploy with GitHub Pages
+## Pages
 
-1. Open the repository **Settings → Pages**.
-2. Under **Build and deployment**, set **Source** to **GitHub Actions**.
-3. Merge this portfolio branch into `main`.
-4. The workflow at `.github/workflows/deploy-portfolio.yml` publishes the `portfolio/` directory.
-5. After the workflow succeeds, the site is available at:
-
-   `https://mostafa-frg.github.io/mostafa-frg/`
-
-## Notes
-
-- The interactive console contains clearly labelled illustrative output; it does not execute commands or access a real system.
-- Project descriptions link to the public source directories.
-- No certifications, employment history, client claims, or skill percentages are fabricated.
-- Motion respects the user's reduced-motion preference.
-
-## MOSTA 3.0
-
-The portfolio is a multi-page static site hosted on GitHub Pages.
-
-### Pages
-- `index.html` — homepage
+- `index.html` — homepage and professional overview
 - `projects.html` — searchable and filterable project directory
 - `systems.html` — technical domains and system map
-- `security.html` — browser security controls and hosting limitations
+- `security.html` — security controls and hosting boundaries
 - `lab.html` — local IPv4 subnet calculator and SHA-256 file hashing
 - `about.html` — professional profile
 - `contact.html` — professional links
+- `auth.html` — Worker-hosted sign-in and first-admin setup
+- `dashboard.html` — authenticated workspace and admin controls
 - `404.html` — not-found page
 
-### Security and privacy
-- Same-origin CSS and JavaScript assets; no third-party font or analytics dependencies.
-- Restrictive Content Security Policy delivered through a meta policy.
-- External links opened in new tabs use `noopener noreferrer`.
-- The browser SHA-256 utility processes the selected file locally; it does not upload file contents.
-- GitHub Pages is static hosting. Meta CSP cannot replace server-delivered headers such as HSTS or X-Frame-Options.
+## Deployment
 
-### Local assets
+- `.github/workflows/deploy-portfolio.yml` publishes `portfolio/` to GitHub Pages as a public static mirror.
+- `.github/workflows/deploy-backend.yml` validates the app, applies Cloudflare D1 migrations, configures the optional one-time bootstrap secret, and deploys the Worker with the same portfolio assets.
+- The Worker is the only origin that handles `/api/*`, session cookies, and authenticated dashboard access.
+
+## Security and privacy
+
+- Same-origin CSS and JavaScript; no third-party font or analytics dependencies.
+- Restrictive CSP meta policy on HTML pages. The Worker also sends frame-denial and other security headers for its static responses.
+- External links opened in new tabs use `noopener noreferrer`.
+- The browser SHA-256 utility processes selected files locally; file contents are not uploaded.
+- Config Audit and HTTP Header Audit run in the browser and do not upload or fetch the supplied input.
+- GitHub Pages does not expose general custom response-header configuration; the Cloudflare Worker is the primary runtime for the authenticated platform.
+
+## Local assets
+
 - `assets/home.css` and `assets/home.js` — homepage presentation and behavior
 - `assets/site.css` and `assets/site.js` — shared subpage design and interactions
+- `assets/audit-ui.js`, `assets/config-audit.js`, and `assets/http-audit.js` — browser-side audit tools
 
 All labs and examples are intended for authorized systems and isolated environments.

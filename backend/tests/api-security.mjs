@@ -26,6 +26,8 @@ const att=[];for(let i=0;i<12;i++)att.push((await call('/api/auth/login',{method
 t('attacker IP locked after 5 failures',att.slice(0,5).every(c=>c===401)&&att.slice(5).every(c=>c===429),att.join(','));
 const parallel=await Promise.all(Array.from({length:12},(_,i)=>login('parallel-target','wrong-parallel-'+i,'9.9.9.8')));
 t('concurrent attempts cannot bypass the per-account limit',parallel.filter(x=>x.s===401).length===5&&parallel.filter(x=>x.s===429).length===7,parallel.map(x=>x.s).join(','));
+const parallelSpray=await Promise.all(Array.from({length:25},(_,i)=>login('parallel-spray-'+i,'wrong-spray-'+i,'6.6.6.7')));
+t('concurrent password spray cannot bypass the per-IP limit',parallelSpray.filter(x=>x.s===401).length===20&&parallelSpray.filter(x=>x.s===429).length===5,parallelSpray.map(x=>x.s).join(','));
 a=await call('/api/auth/login',{method:'POST',ip:'8.8.8.8',body:{username:winner,password:PW}});
 t('real admin from another IP NOT locked out',a.s===200,'status '+a.s);
 // successful logins don't count

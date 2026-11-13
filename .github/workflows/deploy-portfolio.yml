@@ -1,6 +1,11 @@
 name: Deploy MOSTA portfolio
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "portfolio/**"
+      - ".github/workflows/deploy-portfolio.yml"
   push:
     branches: [main]
     paths:
@@ -8,19 +13,146 @@ on:
       - ".github/workflows/deploy-portfolio.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
-  group: "mosta-pages-deploy-v2"
+  group: mosta-pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Validate required portfolio files
+        run: |
+          set -euo pipefail
+          test -s portfolio/index.html
+          test -s portfolio/projects.html
+          test -s portfolio/tools.html
+          test -s portfolio/security.html
+          test -s portfolio/about.html
+          test -s portfolio/contact.html
+          test -s portfolio/auth.html
+          test -s portfolio/dashboard.html
+          test -s portfolio/404.html
+          test -s portfolio/assets/site.css
+          test -s portfolio/assets/site.js
+          test -s portfolio/assets/tools.css
+          test -s portfolio/assets/tools.js
+          test -s portfolio/assets/mosta-mark.svg
+      - name: Check JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            echo "Checking $file"
+            node --check "$file"
+          done < <(find portfolio/assets -maxdepth 1 -type f -name '*.js' -print0)
+      - name: Audit HTML links, navigation and external links
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+
+          root = Path("portfolio")
+          public_pages = {"index.html", "projects.html", "tools.html", "security.html", "about.html", "contact.html"}
+          required_nav = {"index.html", "projects.html", "tools.html", "auth.html", "security.html"}
+
+          class Audit(HTMLParser):
+              def __init__(self, path):
+                  super().__init__(convert_charrefs=True)
+                  self.path = path
+                  self.errors = []
+                  self.nav_links = set()
+                  self.in_nav = False
+                  self.has_viewport = False
+                  self.has_lang = False
+
+              def handle_starttag(self, tag, attrs):
+                  a = dict(attrs)
+                  if tag == "html":
+                      self.has_lang = bool(a.get("lang"))
+                  if tag == "meta" and a.get("name", "").lower() == "viewport":
+                      self.has_viewport = True
+                  if tag == "nav" and a.get("id") == "siteNav":
+                      self.in_nav = True
+                  if tag == "a" and self.in_nav:
+                      href = a.get("href", "")
+                      if href:
+                          self.nav_links.add(href.split("#", 1)[0])
+                  if tag == "a" and a.get("target") == "_blank":
+                      rel = set(a.get("rel", "").lower().split())
+                      if not {"noopener", "noreferrer"} <= rel:
+                          self.errors.append(f"external target missing rel protections: {a.get('href')}")
+                  for key in ("href", "src"):
+                      value = a.get(key, "").strip()
+                      if not value or value.startswith(("#", "https://", "http://", "mailto:", "tel:", "data:")):
+                          continue
+                      if value.lower().startswith("javascript:"):
+                          self.errors.append(f"javascript URL: {value}")
+                          continue
+                      target = (self.path.parent / value.split("#", 1)[0].split("?", 1)[0]).resolve()
+                      if not target.is_file():
+                          self.errors.append(f"missing local {key}: {value}")
+
+              def handle_endtag(self, tag):
+                  if tag == "nav":
+                      self.in_nav = False
+
+          failures = []
+          for page in sorted(root.glob("*.html")):
+              audit = Audit(page)
+              audit.feed(page.read_text(encoding="utf-8"))
+              if not audit.has_lang:
+                  failures.append(f"{page}: missing html lang")
+              if not audit.has_viewport:
+                  failures.append(f"{page}: missing viewport meta")
+              failures.extend(f"{page}: {error}" for error in audit.errors)
+              if page.name in public_pages:
+                  missing = required_nav - audit.nav_links
+                  if missing:
+                      failures.append(f"{page}: navigation missing {sorted(missing)}")
+          if failures:
+              raise SystemExit("\\n".join(failures))
+          print("HTML links, navigation, viewport and external-link protections passed.")
+          PY
+      - name: Check front-end size budgets
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          budgets = {
+              "portfolio/assets/site.js": 24_000,
+              "portfolio/assets/site.css": 36_000,
+              "portfolio/assets/tools.js": 24_000,
+              "portfolio/assets/tools.css": 8_000,
+          }
+          failures = []
+          for name, limit in budgets.items():
+              size = Path(name).stat().st_size
+              print(f"{name}: {size} / {limit} bytes")
+              if size > limit:
+                  failures.append(f"{name} exceeds its {limit}-byte budget")
+          if failures:
+              raise SystemExit("\\n".join(failures))
+          PY
+
+  deploy:
+    needs: validate
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -30,65 +162,12 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 1
-      - name: Validate portfolio assets
-        run: |
-          test -s portfolio/index.html
-          test -s portfolio/assets/home.css
-          test -s portfolio/assets/home.js
-          test -s portfolio/assets/site.css
-          test -s portfolio/assets/site.js
-          test -s portfolio/assets/tools.js
-          test -s portfolio/assets/tools.css
-          test -s portfolio/tools.html
-          test -s portfolio/assets/mosta-mark.svg
-          for page in projects systems security lab tools about contact 404; do test -s "portfolio/$page.html"; done
-      - name: Validate JavaScript and local page links
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --check portfolio/assets/home.js
-          node --check portfolio/assets/site.js
-          node --check portfolio/assets/tools.js
-          python3 - <<'PY'
-          from html.parser import HTMLParser
-          from pathlib import Path
-          root = Path("portfolio")
-          class Audit(HTMLParser):
-              def __init__(self, path):
-                  super().__init__(convert_charrefs=True)
-                  self.path = path
-                  self.errors = []
-              def handle_starttag(self, tag, attrs):
-                  a = dict(attrs)
-                  if tag == "a" and a.get("target") == "_blank":
-                      rel = set(a.get("rel", "").lower().split())
-                      if not {"noopener", "noreferrer"} <= rel:
-                          self.errors.append(f"external target missing rel protections: {a.get('href')}")
-                  for key in ("href", "src"):
-                      value = a.get(key, "").strip()
-                      if not value or value.startswith(("#", "https://", "http://", "mailto:", "tel:", "data:")):
-                          continue
-                      if value.startswith("javascript:"):
-                          self.errors.append(f"javascript URL: {value}")
-                          continue
-                      target = (self.path.parent / value.split("#", 1)[0].split("?", 1)[0]).resolve()
-                      if not target.is_file():
-                          self.errors.append(f"missing local {key}: {value}")
-          failures = []
-          for page in sorted(root.glob("*.html")):
-              audit = Audit(page)
-              audit.feed(page.read_text(encoding="utf-8"))
-              failures.extend(f"{page}: {e}" for e in audit.errors)
-          if failures:
-              raise SystemExit("\n".join(failures))
-          print("Portfolio HTML links and external target protections passed.")
-          PY
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - name: Upload portfolio
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
-          path: "./portfolio"
+          path: ./portfolio
           name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
       - name: Deploy to GitHub Pages
         id: deployment

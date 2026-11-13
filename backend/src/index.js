@@ -1,4 +1,4 @@
-const COOKIE="__Host-mosta_session",SESSION=604800,ITER=100000,LOGIN_PAIR_LIMIT=5,LOGIN_IP_LIMIT=20,BOOT_LIMIT=5,WINDOW=900,MAX_BODY=16384;
+const COOKIE="__Host-mosta_session",SESSION=604800,ITER=100000,LOGIN_PAIR_LIMIT=5,LOGIN_IP_LIMIT=20,BOOT_LIMIT=5,WINDOW=900,MAX_BODY=16384,MAX_SESSIONS=10;
 class HttpError extends Error{constructor(status,message){super(message);this.status=status;}}
 const TOOLS=[
 {id:"subnet-calculator",name:"IPv4 Subnet Calculator",group:"Networking",mode:"browser",description:"Calculate IPv4 network boundaries and host ranges."},
@@ -19,7 +19,7 @@ async function ipId(req,env){const ip=req.headers.get("CF-Connecting-IP")||"unkn
 let DUMMY;const dummy=async()=>DUMMY||(DUMMY={...await passHash("mosta-timing-equaliser"),iter:ITER});
 const COMMON=["password","123456","qwerty","letmein","admin","welcome","iloveyou"];
 function weakPassword(pw,name){if(pw.length<14||pw.length>128)return"Password must be 14–128 characters.";if(/^(.)\1+$/.test(pw))return"Password is too repetitive.";const l=pw.toLowerCase();if(name&&name.length>=3&&l.includes(String(name).toLowerCase()))return"Password must not contain the username.";if(COMMON.some(w=>l.includes(w)))return"Password contains a very common word or sequence.";return null;}
-const newSession=async(env,userId,now)=>{const raw=b64(rand(32));await env.DB.prepare("INSERT INTO sessions(id,user_id,token_hash,created_at,expires_at) VALUES(?,?,?,?,?)").bind(crypto.randomUUID(),userId,await hash(raw),now,now+SESSION).run();return raw;};
+const newSession=async(env,userId,now)=>{const raw=b64(rand(32));await env.DB.prepare("INSERT INTO sessions(id,user_id,token_hash,created_at,expires_at) VALUES(?,?,?,?,?)").bind(crypto.randomUUID(),userId,await hash(raw),now,now+SESSION).run();await env.DB.prepare("DELETE FROM sessions WHERE user_id=? AND id NOT IN (SELECT id FROM sessions WHERE user_id=? ORDER BY created_at DESC, rowid DESC LIMIT "+MAX_SESSIONS+")").bind(userId,userId).run();return raw;};
 async function tokenOK(given,expected){const x=unb64(await hash(String(given||"").trim())),y=unb64(await hash(String(expected).trim()));let d=0;for(let i=0;i<x.length;i++)d|=x[i]^y[i];return d===0;}
 function cookie(req){for(const p of (req.headers.get("Cookie")||"").split(";")){const x=p.trim().split("=");if(x[0]===COOKIE)return x.slice(1).join("=");}return null;}
 const setCookie=v=>COOKIE+"="+v+"; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age="+SESSION,clearCookie=()=>COOKIE+"=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0";

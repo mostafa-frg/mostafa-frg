@@ -111,4 +111,9 @@ t('reset: sessions revoked, old password dead, new works',(await call('/api/auth
 a=await call('/api/admin/audit',{cookie:adminCookie});const acts=new Set(a.j.events.map(e=>e.action));
 t('audit trail has the new events',['auth.password_changed','auth.password_change_failed','auth.logout_all','admin.session.revoke','admin.user.password_reset'].every(x=>acts.has(x)),[...acts].join(','));
 
+// session cap
+const cookies=[];for(let i=0;i<12;i++){const r=await login('carol','amber-falcon-river-42','31.0.'+i+'.1');cookies.push(ck(r));}
+const alive=[];for(const c of cookies)alive.push((await call('/api/auth/me',{cookie:c})).s===200);
+t('session cap: only the newest 10 sessions survive',alive.filter(Boolean).length===10&&!alive[0]&&!alive[1]&&alive[11],alive.map(x=>x?1:0).join(''));
+
 console.log(`\n${pass} passed, ${fail} failed`);process.exit(fail?1:0);

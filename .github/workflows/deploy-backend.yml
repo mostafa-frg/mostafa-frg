@@ -109,19 +109,24 @@ jobs:
           worker_pid=$!
           trap 'kill "$worker_pid" 2>/dev/null || true' EXIT
           ready=0
-          for i in $(seq 1 30); do
-            if curl -fsS "$BASE_URL/api/health" >/tmp/mosta-health.json; then
+          for i in $(seq 1 45); do
+            if ! kill -0 "$worker_pid" 2>/dev/null; then
+              echo "::error::Local Worker exited before becoming ready."
+              cat /tmp/mosta-worker.log
+              exit 1
+            fi
+            if curl --silent --show-error --fail "$BASE_URL/api/health" --output /tmp/mosta-health.json 2>/dev/null; then
               ready=1
               break
             fi
             sleep 2
           done
           if [ "$ready" -ne 1 ]; then
+            echo "::error::Local Worker did not become healthy within 90 seconds."
             cat /tmp/mosta-worker.log
-            echo "::error::Local Worker did not become healthy."
             exit 1
           fi
-          grep -q '"ok":true' /tmp/mosta-health.json
+          node -e "const h=JSON.parse(require('fs').readFileSync('/tmp/mosta-health.json','utf8')); if(h.ok!==true || h.database!=='ok' || h.security!=='ok') process.exit(1)"
           npm run test:security
 
   deploy:

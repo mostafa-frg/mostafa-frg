@@ -9,6 +9,11 @@ on:
       - "backend/**"
       - "portfolio/**"
       - ".github/workflows/deploy-backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "portfolio/**"
+      - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
 
 permissions:
@@ -59,8 +64,63 @@ jobs:
           print("D1 schema validation passed.")
           PY
 
+  security-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend dependencies
+        run: npm ci --no-audit --no-fund
+        working-directory: backend
+      - name: Prepare isolated local Worker configuration
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const config = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8'));
+          config.d1_databases[0].database_id = '00000000-0000-0000-0000-000000000000';
+          fs.writeFileSync('wrangler.local.json', JSON.stringify(config, null, 2) + '\\n');
+          NODE
+          printf '%s\\n' \\
+            'ADMIN_BOOTSTRAP_TOKEN=test-bootstrap-token-0123456789abcdef' \\
+            'IP_HASH_SECRET=local-ci-only-secret-not-for-production' > .dev.vars
+      - name: Apply migrations to isolated local D1
+        run: npx wrangler d1 migrations apply DB --local --persist-to .state --config wrangler.local.json
+        working-directory: backend
+      - name: Run black-box API security tests against local Worker
+        working-directory: backend
+        env:
+          BASE_URL: http://127.0.0.1:8787
+          TEST_BOOTSTRAP_TOKEN: test-bootstrap-token-0123456789abcdef
+        run: |
+          set -euo pipefail
+          npx wrangler dev --local --ip 127.0.0.1 --port 8787 --persist-to .state --config wrangler.local.json > /tmp/mosta-worker.log 2>&1 &
+          worker_pid=$!
+          trap 'kill "$worker_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for i in $(seq 1 30); do
+            if curl -fsS "$BASE_URL/api/health" >/tmp/mosta-health.json; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/mosta-worker.log
+            echo "::error::Local Worker did not become healthy."
+            exit 1
+          fi
+          grep -q '"ok":true' /tmp/mosta-health.json
+          npm run test:security
+
   deploy:
-    needs: validate
+    needs: [validate, security-tests]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20

@@ -85,11 +85,12 @@ jobs:
           const fs = require('node:fs');
           const config = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8'));
           config.d1_databases[0].database_id = '00000000-0000-0000-0000-000000000000';
-          fs.writeFileSync('wrangler.local.json', JSON.stringify(config, null, 2) + '\\n');
+          fs.writeFileSync('wrangler.local.json', JSON.stringify(config, null, 2) + '\n');
           NODE
-          printf '%s\\n' \\
-            'ADMIN_BOOTSTRAP_TOKEN=test-bootstrap-token-0123456789abcdef' \\
-            'IP_HASH_SECRET=local-ci-only-secret-not-for-production' > .dev.vars
+          cat > .dev.vars <<'VARS'
+          ADMIN_BOOTSTRAP_TOKEN=test-bootstrap-token-0123456789abcdef
+          IP_HASH_SECRET=local-ci-only-secret-not-for-production
+          VARS
       - name: Apply migrations to isolated local D1
         run: npx wrangler d1 migrations apply DB --local --persist-to .state --config wrangler.local.json
         working-directory: backend

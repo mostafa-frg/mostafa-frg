@@ -31,9 +31,9 @@ In GitHub, open **Settings → Secrets and variables → Actions → Secrets** a
 2. `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account ID (not an API token).
 3. `ADMIN_BOOTSTRAP_TOKEN` — set this only for initial administrator setup. Use a long, random value. The workflow configures it on the Worker when present and skips that step when absent.
 
-After the first administrator has been created successfully, remove `ADMIN_BOOTSTRAP_TOKEN` from GitHub Actions secrets and delete the Worker secret with Wrangler or from **Cloudflare Dashboard → Workers & Pages → mostafa-frg → Settings → Variables and Secrets**. Later deployments will continue without it, and the API bootstrap route will remain closed because an administrator already exists.
+After the first administrator has been created successfully and you have confirmed that sign-in works, remove `ADMIN_BOOTSTRAP_TOKEN` from GitHub Actions secrets. The next deployment detects the existing administrator and automatically deletes the Worker-side bootstrap secret. The API bootstrap route remains closed because an administrator already exists.
 
-The optional `CLOUDFLARE_WORKERS_SUBDOMAIN` secret can override the default `frh7977` subdomain used by the workflow health check if your workers.dev subdomain differs.
+The workflow also creates `IP_HASH_SECRET` on the Worker when it is missing. The value is generated on the runner, sent directly to Cloudflare, and is never printed or committed. Keep this secret stable: changing it resets the IP-based rate-limit buckets. Once an administrator exists, the next deployment automatically deletes the Worker-side `ADMIN_BOOTSTRAP_TOKEN`; remove the corresponding GitHub Actions secret manually after confirming the admin account works. The optional `CLOUDFLARE_WORKERS_SUBDOMAIN` secret can override the default `frh7977` subdomain used by the workflow health check if your workers.dev subdomain differs.
 
 ## First deployment and administrator setup
 

@@ -2,6 +2,7 @@ const B=process.env.BASE_URL||'http://localhost:8787', TOKEN=process.env.TEST_BO
 let pass=0,fail=0;const t=(name,ok,note='')=>{ok?pass++:fail++;console.log((ok?'PASS ':'FAIL ')+name+(note?'  ['+note+']':''))};
 const call=async(path,{method='GET',body,cookie,origin=B,raw,ip,stream}={})=>{const h={};if(origin)h.origin=origin;if(cookie)h.cookie=cookie;if(ip)h['cf-connecting-ip']=ip;if(body!==undefined||raw!==undefined||stream)h['content-type']='application/json';const init={method,headers:h,body:stream|| (raw!==undefined?raw:(body!==undefined?JSON.stringify(body):undefined)),redirect:'manual'};if(stream)init.duplex='half';const r=await fetch(B+path,init);let j=null;try{j=await r.clone().json()}catch{};return{r,j,s:r.status,sc:r.headers.get('set-cookie')}};
 const ck=r=>(r.sc||'').split(';')[0];
+const login=async(u,pw,ip)=>call('/api/auth/login',{method:'POST',ip,body:{username:u,password:pw}});
 const PW='correct-horse-battery-1';
 // S-03 json handling
 t('malformed JSON -> 400',(await call('/api/auth/login',{method:'POST',raw:'{x',ip:'3.3.3.3'})).s===400);
@@ -78,7 +79,6 @@ t('policy: contains username rejected',(await mkUser('carol','carol-is-my-name-1
 t('policy: common word rejected',(await mkUser('carol','my-password-is-long')).s===400);
 t('policy: repetitive rejected',(await mkUser('carol','a'.repeat(16))).s===400);
 a=await mkUser('carol','blue-lantern-orbit-77');t('policy: strong password accepted',a.s===201);const carolId=a.j.id;
-const login=async(u,pw,ip)=>call('/api/auth/login',{method:'POST',ip,body:{username:u,password:pw}});
 a=await login('carol','blue-lantern-orbit-77','21.0.0.1');const c1=ck(a);a=await login('carol','blue-lantern-orbit-77','21.0.0.2');const c2=ck(a);
 t('two concurrent sessions for one user',(await call('/api/auth/me',{cookie:c1})).s===200&&(await call('/api/auth/me',{cookie:c2})).s===200);
 a=await call('/api/auth/change-password',{method:'POST',cookie:c1,ip:'21.0.0.1',body:{currentPassword:'WRONG-current-pass',newPassword:'green-harbor-compass-88'}});t('change-password: wrong current -> 403',a.s===403);

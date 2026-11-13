@@ -121,7 +121,7 @@ jobs:
                   if missing:
                       failures.append(f"{page}: navigation missing {sorted(missing)}")
           if failures:
-              raise SystemExit("\\n".join(failures))
+              raise SystemExit("\n".join(failures))
           print("HTML links, navigation, viewport and external-link protections passed.")
           PY
       - name: Check front-end size budgets
@@ -141,7 +141,7 @@ jobs:
               if size > limit:
                   failures.append(f"{name} exceeds its {limit}-byte budget")
           if failures:
-              raise SystemExit("\\n".join(failures))
+              raise SystemExit("\n".join(failures))
           PY
 
   deploy:

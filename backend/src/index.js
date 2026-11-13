@@ -14,7 +14,7 @@ const hash=async s=>b64(await crypto.subtle.digest("SHA-256",new TextEncoder().e
 async function passHash(password,salt=rand(16),iter=ITER){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);return{salt:b64(salt),hash:b64(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt,iterations:iter},k,256))};}
 async function passOK(p,s,h,iter=100000){const a=unb64((await passHash(p,unb64(s),iter)).hash),b=unb64(h);let d=a.length^b.length;for(let i=0;i<Math.min(a.length,b.length);i++)d|=a[i]^b[i];return d===0;}
 // Rate-limit keys use HMAC-SHA256 with a Worker secret so stored values cannot be reversed by enumerating IPv4 space.
-// Without the secret (local dev) it falls back to a plain SHA-256.
+// The secret is mandatory in every environment; requests fail closed if it is missing or too short.
 async function ipId(req,env){const ip=req.headers.get("CF-Connecting-IP")||"unknown";if(typeof env.IP_HASH_SECRET!=="string"||env.IP_HASH_SECRET.length<32)throw new HttpError(503,"Security configuration unavailable.");const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(env.IP_HASH_SECRET),{name:"HMAC",hash:"SHA-256"},false,["sign"]);return b64(await crypto.subtle.sign("HMAC",k,new TextEncoder().encode(ip)));}
 let DUMMY;const dummy=async()=>DUMMY||(DUMMY={...await passHash("mosta-timing-equaliser"),iter:ITER});
 const COMMON=["password","123456","qwerty","letmein","admin","welcome","iloveyou"];

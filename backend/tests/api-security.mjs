@@ -1,6 +1,6 @@
 const B=process.env.BASE_URL||'http://localhost:8787', TOKEN=process.env.TEST_BOOTSTRAP_TOKEN||'test-bootstrap-token-0123456789abcdef';
 let pass=0,fail=0;const t=(name,ok,note='')=>{ok?pass++:fail++;console.log((ok?'PASS ':'FAIL ')+name+(note?'  ['+note+']':''))};
-const call=async(path,{method='GET',body,cookie,origin=B,raw,ip}={})=>{const h={};if(origin)h.origin=origin;if(cookie)h.cookie=cookie;if(ip)h['cf-connecting-ip']=ip;if(body!==undefined||raw!==undefined)h['content-type']='application/json';const r=await fetch(B+path,{method,headers:h,body:raw!==undefined?raw:(body!==undefined?JSON.stringify(body):undefined),redirect:'manual'});let j=null;try{j=await r.clone().json()}catch{};return{r,j,s:r.status,sc:r.headers.get('set-cookie')}};
+const call=async(path,{method='GET',body,cookie,origin=B,raw,ip,stream}={})=>{const h={};if(origin)h.origin=origin;if(cookie)h.cookie=cookie;if(ip)h['cf-connecting-ip']=ip;if(body!==undefined||raw!==undefined||stream)h['content-type']='application/json';const init={method,headers:h,body:stream|| (raw!==undefined?raw:(body!==undefined?JSON.stringify(body):undefined)),redirect:'manual'};if(stream)init.duplex='half';const r=await fetch(B+path,init);let j=null;try{j=await r.clone().json()}catch{};return{r,j,s:r.status,sc:r.headers.get('set-cookie')}};
 const ck=r=>(r.sc||'').split(';')[0];
 const PW='correct-horse-battery-1';
 // S-03 json handling
@@ -8,6 +8,8 @@ t('malformed JSON -> 400',(await call('/api/auth/login',{method:'POST',raw:'{x',
 t('JSON null -> 400',(await call('/api/auth/login',{method:'POST',raw:'null',ip:'3.3.3.3'})).s===400);
 t('JSON array -> 400',(await call('/api/auth/login',{method:'POST',raw:'[1]',ip:'3.3.3.3'})).s===400);
 t('oversize body -> 413',(await call('/api/auth/login',{method:'POST',raw:JSON.stringify({a:'x'.repeat(20000)}),ip:'3.3.3.3'})).s===413);
+const oversizedStream=new ReadableStream({start(c){c.enqueue(new TextEncoder().encode('{"x":"'));c.enqueue(new Uint8Array(20000).fill(97));c.enqueue(new TextEncoder().encode('"}'));c.close();}});
+t('chunked oversize body without Content-Length -> 413',(await call('/api/auth/login',{method:'POST',stream:oversizedStream,ip:'3.3.3.5'})).s===413);
 // S-02 bootstrap throttle
 const codes=[];for(let i=0;i<8;i++)codes.push((await call('/api/auth/bootstrap',{method:'POST',ip:'4.4.4.4',body:{bootstrapToken:'wrong'+i,username:'adminone',password:'x'.repeat(14)}})).s);
 t('bootstrap brute force throttled',codes.slice(0,5).every(c=>c===403)&&codes.slice(5).every(c=>c===429),codes.join(','));

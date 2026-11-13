@@ -24,7 +24,19 @@ async function tokenOK(given,expected){const x=unb64(await hash(String(given||""
 function cookie(req){for(const p of (req.headers.get("Cookie")||"").split(";")){const x=p.trim().split("=");if(x[0]===COOKIE)return x.slice(1).join("=");}return null;}
 const setCookie=v=>COOKIE+"="+v+"; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age="+SESSION,clearCookie=()=>COOKIE+"=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0";
 function sameOrigin(req){try{return new URL(req.headers.get("Origin")||"").origin===new URL(req.url).origin;}catch{return false;}}
-async function body(req){if(Number(req.headers.get("content-length")||0)>MAX_BODY)throw new HttpError(413,"Request body too large.");const raw=await req.text();if(raw.length>MAX_BODY)throw new HttpError(413,"Request body too large.");let d;try{d=JSON.parse(raw);}catch{throw new HttpError(400,"Invalid JSON body.");}if(!d||typeof d!=="object"||Array.isArray(d))throw new HttpError(400,"JSON object expected.");return d;}
+async function body(req){
+const declared=req.headers.get("content-length");
+if(declared!==null){if(!/^\\d+$/.test(declared))throw new HttpError(400,"Invalid Content-Length.");if(Number(declared)>MAX_BODY)throw new HttpError(413,"Request body too large.");}
+const reader=req.body?.getReader();if(!reader)throw new HttpError(400,"JSON body required.");
+const chunks=[];let size=0;
+try{while(true){const{done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>MAX_BODY){await reader.cancel();throw new HttpError(413,"Request body too large.");}chunks.push(value);}}
+finally{reader.releaseLock();}
+if(declared!==null&&Number(declared)!==size)throw new HttpError(400,"Content-Length mismatch.");
+const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+let raw;try{raw=new TextDecoder("utf-8",{fatal:true}).decode(bytes);}catch{throw new HttpError(400,"Invalid UTF-8 body.");}
+let d;try{d=JSON.parse(raw);}catch{throw new HttpError(400,"Invalid JSON body.");}
+if(!d||typeof d!=="object"||Array.isArray(d))throw new HttpError(400,"JSON object expected.");return d;
+}
 async function current(req,env){const raw=cookie(req);if(!raw)return null;return env.DB.prepare("SELECT u.id,u.username,u.role,u.active FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.token_hash=? AND s.expires_at>? AND u.active=1").bind(await hash(raw),Math.floor(Date.now()/1000)).first();}
 async function audit(env,id,action,detail=""){await env.DB.prepare("INSERT INTO audit_logs(user_id,action,detail,created_at) VALUES(?,?,?,?)").bind(id,action,String(detail).slice(0,300),Math.floor(Date.now()/1000)).run();}
 function ipInt(ip){const p=ip.split(".");if(p.length!==4||p.some(x=>!/^(0|[1-9][0-9]{0,2})$/.test(x)||Number(x)>255))throw Error("Enter a valid IPv4 address.");return p.reduce((n,x)=>(n<<8n)+BigInt(x),0n);}

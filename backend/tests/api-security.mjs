@@ -43,8 +43,8 @@ t('cross-origin login rejected',(await call('/api/auth/login',{method:'POST',ori
 t('cross-origin admin POST rejected',(await call('/api/admin/users',{method:'POST',origin:'https://evil.example',cookie:adminCookie,body:{username:'zzz',password:'x'.repeat(14)}})).s===403);
 t('missing Origin admin POST rejected',(await call('/api/admin/users',{method:'POST',origin:null,cookie:adminCookie,body:{username:'zzz',password:'x'.repeat(14)}})).s===403);
 // authz
-a=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:'bob',password:'bobs-password-123'}});const bobId=a.j.id;t('admin creates user',a.s===201);
-a=await call('/api/auth/login',{method:'POST',ip:'12.0.0.1',body:{username:'bob',password:'bobs-password-123'}});const bob=ck(a);
+a=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:'bob',password:'amber-lantern-quartz-2026'}});const bobId=a.j.id;t('admin creates user',a.s===201);
+a=await call('/api/auth/login',{method:'POST',ip:'12.0.0.1',body:{username:'bob',password:'amber-lantern-quartz-2026'}});const bob=ck(a);
 for(const [p,m] of [['/api/admin/users','GET'],['/api/admin/audit','GET'],['/api/admin/tool-access','GET'],['/api/admin/tools/subnet-calculator','POST']])t(`user blocked: ${m} ${p}`,(await call(p,{method:m,cookie:bob,body:m==='POST'?{enabled:true}:undefined})).s===403);
 t('tool default-deny for user',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'10.0.0.1',prefix:24}})).s===403);
 await call('/api/admin/tools/subnet-calculator',{method:'POST',cookie:adminCookie,body:{enabled:true}});
@@ -52,7 +52,7 @@ a=await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.
 t('unauthenticated API blocked',(await call('/api/tools')).s===401);
 await call('/api/admin/users/'+bobId+'/disable',{method:'POST',cookie:adminCookie,body:{}});
 t('disable revokes live session',(await call('/api/auth/me',{cookie:bob})).s===401);
-t('disabled user cannot log in',(await call('/api/auth/login',{method:'POST',ip:'12.0.0.2',body:{username:'bob',password:'bobs-password-123'}})).s===401);
+t('disabled user cannot log in',(await call('/api/auth/login',{method:'POST',ip:'12.0.0.2',body:{username:'bob',password:'amber-lantern-quartz-2026'}})).s===401);
 const adm=(await call('/api/admin/users',{cookie:adminCookie})).j.users.find(u=>u.role==='admin');
 t('admin account cannot be disabled',(await call('/api/admin/users/'+adm.id+'/disable',{method:'POST',cookie:adminCookie,body:{}})).s===403);
 // S-04/S-05 gating + headers
@@ -63,4 +63,52 @@ const authRed=await call('/auth',{cookie:adminCookie});t('authed /auth -> dashbo
 for(const p of ['/api/health','/api/nope','/api/auth/me','/tools.html','/auth.html']){const x=await call(p);const h=x.r.headers;t('headers on '+p+' ('+x.s+')',!!h.get('content-security-policy')&&h.get('x-content-type-options')==='nosniff'&&h.get('x-frame-options')==='DENY'&&!!h.get('strict-transport-security'));}
 t('API cache-control no-store',(await call('/api/health')).r.headers.get('cache-control')==='no-store');
 t('static CSP intact (connect-src crt.sh)',/connect-src 'self'[^;]*crt\.sh/.test((await call('/tools.html')).r.headers.get('content-security-policy')));
+
+// ---- Step 2: password policy, change-password, sessions, reset ----
+const mkUser=async(u,pw)=>call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:u,password:pw}});
+t('policy: 13 chars rejected',(await mkUser('carol','short-pass-13')).s===400);
+t('policy: contains username rejected',(await mkUser('carol','carol-is-my-name-1')).s===400);
+t('policy: common word rejected',(await mkUser('carol','my-password-is-long')).s===400);
+t('policy: repetitive rejected',(await mkUser('carol','a'.repeat(16))).s===400);
+a=await mkUser('carol','blue-lantern-orbit-77');t('policy: strong password accepted',a.s===201);const carolId=a.j.id;
+const login=async(u,pw,ip)=>call('/api/auth/login',{method:'POST',ip,body:{username:u,password:pw}});
+a=await login('carol','blue-lantern-orbit-77','21.0.0.1');const c1=ck(a);a=await login('carol','blue-lantern-orbit-77','21.0.0.2');const c2=ck(a);
+t('two concurrent sessions for one user',(await call('/api/auth/me',{cookie:c1})).s===200&&(await call('/api/auth/me',{cookie:c2})).s===200);
+a=await call('/api/auth/change-password',{method:'POST',cookie:c1,ip:'21.0.0.1',body:{currentPassword:'WRONG-current-pass',newPassword:'green-harbor-compass-88'}});t('change-password: wrong current -> 403',a.s===403);
+t('change-password: weak new rejected',(await call('/api/auth/change-password',{method:'POST',cookie:c1,ip:'21.0.0.1',body:{currentPassword:'blue-lantern-orbit-77',newPassword:'short'}})).s===400);
+t('change-password: same password rejected',(await call('/api/auth/change-password',{method:'POST',cookie:c1,ip:'21.0.0.1',body:{currentPassword:'blue-lantern-orbit-77',newPassword:'blue-lantern-orbit-77'}})).s===400);
+t('change-password: cross-origin rejected',(await call('/api/auth/change-password',{method:'POST',origin:'https://evil.example',cookie:c1,body:{currentPassword:'x',newPassword:'y'}})).s===403);
+t('change-password: unauthenticated rejected',(await call('/api/auth/change-password',{method:'POST',body:{currentPassword:'x',newPassword:'y'}})).s===401);
+a=await call('/api/auth/change-password',{method:'POST',cookie:c1,ip:'21.0.0.1',body:{currentPassword:'blue-lantern-orbit-77',newPassword:'green-harbor-compass-88'}});const c1new=ck(a);
+t('change-password: success issues new cookie',a.s===200&&c1new.startsWith('__Host-')&&c1new!==c1);
+t('change-password: all old sessions revoked',(await call('/api/auth/me',{cookie:c1})).s===401&&(await call('/api/auth/me',{cookie:c2})).s===401&&(await call('/api/auth/me',{cookie:c1new})).s===200);
+t('old password no longer works',(await login('carol','blue-lantern-orbit-77','21.0.0.3')).s===401);
+t('new password works',(await login('carol','green-harbor-compass-88','21.0.0.4')).s===200);
+const wr=[];for(let i=0;i<7;i++)wr.push((await call('/api/auth/change-password',{method:'POST',cookie:c1new,ip:'22.0.0.9',body:{currentPassword:'nope-nope-nope-'+i,newPassword:'another-long-passphrase-9'}})).s);
+t('change-password brute force throttled',wr.slice(0,5).every(x=>x===403)&&wr.slice(5).every(x=>x===429),wr.join(','));
+// logout-all
+a=await login('carol','green-harbor-compass-88','23.0.0.1');const l1=ck(a);const l2=ck(await login('carol','green-harbor-compass-88','23.0.0.2'));
+await call('/api/auth/logout-all',{method:'POST',cookie:l1,body:{}});
+t('logout-all revokes every session',(await call('/api/auth/me',{cookie:l1})).s===401&&(await call('/api/auth/me',{cookie:l2})).s===401&&(await call('/api/auth/me',{cookie:c1new})).s===401);
+// admin sessions
+const s1=ck(await login('carol','green-harbor-compass-88','24.0.0.1'));
+a=await call('/api/admin/sessions',{cookie:adminCookie});
+t('admin lists sessions without token material',a.s===200&&a.j.sessions.length>0&&a.j.sessions.every(x=>!('token_hash' in x)&&!('token' in x))&&a.j.sessions.some(x=>x.current),a.j.sessions.length+' sessions');
+const target=a.j.sessions.find(x=>x.username==='carol'&&!x.current);
+t('non-admin cannot list sessions',(await call('/api/admin/sessions',{cookie:s1})).s===403);
+t('non-admin cannot revoke sessions',(await call('/api/admin/sessions/'+target.id+'/revoke',{method:'POST',cookie:s1,body:{}})).s===403);
+t('admin revokes a session',(await call('/api/admin/sessions/'+target.id+'/revoke',{method:'POST',cookie:adminCookie,body:{}})).s===200&&(await call('/api/auth/me',{cookie:s1})).s===401);
+t('revoke unknown session -> 404',(await call('/api/admin/sessions/00000000-0000-0000-0000-000000000000/revoke',{method:'POST',cookie:adminCookie,body:{}})).s===404);
+t('revoke malformed id -> 404',(await call('/api/admin/sessions/not-a-uuid/revoke',{method:'POST',cookie:adminCookie,body:{}})).s===404);
+// admin reset
+const s2=ck(await login('carol','green-harbor-compass-88','25.0.0.1'));
+t('non-admin cannot reset passwords',(await call('/api/admin/users/'+carolId+'/password',{method:'POST',cookie:s2,body:{password:'whatever-long-password-1'}})).s===403);
+t('reset: weak password rejected',(await call('/api/admin/users/'+carolId+'/password',{method:'POST',cookie:adminCookie,body:{password:'short'}})).s===400);
+t('reset: admin account refused',(await call('/api/admin/users/'+adm.id+'/password',{method:'POST',cookie:adminCookie,body:{password:'reset-attempt-long-pass-1'}})).s===403);
+t('reset: unknown user -> 404',(await call('/api/admin/users/00000000-0000-0000-0000-000000000000/password',{method:'POST',cookie:adminCookie,body:{password:'reset-attempt-long-pass-1'}})).s===404);
+t('reset: success',(await call('/api/admin/users/'+carolId+'/password',{method:'POST',cookie:adminCookie,body:{password:'amber-falcon-river-42'}})).s===200);
+t('reset: sessions revoked, old password dead, new works',(await call('/api/auth/me',{cookie:s2})).s===401&&(await login('carol','green-harbor-compass-88','25.0.0.2')).s===401&&(await login('carol','amber-falcon-river-42','25.0.0.3')).s===200);
+a=await call('/api/admin/audit',{cookie:adminCookie});const acts=new Set(a.j.events.map(e=>e.action));
+t('audit trail has the new events',['auth.password_changed','auth.password_change_failed','auth.logout_all','admin.session.revoke','admin.user.password_reset'].every(x=>acts.has(x)),[...acts].join(','));
+
 console.log(`\n${pass} passed, ${fail} failed`);process.exit(fail?1:0);

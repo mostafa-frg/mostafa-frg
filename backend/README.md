@@ -57,3 +57,18 @@ npx wrangler dev
 The committed `wrangler.jsonc` intentionally contains a placeholder D1 ID. The GitHub Actions workflow generates a deployment-only Wrangler config with the real D1 ID, so no account IDs, database IDs, or credentials need to be committed.
 
 Never commit API tokens, bootstrap tokens, or passwords. GitHub is the source repository and CI system; Cloudflare is the runtime.
+
+## Account recovery (administrator)
+
+There is no email reset by design. If the administrator password is lost:
+
+1. Change it while signed in: Dashboard → Account security → Change password.
+2. If you cannot sign in, delete the admin row so the one-time setup opens again, then run setup with the
+   `ADMIN_BOOTSTRAP_TOKEN` secret (re-add it in GitHub Actions secrets and redeploy if you removed it):
+
+   ```bash
+   cd backend
+   npx wrangler d1 execute mosta-platform --remote --command "DELETE FROM users WHERE role='admin'"
+   ```
+
+   This also removes the admin's sessions (cascade). Users created earlier keep their accounts.

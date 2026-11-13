@@ -1,5 +1,6 @@
 name: Deploy MOSTA platform
 # Keep deployment workflow in sync with the current first-admin setup flow.
+# Refresh bootstrap secret after administrator token rotation.
 
 on:
   push:

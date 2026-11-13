@@ -42,6 +42,10 @@ jobs:
           node --check backend/tests/api-security.mjs
           node --check portfolio/assets/site.js
           node --check portfolio/assets/home.js
+          node --check portfolio/assets/tools.js
+          node --check portfolio/assets/config-audit.js
+          node --check portfolio/assets/http-audit.js
+          node --check portfolio/assets/audit-ui.js
           node -e "JSON.parse(require('fs').readFileSync('backend/wrangler.jsonc','utf8'))"
           test -s portfolio/index.html
           test -s portfolio/auth.html

@@ -26,7 +26,7 @@ const setCookie=v=>COOKIE+"="+v+"; Path=/; HttpOnly; Secure; SameSite=Strict; Ma
 function sameOrigin(req){try{return new URL(req.headers.get("Origin")||"").origin===new URL(req.url).origin;}catch{return false;}}
 async function body(req){
 const declared=req.headers.get("content-length");
-if(declared!==null){if(!/^\\d+$/.test(declared))throw new HttpError(400,"Invalid Content-Length.");if(Number(declared)>MAX_BODY)throw new HttpError(413,"Request body too large.");}
+if(declared!==null){if(!/^\d+$/.test(declared))throw new HttpError(400,"Invalid Content-Length.");if(Number(declared)>MAX_BODY)throw new HttpError(413,"Request body too large.");}
 const reader=req.body?.getReader();if(!reader)throw new HttpError(400,"JSON body required.");
 const chunks=[];let size=0;
 try{while(true){const{done,value}=await reader.read();if(done)break;size+=value.byteLength;if(size>MAX_BODY){await reader.cancel();throw new HttpError(413,"Request body too large.");}chunks.push(value);}}

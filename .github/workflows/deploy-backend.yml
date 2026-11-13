@@ -1,4 +1,5 @@
 name: Deploy MOSTA platform
+# Keep deployment workflow in sync with the current first-admin setup flow.
 
 on:
   push:

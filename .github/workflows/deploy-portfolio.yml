@@ -37,14 +37,18 @@ jobs:
           test -s portfolio/assets/home.js
           test -s portfolio/assets/site.css
           test -s portfolio/assets/site.js
+          test -s portfolio/assets/tools.js
+          test -s portfolio/assets/tools.css
+          test -s portfolio/tools.html
           test -s portfolio/assets/mosta-mark.svg
-          for page in projects systems security lab about contact 404; do test -s "portfolio/$page.html"; done
+          for page in projects systems security lab tools about contact 404; do test -s "portfolio/$page.html"; done
       - name: Validate JavaScript and local page links
         shell: bash
         run: |
           set -euo pipefail
           node --check portfolio/assets/home.js
           node --check portfolio/assets/site.js
+          node --check portfolio/assets/tools.js
           python3 - <<'PY'
           from html.parser import HTMLParser
           from pathlib import Path

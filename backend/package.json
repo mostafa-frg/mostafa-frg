@@ -1,1 +1,1 @@
-{"name":"mosta-platform-api","private":true,"type":"module","scripts":{"dev":"wrangler dev","deploy":"wrangler d1 migrations apply DB --remote && wrangler deploy","check":"node --check src/index.js","test:security":"node tests/api-security.mjs"},"devDependencies":{"wrangler":"^4.0.0"}}
+{"name":"mosta-platform-api","private":true,"type":"module","scripts":{"dev":"wrangler dev","deploy":"wrangler d1 migrations apply DB --remote && wrangler deploy","check":"node --check src/index.js","test:security":"node tests/api-security.mjs"},"devDependencies":{"wrangler":"4.162.0"}}

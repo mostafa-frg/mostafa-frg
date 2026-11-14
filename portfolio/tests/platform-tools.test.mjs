@@ -120,6 +120,9 @@ test('OpenSSH configuration audit flags risky directives', () => {
   assert.match(output, /passwordauthentication: yes \[RISK\]/i);
   assert.match(output, /x11forwarding: yes \[RISK\]/i);
   assert.match(output, /maxauthtries: 6 \[REVIEW\]/i);
+  const duplicate = byId('sshd-config-audit').run({ config: 'PermitRootLogin no\\nPermitRootLogin yes' });
+  assert.match(duplicate, /permitrootlogin: no \[OK\]/i);
+  assert.match(duplicate, /duplicate directives: permitrootlogin/i);
 });
 
 test('query string builder safely encodes values and preserves duplicate keys', () => {

@@ -243,21 +243,21 @@ jobs:
           tmp="$(mktemp -d)"
           trap 'rm -rf "$tmp"' EXIT
           for path in / /tools.html /assets/site.js /assets/tools.js /assets/regex-worker.js; do
-            code="$(curl -sS -o "$tmp/body" -w '%{http_code}' "$SITE_ORIGIN$path")"
+            code="$(curl -sS -L --max-redirs 5 -o "$tmp/body" -w '%{http_code}' "$SITE_ORIGIN$path")"
             if [ "$code" != "200" ] || [ ! -s "$tmp/body" ]; then
               echo "::error::Live asset check failed for $path (HTTP $code)."
               exit 1
             fi
             echo "OK $path (HTTP $code)"
           done
-          curl -fsS "$SITE_ORIGIN/assets/tools.js" -o "$tmp/tools.js"
-          curl -fsS "$SITE_ORIGIN/assets/regex-worker.js" -o "$tmp/regex-worker.js"
+          curl -fsSL --max-redirs 5 "$SITE_ORIGIN/assets/tools.js" -o "$tmp/tools.js"
+          curl -fsSL --max-redirs 5 "$SITE_ORIGIN/assets/regex-worker.js" -o "$tmp/regex-worker.js"
           grep -q "bind('subnetForm'" "$tmp/tools.js"
           grep -q "bind('dnsForm'" "$tmp/tools.js"
           grep -q "bind('hashForm'" "$tmp/tools.js"
           grep -q "bind('regexForm'" "$tmp/tools.js"
           grep -q "self.onmessage" "$tmp/regex-worker.js"
-          headers="$(curl -sSI "$SITE_ORIGIN/tools.html")"
+          headers="$(curl -sSIL --max-redirs 5 "$SITE_ORIGIN/tools.html")"
           for header in content-security-policy strict-transport-security x-frame-options x-content-type-options referrer-policy; do
             printf '%s\n' "$headers" | grep -qi "^$header:" || {
               echo "::error::Missing live security header: $header"

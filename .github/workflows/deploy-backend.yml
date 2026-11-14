@@ -234,3 +234,36 @@ jobs:
           done
           echo "::error::$url did not return the MOSTA health JSON. If this is 404, another deployment (e.g. Cloudflare Git integration) may be serving the worker name."
           exit 1
+          echo "API health check passed."
+      - name: Smoke-test deployed website and browser tools
+        env:
+          SITE_ORIGIN: https://mostafa-frg.${{ secrets.CLOUDFLARE_WORKERS_SUBDOMAIN || 'frh7977' }}.workers.dev
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          for path in / /tools.html /assets/site.js /assets/tools.js /assets/regex-worker.js; do
+            code="$(curl -sS -o "$tmp/body" -w '%{http_code}' "$SITE_ORIGIN$path")"
+            if [ "$code" != "200" ] || [ ! -s "$tmp/body" ]; then
+              echo "::error::Live asset check failed for $path (HTTP $code)."
+              exit 1
+            fi
+            echo "OK $path (HTTP $code)"
+          done
+          curl -fsS "$SITE_ORIGIN/assets/tools.js" -o "$tmp/tools.js"
+          curl -fsS "$SITE_ORIGIN/assets/regex-worker.js" -o "$tmp/regex-worker.js"
+          grep -q "bind('subnetForm'" "$tmp/tools.js"
+          grep -q "bind('dnsForm'" "$tmp/tools.js"
+          grep -q "bind('hashForm'" "$tmp/tools.js"
+          grep -q "bind('regexForm'" "$tmp/tools.js"
+          grep -q "self.onmessage" "$tmp/regex-worker.js"
+          headers="$(curl -sSI "$SITE_ORIGIN/tools.html")"
+          for header in content-security-policy strict-transport-security x-frame-options x-content-type-options referrer-policy; do
+            printf '%s\n' "$headers" | grep -qi "^$header:" || {
+              echo "::error::Missing live security header: $header"
+              exit 1
+            }
+          done
+          printf '%s\n' "$headers" | grep -qi '^x-frame-options: DENY'
+          printf '%s\n' "$headers" | grep -qi '^x-content-type-options: nosniff'
+          echo "Live site, browser-tool handlers, regex worker, and security headers passed."

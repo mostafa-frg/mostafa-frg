@@ -45,6 +45,7 @@ jobs:
           test -s portfolio/assets/site.js
           test -s portfolio/assets/tools.css
           test -s portfolio/assets/tools.js
+          test -s portfolio/assets/regex-worker.js
           test -s portfolio/assets/mosta-mark.svg
       - name: Check JavaScript syntax
         shell: bash

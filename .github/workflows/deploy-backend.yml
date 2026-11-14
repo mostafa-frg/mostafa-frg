@@ -9,6 +9,11 @@ on:
       - "backend/**"
       - "portfolio/**"
       - ".github/workflows/deploy-backend.yml"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "portfolio/**"
+      - ".github/workflows/deploy-backend.yml"
   workflow_dispatch:
 
 permissions:
@@ -23,8 +28,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       - name: Validate application files
@@ -33,8 +38,15 @@ jobs:
           node --check backend/src/index.js
           node --check portfolio/assets/auth.js
           node --check portfolio/assets/dashboard.js
+          node --check portfolio/assets/account.js
+          node --check backend/tests/api-security.mjs
           node --check portfolio/assets/site.js
           node --check portfolio/assets/home.js
+          node --check portfolio/assets/tools.js
+          node --check portfolio/assets/regex-worker.js
+          node --check portfolio/assets/config-audit.js
+          node --check portfolio/assets/http-audit.js
+          node --check portfolio/assets/audit-ui.js
           node -e "JSON.parse(require('fs').readFileSync('backend/wrangler.jsonc','utf8'))"
           test -s portfolio/index.html
           test -s portfolio/auth.html
@@ -43,24 +55,89 @@ jobs:
           python3 - <<'PY'
           import sqlite3
           db = sqlite3.connect(':memory:')
-          db.executescript(open('backend/migrations/0001_init.sql', encoding='utf-8').read())
+          import glob
+          for f in sorted(glob.glob('backend/migrations/*.sql')):
+              db.executescript(open(f, encoding='utf-8').read())
           tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
           required = {'users','sessions','auth_attempts','tool_access','audit_logs'}
           assert required <= tables, f"Missing tables: {required - tables}"
+          cols = {r[1] for r in db.execute('PRAGMA table_info(users)')}
+          assert 'password_iter' in cols, 'password_iter column missing'
           indexes = {r[1] for r in db.execute("PRAGMA index_list(users)")}
           assert 'idx_single_admin' in indexes, "Single-admin constraint missing"
           assert not list(db.execute("PRAGMA foreign_key_check")), "Foreign-key check failed"
           print("D1 schema validation passed.")
           PY
 
+  security-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend dependencies
+        run: npm ci --no-audit --no-fund
+        working-directory: backend
+      - name: Prepare isolated local Worker configuration
+        working-directory: backend
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('node:fs');
+          const config = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8'));
+          config.d1_databases[0].database_id = '00000000-0000-0000-0000-000000000000';
+          fs.writeFileSync('wrangler.local.json', JSON.stringify(config, null, 2) + '\n');
+          NODE
+          cat > .dev.vars <<'VARS'
+          ADMIN_BOOTSTRAP_TOKEN=test-bootstrap-token-0123456789abcdef
+          IP_HASH_SECRET=local-ci-only-secret-not-for-production
+          VARS
+      - name: Apply migrations to isolated local D1
+        run: npx wrangler d1 migrations apply DB --local --persist-to .state --config wrangler.local.json
+        working-directory: backend
+      - name: Run black-box API security tests against local Worker
+        working-directory: backend
+        env:
+          BASE_URL: http://127.0.0.1:8787
+          TEST_BOOTSTRAP_TOKEN: test-bootstrap-token-0123456789abcdef
+        run: |
+          set -euo pipefail
+          npx wrangler dev --local --ip 127.0.0.1 --port 8787 --persist-to .state --config wrangler.local.json > /tmp/mosta-worker.log 2>&1 &
+          worker_pid=$!
+          trap 'kill "$worker_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for i in $(seq 1 45); do
+            if ! kill -0 "$worker_pid" 2>/dev/null; then
+              echo "::error::Local Worker exited before becoming ready."
+              cat /tmp/mosta-worker.log
+              exit 1
+            fi
+            if curl --silent --show-error --fail "$BASE_URL/api/health" --output /tmp/mosta-health.json 2>/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            echo "::error::Local Worker did not become healthy within 90 seconds."
+            cat /tmp/mosta-worker.log
+            exit 1
+          fi
+          node -e "const h=JSON.parse(require('fs').readFileSync('/tmp/mosta-health.json','utf8')); if(h.ok!==true || h.database!=='ok' || h.security!=='ok') process.exit(1)"
+          npm run test:security
+
   deploy:
-    needs: validate
+    needs: [validate, security-tests]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
       - name: Check Cloudflare credentials
@@ -72,7 +149,7 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Add CLOUDFLARE_API_TOKEN in GitHub Actions secrets."; exit 1; }
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Add CLOUDFLARE_ACCOUNT_ID in GitHub Actions secrets."; exit 1; }
       - name: Install Wrangler
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
         working-directory: backend
       - name: Ensure D1 database exists
         id: d1
@@ -107,18 +184,36 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx wrangler d1 migrations apply DB --remote --config wrangler.deploy.json
         working-directory: backend
-      - name: Configure initial administrator bootstrap token
+      - name: Ensure IP hashing secret exists
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          if npx wrangler secret list --config wrangler.deploy.json 2>/dev/null | grep -q '"IP_HASH_SECRET"'; then
+            echo "IP_HASH_SECRET is already configured."
+          else
+            openssl rand -base64 48 | npx wrangler secret put IP_HASH_SECRET --config wrangler.deploy.json
+            echo "Generated IP_HASH_SECRET on the Worker (value never printed or stored in GitHub)."
+          fi
+        working-directory: backend
+      - name: Manage one-time administrator bootstrap token
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           ADMIN_BOOTSTRAP_TOKEN: ${{ secrets.ADMIN_BOOTSTRAP_TOKEN }}
+          WORKERS_SUBDOMAIN: ${{ secrets.CLOUDFLARE_WORKERS_SUBDOMAIN || 'frh7977' }}
         run: |
           set -euo pipefail
-          if [ -n "$ADMIN_BOOTSTRAP_TOKEN" ]; then
-            echo "Bootstrap token is present; configuring it on Worker mostafa-frg."
+          state="$(curl -fsS -m 20 "https://mostafa-frg.${WORKERS_SUBDOMAIN}.workers.dev/api/auth/setup-status" 2>/dev/null || true)"
+          if printf '%s' "$state" | grep -q '"setupRequired":false'; then
+            echo "An administrator already exists: removing the one-time bootstrap secret from the Worker."
+            printf 'y\n' | npx wrangler secret delete ADMIN_BOOTSTRAP_TOKEN --config wrangler.deploy.json || echo "Bootstrap secret was not set."
+          elif [ -n "$ADMIN_BOOTSTRAP_TOKEN" ]; then
+            echo "No administrator yet and a bootstrap token is available; configuring it on Worker mostafa-frg."
             printf '%s' "$ADMIN_BOOTSTRAP_TOKEN" | npx wrangler secret put ADMIN_BOOTSTRAP_TOKEN --config wrangler.deploy.json
           else
-            echo "ADMIN_BOOTSTRAP_TOKEN is not set; skipping one-time administrator bootstrap secret."
+            echo "No administrator yet and ADMIN_BOOTSTRAP_TOKEN is not set; first-admin setup stays locked."
           fi
         working-directory: backend
       - name: Deploy Worker and static portfolio

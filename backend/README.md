@@ -17,6 +17,8 @@ Cloudflare Worker API + D1 database. The Worker serves the portfolio and the `/a
 - Only administrators can create ordinary users, enable/disable accounts, review audit events, and grant/revoke tool access.
 - Passwords use PBKDF2-HMAC-SHA-256 with random salts. Sessions use random opaque tokens stored as SHA-256 hashes in D1 and Secure/HttpOnly/SameSite=Strict cookies.
 - Mutating authentication routes require an exact same-origin Origin header.
+- Login, bootstrap, and password-change throttles use atomic D1 attempt reservations to resist concurrent bypasses.
+- IP-based throttling requires a stable `IP_HASH_SECRET` of at least 32 characters; there is no plain-hash fallback. The health endpoint returns 503 if D1 schema or this security secret is unavailable.
 - The Worker protects `dashboard.html`, serves browser-only `lab.html` publicly, and adds security response headers to static assets.
 - IPv4 subnet calculation is server-executed in the workspace. File SHA-256, Config Audit, and HTTP Header Audit run locally in the browser; supplied file/config/header content is not uploaded by the browser-side tools.
 - Planned tools are not executable. Arbitrary URL fetch, port scanning, shell execution, and public PCAP processing are not exposed.
@@ -31,9 +33,9 @@ In GitHub, open **Settings → Secrets and variables → Actions → Secrets** a
 2. `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account ID (not an API token).
 3. `ADMIN_BOOTSTRAP_TOKEN` — set this only for initial administrator setup. Use a long, random value. The workflow configures it on the Worker when present and skips that step when absent.
 
-After the first administrator has been created successfully, remove `ADMIN_BOOTSTRAP_TOKEN` from GitHub Actions secrets and delete the Worker secret with Wrangler or from **Cloudflare Dashboard → Workers & Pages → mostafa-frg → Settings → Variables and Secrets**. Later deployments will continue without it, and the API bootstrap route will remain closed because an administrator already exists.
+After the first administrator has been created successfully and you have confirmed that sign-in works, remove `ADMIN_BOOTSTRAP_TOKEN` from GitHub Actions secrets. The next deployment detects the existing administrator and automatically deletes the Worker-side bootstrap secret. The API bootstrap route remains closed because an administrator already exists.
 
-The optional `CLOUDFLARE_WORKERS_SUBDOMAIN` secret can override the default `frh7977` subdomain used by the workflow health check if your workers.dev subdomain differs.
+The workflow also creates `IP_HASH_SECRET` on the Worker when it is missing. The value is generated on the runner, sent directly to Cloudflare, and is never printed or committed. Keep this secret stable: changing it resets the IP-based rate-limit buckets. Once an administrator exists, the next deployment automatically deletes the Worker-side `ADMIN_BOOTSTRAP_TOKEN`; remove the corresponding GitHub Actions secret manually after confirming the admin account works. The optional `CLOUDFLARE_WORKERS_SUBDOMAIN` secret can override the default `frh7977` subdomain used by the workflow health check if your workers.dev subdomain differs.
 
 ## First deployment and administrator setup
 
@@ -47,13 +49,35 @@ The GitHub Pages mirror is static-only. Its Platform Access link and direct `aut
 
 ## Local development
 
-From this directory:
+From this directory, use an isolated local config and local-only secrets:
 
 ```sh
-npm install
-npx wrangler dev
+npm ci
+cp wrangler.jsonc wrangler.local.json
+# Replace database_id in wrangler.local.json with any valid 36-character placeholder UUID.
+cat > .dev.vars <<'VARS'
+ADMIN_BOOTSTRAP_TOKEN=local-only-bootstrap-token-change-me
+IP_HASH_SECRET=local-only-ip-hash-secret-at-least-32-chars
+VARS
+npx wrangler d1 migrations apply DB --local --config wrangler.local.json
+npx wrangler dev --local --config wrangler.local.json
 ```
 
-The committed `wrangler.jsonc` intentionally contains a placeholder D1 ID. The GitHub Actions workflow generates a deployment-only Wrangler config with the real D1 ID, so no account IDs, database IDs, or credentials need to be committed.
+The committed `wrangler.jsonc` intentionally contains a placeholder D1 ID. The GitHub Actions workflow generates a deployment-only Wrangler config with the real D1 ID, so no account IDs, database IDs, or credentials need to be committed. Never reuse local development secrets in production.
 
 Never commit API tokens, bootstrap tokens, or passwords. GitHub is the source repository and CI system; Cloudflare is the runtime.
+
+## Account recovery (administrator)
+
+There is no email reset by design. If the administrator password is lost:
+
+1. Change it while signed in: Dashboard → Account security → Change password.
+2. If you cannot sign in, delete the admin row so the one-time setup opens again, then run setup with the
+   `ADMIN_BOOTSTRAP_TOKEN` secret (re-add it in GitHub Actions secrets and redeploy if you removed it):
+
+   ```bash
+   cd backend
+   npx wrangler d1 execute mosta-platform --remote --command "DELETE FROM users WHERE role='admin'"
+   ```
+
+   This also removes the admin's sessions (cascade). Users created earlier keep their accounts.

@@ -20,6 +20,8 @@ const tools = vm.runInNewContext(`(()=>{ ${helpers}\n return ${registryLiteral};
   crypto: webcrypto,
   TextEncoder,
   Uint8Array,
+  URL,
+  URLSearchParams,
 });
 const byId = id => {
   const tool = tools.find(item => item.id === id);
@@ -30,11 +32,16 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
+  assert.equal(tools.length, 52);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 16);
+  assert.equal(tools.filter(tool => tool.cat === 'security').length, 13);
   assert.equal(tools.filter(tool => tool.cat === 'soc').length, 4);
+  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 8);
+  assert.equal(tools.filter(tool => tool.cat === 'developer').length, 11);
 });
 
 test('IOC extractor normalizes defanged indicators and classifies hashes', () => {
@@ -87,4 +94,40 @@ test('SOC tools reject empty inputs instead of returning misleading results', ()
   assert.throws(() => byId('ioc-extractor').run({ data: '  ' }), /Paste text/);
   assert.throws(() => byId('auth-log-triage').run({ log: '' }), /Paste authentication log/);
   assert.throws(() => byId('log-timeline').run({ events: '' }), /Paste log lines/);
+});
+
+test('CIDR overlap checker distinguishes containment and separate networks', () => {
+  const contained = byId('cidr-overlap').run({ networkA: '10.10.0.0/16', networkB: '10.10.20.0/24' });
+  assert.match(contained, /Overlap: YES/);
+  assert.match(contained, /Network B is inside A/);
+  const separate = byId('cidr-overlap').run({ networkA: '10.0.0.0/24', networkB: '10.0.1.0/24' });
+  assert.match(separate, /Overlap: NO/);
+});
+
+test('URL triage reports obvious risk signals without fetching the URL', () => {
+  const output = byId('url-risk-review').run({ url: 'http://user:pass@xn--bcher-kva.example:8080/path%40x' });
+  assert.match(output, /does not use HTTPS/);
+  assert.match(output, /embedded user information/);
+  assert.match(output, /punycode/);
+  assert.match(output, /non-standard destination port/);
+});
+
+test('OpenSSH configuration audit flags risky directives', () => {
+  const output = byId('sshd-config-audit').run({
+    config: 'PermitRootLogin yes\nPasswordAuthentication yes\nPermitEmptyPasswords no\nPubkeyAuthentication yes\nX11Forwarding yes\nMaxAuthTries 6',
+  });
+  assert.match(output, /permitrootlogin: yes \[RISK\]/i);
+  assert.match(output, /passwordauthentication: yes \[RISK\]/i);
+  assert.match(output, /x11forwarding: yes \[RISK\]/i);
+  assert.match(output, /maxauthtries: 6 \[REVIEW\]/i);
+});
+
+test('query string builder safely encodes values and preserves duplicate keys', () => {
+  const output = byId('query-string-builder').run({
+    base: 'https://example.com/search',
+    params: 'q=network security\ntag=linux\ntag=security',
+  });
+  assert.match(output, /q=network\+security/);
+  assert.match(output, /tag=linux&tag=security/);
+  assert.match(output, /Parameter count: 3/);
 });

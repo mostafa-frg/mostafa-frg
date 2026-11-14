@@ -1,3 +1,5 @@
 User-agent: *
 Allow: /
-Sitemap: https://mostafa-frg.github.io/mostafa-frg/sitemap.xml
+Disallow: /auth.html
+Disallow: /dashboard.html
+Sitemap: https://mostafa-frg.frh7977.workers.dev/sitemap.xml

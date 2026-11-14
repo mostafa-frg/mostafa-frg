@@ -4,10 +4,10 @@ const TOOLS=[
 {id:"subnet-calculator",name:"IPv4 Subnet Calculator",group:"Networking",mode:"browser",description:"Calculate IPv4 network boundaries and host ranges."},
 {id:"sha256-local",name:"Local SHA-256",group:"File Integrity",mode:"browser",description:"Hash files locally; file contents never leave the browser."},
 {id:"config-audit",name:"Config Audit",group:"Networking",mode:"browser",description:"Paste a Cisco-style configuration and review common management-security issues. Runs in your browser; nothing is uploaded."},
-{id:"log-review",name:"Log Review",group:"Security Operations",mode:"planned",description:"Reserved for a bounded log-analysis workflow."},
+
 {id:"http-audit",name:"HTTP Header Audit",group:"Web Security",mode:"browser",description:"Paste response headers you captured and review security headers and cookie flags. Runs in your browser; the platform never fetches URLs."},
-{id:"pcap-analysis",name:"PCAP Analysis",group:"Network Analysis",mode:"planned",description:"Reserved for isolated, size-limited packet analysis."},
-{id:"network-inventory",name:"Network Inventory",group:"Networking",mode:"planned",description:"Reserved for authorized inventory workflows."}];
+
+];
 const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}});
 const fail=(m,s=400)=>json({error:m},s),b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replaceAll("+","-").replaceAll("/","_").replaceAll("=",""),unb64=s=>Uint8Array.from(atob(s.replaceAll("-","+").replaceAll("_","/")),c=>c.charCodeAt(0)),rand=n=>crypto.getRandomValues(new Uint8Array(n));
 const hash=async s=>b64(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)));

@@ -124,6 +124,15 @@ jobs:
               raise SystemExit("\n".join(failures))
           print("HTML links, navigation, viewport and external-link protections passed.")
           PY
+      - name: Prevent private workspace pages from indexing
+        run: |
+          set -euo pipefail
+          for page in portfolio/auth.html portfolio/dashboard.html; do
+            grep -Eq '<meta name="robots" content="noindex,nofollow,noarchive">' "$page" || {
+              echo "::error::$page must remain excluded from search indexing."
+              exit 1
+            }
+          done
       - name: Check front-end size budgets
         run: |
           python3 - <<'PY'

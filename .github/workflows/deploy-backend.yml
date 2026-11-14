@@ -205,15 +205,21 @@ jobs:
           WORKERS_SUBDOMAIN: ${{ secrets.CLOUDFLARE_WORKERS_SUBDOMAIN || 'frh7977' }}
         run: |
           set -euo pipefail
-          state="$(curl -fsS -m 20 "https://mostafa-frg.${WORKERS_SUBDOMAIN}.workers.dev/api/auth/setup-status" 2>/dev/null || true)"
-          if printf '%s' "$state" | grep -q '"setupRequired":false'; then
-            echo "An administrator already exists: removing the one-time bootstrap secret from the Worker."
+          db_id="$(node -e "console.log(JSON.parse(require('fs').readFileSync('wrangler.deploy.json','utf8')).d1_databases[0].database_id)")"
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database/$db_id/query"
+          headers=(-H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "Content-Type: application/json")
+          payload="$(jq -n --arg sql "SELECT COUNT(*) AS admin_count FROM users WHERE role='admin'" '{sql:$sql}')"
+          response="$(curl -fsS -X POST "$api" "${headers[@]}" --data "$payload")"
+          admin_count="$(jq -er '.result[0].results[0].admin_count' <<< "$response")"
+          [[ "$admin_count" =~ ^[0-9]+$ ]] || { echo "::error::Could not verify administrator state in the production D1 database."; exit 1; }
+          if [ "$admin_count" -gt 0 ]; then
+            echo "Production D1 confirms an administrator exists; removing the one-time bootstrap secret from the Worker."
             printf 'y\n' | npx wrangler secret delete ADMIN_BOOTSTRAP_TOKEN --config wrangler.deploy.json || echo "Bootstrap secret was not set."
           elif [ -n "$ADMIN_BOOTSTRAP_TOKEN" ]; then
-            echo "No administrator yet and a bootstrap token is available; configuring it on Worker mostafa-frg."
+            echo "No administrator exists in production D1; configuring the one-time bootstrap secret."
             printf '%s' "$ADMIN_BOOTSTRAP_TOKEN" | npx wrangler secret put ADMIN_BOOTSTRAP_TOKEN --config wrangler.deploy.json
           else
-            echo "No administrator yet and ADMIN_BOOTSTRAP_TOKEN is not set; first-admin setup stays locked."
+            echo "No administrator exists and ADMIN_BOOTSTRAP_TOKEN is not set; first-admin setup stays locked."
           fi
         working-directory: backend
       - name: Deploy Worker and static portfolio

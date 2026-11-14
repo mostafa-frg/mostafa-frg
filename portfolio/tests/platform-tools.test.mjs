@@ -51,16 +51,16 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 56);
+  assert.equal(tools.length, 66);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 17);
-  assert.equal(tools.filter(tool => tool.cat === 'security').length, 15);
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 20);
+  assert.equal(tools.filter(tool => tool.cat === 'security').length, 17);
   assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
-  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 8);
-  assert.equal(tools.filter(tool => tool.cat === 'developer').length, 11);
+  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 9);
+  assert.equal(tools.filter(tool => tool.cat === 'developer').length, 15);
 });
 
 test('IOC extractor normalizes defanged indicators and classifies hashes', () => {
@@ -156,7 +156,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 56);
+  assert.equal(tools.length, 66);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -323,4 +323,20 @@ test('all browser-independent tools execute with representative inputs', async (
     assert.notEqual(output, undefined, tool.id + ' returned undefined');
     assert.notEqual(output, null, tool.id + ' returned null');
   }
+});
+
+test('converter and calculator tools added in platform-v2 return correct results', async () => {
+  const r = (id, v) => byId(id).run(v);
+  assert.match(await r('base-convert', { value: 'ff', from: '16' }), /Decimal: 255/);
+  await assert.rejects(async () => r('base-convert', { value: '12z', from: '10' }));
+  assert.equal(await r('text-hex', { text: 'Hi', mode: 'text to hex' }), '48 69');
+  assert.equal(await r('text-hex', { text: '48 69', mode: 'hex to text' }), 'Hi');
+  assert.match(await r('color', { hex: '#0ea5e9' }), /rgb\(14, 165, 233\)/);
+  assert.match(await r('transfer-time', { size: '10', mbps: '100' }), /13m 20s/);
+  assert.match(await r('bdp', { mbps: '1000', rtt: '40' }), /5000000/);
+  assert.match(await r('mtu-mss', { mtu: '1500', ver: 'IPv4' }), /TCP MSS: 1460/);
+  assert.match(await r('entropy', { text: 'aabb' }), /1\.000/);
+  assert.match(await r('hash-id', { hash: '5d41402abc4b2a76b9719d911017c592' }), /MD5/);
+  assert.match(await r('umask', { umask: '022' }), /0644/);
+  assert.match(await r('http-status', { code: '404' }), /Not Found/);
 });

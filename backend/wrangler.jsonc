@@ -4,7 +4,17 @@
   "main":"src/index.js",
   "compatibility_date":"2026-11-09",
   "workers_dev":true,
-  "previews":{},
+  "previews":{
+    "vars":{"APP_NAME":"MOSTA Preview"},
+    "d1_databases":[
+      {
+        "binding":"DB",
+        "database_name":"mosta-preview",
+        "database_id":"5cc6ca23-fdf7-4ea2-b808-7d2ddc95d3d1",
+        "migrations_dir":"migrations"
+      }
+    ]
+  },
   "assets":{"directory":"../portfolio","binding":"ASSETS","run_worker_first":true},
   "d1_databases":[{"binding":"DB","database_name":"mosta-platform","database_id":"REPLACE_WITH_D1_DATABASE_ID","migrations_dir":"migrations"}],
   "vars":{"APP_NAME":"MOSTA"}

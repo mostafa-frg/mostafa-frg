@@ -18,7 +18,7 @@ test("regex worker returns bounded matches", () => {
   const result = evaluate({ pattern: "\\bcat\\b", flags: "gi", text: "cat dog CAT" });
   assert.equal(result.ok, true);
   assert.deepEqual(
-    result.matches.map((match) => [match.value, match.index]),
+    JSON.parse(JSON.stringify(result.matches.map((match) => [match.value, match.index]))),
     [["cat", 0], ["CAT", 8]],
   );
 });
@@ -26,7 +26,7 @@ test("regex worker returns bounded matches", () => {
 test("regex worker advances after zero-width matches", () => {
   const result = evaluate({ pattern: "", flags: "g", text: "ab" });
   assert.equal(result.ok, true);
-  assert.deepEqual(result.matches.map((match) => match.index), [0, 1, 2]);
+  assert.deepEqual(JSON.parse(JSON.stringify(result.matches.map((match) => match.index))), [0, 1, 2]);
 });
 
 test("regex worker rejects invalid patterns", () => {

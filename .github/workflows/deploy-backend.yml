@@ -43,6 +43,7 @@ jobs:
           node --check portfolio/assets/site.js
           node --check portfolio/assets/home.js
           node --check portfolio/assets/tools.js
+          node --check portfolio/assets/regex-worker.js
           node --check portfolio/assets/config-audit.js
           node --check portfolio/assets/http-audit.js
           node --check portfolio/assets/audit-ui.js

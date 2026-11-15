@@ -294,6 +294,20 @@ test('Dockerfile audit evaluates the final stage rather than earlier build stage
   ].join('\n')});
   assert.doesNotMatch(hardened,/final build stage may run as root/);
   assert.doesNotMatch(hardened,/Base image is unpinned/);
+  const switchedBack = byId('dockerfile-audit').run({dockerfile:[
+    'FROM node:20',
+    'USER app',
+    'RUN npm ci',
+    'USER root',
+    'CMD ["node","server.js"]',
+  ].join('\\n')});
+  assert.match(switchedBack,/switches to the root user/);
+  const numericRoot = byId('dockerfile-audit').run({dockerfile:[
+    'FROM node:20',
+    'USER 1000:1000',
+    'USER 0:0',
+  ].join('\\n')});
+  assert.match(numericRoot,/switches to the root user/);
 });
 
 

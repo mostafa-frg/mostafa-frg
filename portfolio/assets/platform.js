@@ -1,6 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
-const categories={networking:'NETWORKING',security:'CYBERSECURITY',soc:'SOC / INCIDENT RESPONSE',linux:'LINUX & SYSTEMS',developer:'DEVELOPER'};
+const categories={networking:'NETWORK ENGINEERING',security:'CYBERSECURITY',soc:'SOC & INCIDENT RESPONSE',linux:'LINUX ADMINISTRATION',ubuntu:'UBUNTU',kali:'KALI LINUX',termux:'TERMUX / ANDROID',bash:'BASH SCRIPTING',developer:'DEVELOPER TOOLS'};
+const categoryMeta={all:['ALL','Complete tool library'],networking:['NET','IP addressing, routing and network diagnostics'],security:['SEC','Defensive security and configuration analysis'],soc:['SOC','Detection, triage and incident workflows'],linux:['LNX','General Linux system administration'],ubuntu:['UBU','Ubuntu desktop and server operations'],kali:['KALI','Authorized Kali Linux assessment workflows'],termux:['TMX','Android terminal and Termux automation'],bash:['BASH','Shell scripting and automation'],developer:['DEV','Data formats and developer utilities']};
 const tools=[
 {id:'subnet',name:'IPv4 Subnet Calculator',cat:'networking',symbol:'IP',desc:'Calculate network address, broadcast, subnet mask, wildcard, host range and address capacity.',tags:'ipv4 cidr subnet mask broadcast network hosts',featured:true,fields:[['ip','IPv4 address','192.168.1.10'],['prefix','CIDR prefix','24','number']],run:v=>{const n=ip(v.ip),p=integer(v.prefix,0,32),m=p===0?0n:(0xffffffffn<<(32n-BigInt(p)))&0xffffffffn,net=n&m,b=net|(~m&0xffffffffn);return rows([['Network',ipstr(net)+'/'+p],['Broadcast',ipstr(b)],['Subnet mask',ipstr(m)],['Wildcard',ipstr(~m&0xffffffffn)],['First host',ipstr(p>=31?net:net+1n)],['Last host',ipstr(p>=31?b:b-1n)],['Total addresses',(1n<<(32n-BigInt(p))).toString()],['Usable hosts',p===32?'1':p===31?'2':((1n<<(32n-BigInt(p)))-2n).toString()]]);}},
 {id:'cidr',name:'CIDR & Subnet Mask Converter',cat:'networking',symbol:'/24',desc:'Convert a CIDR prefix to dotted-decimal subnet and wildcard masks.',tags:'cidr subnet mask prefix wildcard',fields:[['prefix','Prefix length','24','number']],run:v=>{const p=integer(v.prefix,0,32),m=p===0?0n:(0xffffffffn<<(32n-BigInt(p)))&0xffffffffn;return rows([['CIDR','/'+p],['Subnet mask',ipstr(m)],['Wildcard',ipstr(~m&0xffffffffn)],['Addresses',(1n<<(32n-BigInt(p))).toString()]]);}},
@@ -139,48 +140,110 @@ function ip(s){const p=String(s||'').trim().split('.');if(p.length!==4||!p.every
 function ipstr(n){return [24n,16n,8n,0n].map(s=>Number((n>>s)&255n)).join('.');}
 function domain(s){const d=String(s||'').trim().replace(/\.$/,'');if(!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(d))throw Error('Enter a valid public domain name.');return d;}
 function hex(b){return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+function shellQuote(value){return "'"+String(value??'').replace(/'/g,"'\\''")+"'";}
 const grid=$('#toolGrid'),modal=$('#toolModal'),form=$('#toolRunForm'),result=$('#toolResult'),search=$('#toolSearch'),sort=$('#toolSort');let category='all',activeTool=null,lastToolTrigger=null;
+function renderCategories(){
+ const root=$('#categoryTabs');if(!root)return;
+ root.replaceChildren();
+ const keys=['all',...Object.keys(categories)];
+ for(const key of keys){
+  const meta=categoryMeta[key],button=document.createElement('button');
+  button.type='button';button.className='category-tab';button.dataset.category=key;
+  button.setAttribute('aria-pressed',String(category===key));
+  const icon=document.createElement('span');icon.className='category-icon';icon.textContent=meta[0];
+  const label=document.createElement('span');label.textContent=key==='all'?'All tools':categories[key];
+  const count=document.createElement('b');count.dataset.categoryCount=key;count.textContent='0';
+  button.append(icon,label,count);
+  button.addEventListener('click',()=>setCategory(key));
+  root.append(button);
+ }
+}
+function setCategory(next){
+ if(next!=='all'&&!Object.hasOwn(categories,next))return;
+ category=next;renderTools();
+ const url=new URL(location.href);url.searchParams.delete('tool');
+ if(category==='all')url.searchParams.delete('category');else url.searchParams.set('category',category);
+ history.replaceState(null,'',url.pathname+url.search+url.hash);
+}
 function renderTools(){
  if(!grid)return;
  const q=(search?.value||'').trim().toLowerCase();
- let list=tools.filter(t=>(category==='all'||t.cat===category)&&(!q||(t.name+' '+t.desc+' '+t.tags+' '+t.cat).toLowerCase().includes(q)));
+ let list=tools.filter(t=>(category==='all'||t.cat===category)&&(!q||(t.name+' '+t.desc+' '+(t.tags||'')+' '+t.cat).toLowerCase().includes(q)));
  if(sort?.value==='az')list.sort((a,b)=>a.name.localeCompare(b.name));
  else list.sort((a,b)=>Number(!!b.featured)-Number(!!a.featured)||a.name.localeCompare(b.name));
  grid.replaceChildren();
- for(let index=0;index<list.length;index++){
-  const t=list[index],card=document.createElement('article');card.className='directory-tool';card.dataset.category=t.cat;
+ for(const t of list){
+  const card=document.createElement('a');card.className='directory-tool';card.dataset.category=t.cat;
+  card.href='tools.html?tool='+encodeURIComponent(t.id);
+  card.setAttribute('aria-label','Open '+t.name+' tool workspace');
+  card.addEventListener('click',event=>{if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();openTool(t.id);});
   const top=document.createElement('div');top.className='directory-tool-top';
   const sym=document.createElement('span');sym.className='tool-symbol';sym.textContent=t.symbol;
-  const mode=document.createElement('span');mode.className='tool-mode';mode.textContent=t.fields?.some(f=>f[3]==='file')?'LOCAL FILE':t.external?'EXTERNAL LOOKUP':'LOCAL / BROWSER';
+  const mode=document.createElement('span');mode.className='tool-mode';
+  mode.textContent=t.fields?.some(f=>f[3]==='file')?'LOCAL FILE':t.external?'EXTERNAL LOOKUP':t.mode==='command'?'COMMAND BUILDER':'LOCAL / BROWSER';
   top.append(sym,mode);
   const h=document.createElement('h3');h.textContent=t.name;
   const p=document.createElement('p');p.textContent=t.desc;
-  const tags=document.createElement('div');tags.className='directory-tool-tags';
-  (t.tags||'').split(/\s+/).filter(Boolean).slice(0,3).forEach(tag=>{const chip=document.createElement('span');chip.textContent=tag;tags.append(chip);});
   const bottom=document.createElement('div');bottom.className='directory-tool-bottom';
-  const cat=document.createElement('span');cat.className='tool-category-label';cat.textContent=categories[t.cat];
-  const btn=document.createElement('button');btn.className='open-tool';btn.type='button';btn.textContent='OPEN WORKSPACE';btn.setAttribute('aria-label','Open '+t.name);btn.addEventListener('click',()=>openTool(t.id));
-  bottom.append(cat,btn);card.append(top,h,p,tags,bottom);grid.append(card);
+  const cat=document.createElement('span');cat.className='tool-category-label';cat.textContent=categories[t.cat]||'TOOL';
+  const open=document.createElement('span');open.className='open-tool';open.textContent='OPEN TOOL →';
+  bottom.append(cat,open);card.append(top,h,p,bottom);grid.append(card);
  }
  const counts={all:tools.length,...Object.fromEntries(Object.keys(categories).map(key=>[key,tools.filter(t=>t.cat===key).length]))};
- $('[data-category-count]').forEach(node=>{const key=node.dataset.categoryCount;node.textContent=String(counts[key]??0).padStart(2,'0');});
- const count=$('#resultCount');if(count)count.textContent=String(list.length).padStart(2,'0')+' / '+String(tools.length).padStart(2,'0')+' TOOLS';
- const total=$('#toolCount');if(total)total.textContent=tools.length+' UTILITIES · 5 DOMAINS';
+ $$('[data-category-count]').forEach(node=>{node.textContent=String(counts[node.dataset.categoryCount]??0).padStart(2,'0');});
+ const count=$('#resultCount');if(count)count.textContent=list.length+' OF '+tools.length+' TOOLS';
+ const total=$('#toolCount');if(total)total.textContent=tools.length+' UTILITIES · '+Object.keys(categories).length+' WORKSPACES';
+ const hero=$('#heroToolTotal'),home=$('#homeToolTotal');if(hero)hero.textContent=String(tools.length);if(home)home.textContent=String(tools.length);
+ $$('[data-home-count]').forEach(node=>{const n=counts[node.dataset.homeCount]??0;node.textContent=n+' tools';});
  const empty=$('#noTools');if(empty)empty.hidden=list.length!==0;
  const title=$('#categoryTitle'),eyebrow=$('#categoryEyebrow'),sub=$('#directorySubhead');
- const names={all:'All tools',networking:'Networking',security:'Cybersecurity',linux:'Linux & systems',developer:'Developer tools',soc:'SOC & incident response'};
- if(title)title.textContent=names[category]||'All tools';
- if(eyebrow)eyebrow.textContent=category==='all'?'COMPLETE TOOLBOX':categories[category]+' WORKSPACE';
- if(sub)sub.textContent=q?'Showing matches for “'+q+'”.':'Choose a utility to open its dedicated workspace.';
- $('[data-category]').forEach(b=>{const active=b.dataset.category===category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
+ if(title)title.textContent=category==='all'?'All tools':categories[category]||'All tools';
+ if(eyebrow)eyebrow.textContent=category==='all'?'COMPLETE TOOL LIBRARY':categories[category]+' WORKSPACE';
+ if(sub)sub.textContent=q?'Showing matches for “'+q+'”.':(category==='all'?'Search the complete library or choose a workspace.':categoryMeta[category][1]);
+ $$('[data-category]').forEach(b=>{const active=b.dataset.category===category;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active));});
 }
 function addField(f){const [name,label,value,type,opts]=f,wrap=document.createElement('div');wrap.className='tool-field'+(type==='textarea'?' full':'');const l=document.createElement('label');l.htmlFor='field-'+name;l.textContent=label;let el;if(type==='textarea'){el=document.createElement('textarea');el.rows=4;el.value=value||'';}else if(type==='select'){el=document.createElement('select');(opts||[]).forEach(o=>{const op=document.createElement('option');op.value=o;op.textContent=o;el.append(op);});el.value=value||opts?.[0]||'';}else{el=document.createElement('input');el.type=type==='number'?'number':type==='file'?'file':type==='password'?'password':'text';if(type!=='file')el.value=value||'';if(type==='number'){el.min='0';el.max='1000000000';}}el.id='field-'+name;el.name=name;el.required=type==='file'||(type!=='textarea'&&type!=='number');wrap.append(l,el);form.append(wrap);}
 function openTool(id){const t=tools.find(x=>x.id===id);if(!t||!modal)return;activeTool=t;lastToolTrigger=document.activeElement;$('#toolModalTitle').textContent=t.name;$('#toolModalCategory').textContent=categories[t.cat]+' / TOOL WORKSPACE';$('#toolModalDescription').textContent=t.desc;$('#toolDisclaimer').textContent=t.disclaimer||'Local processing: your input is handled in this browser unless the tool description states otherwise.';form.replaceChildren();(t.fields||[]).forEach(addField);const submit=document.createElement('button');submit.className='btn primary';submit.type='submit';submit.textContent='RUN TOOL';form.append(submit);result.textContent='Ready when you are.';modal.hidden=false;document.body.style.overflow='hidden';submit.focus();const query=new URLSearchParams(location.search);query.set('tool',id);if(category!=='all')query.set('category',category);history.replaceState(null,'',location.pathname+'?'+query.toString());}
 function closeTool(){if(!modal)return;modal.hidden=true;document.body.style.overflow='';const query=new URLSearchParams(location.search);query.delete('tool');if(category!=='all')query.set('category',category);else query.delete('category');history.replaceState(null,'',location.pathname+(query.toString()?'?'+query.toString():''));if(lastToolTrigger&&typeof lastToolTrigger.focus==='function')lastToolTrigger.focus();}
-form?.addEventListener('submit',async e=>{e.preventDefault();if(!activeTool)return;const button=form.querySelector('button[type=submit]');button.disabled=true;button.textContent='RUNNING…';result.textContent='Processing…';try{const values={};for(const f of activeTool.fields||[]){const el=form.elements.namedItem(f[0]);values[f[0]]=f[3]==='file'?el.files?.[0]:el.value;}const out=await activeTool.run(values);result.textContent=typeof out==='string'?out:JSON.stringify(out,null,2);}catch(err){result.textContent='ERROR: '+(err?.message||'The operation failed.');}finally{button.disabled=false;button.textContent='RUN TOOL';}});
-$$('[data-close-tool]').forEach(x=>x.addEventListener('click',closeTool));document.addEventListener('keydown',e=>{if(modal&&!modal.hidden&&e.key==='Tab'){const focusable=[...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[href],[tabindex]:not([tabindex="-1"])')].filter(x=>!x.hidden&&x.getAttribute('aria-hidden')!=='true');if(focusable.length){const first=focusable[0],last=focusable[focusable.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}}if(e.key==='Escape'&&modal&&!modal.hidden)closeTool();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&$('#toolSearch')){e.preventDefault();$('#toolSearch').focus();}});
-$('#copyToolResult')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(result.textContent);$('#copyToolResult').textContent='COPIED';setTimeout(()=>$('#copyToolResult').textContent='COPY OUTPUT',1200);}catch{$('#copyToolResult').textContent='COPY UNAVAILABLE';}});
-search?.addEventListener('input',()=>{renderTools();const q=search.value.trim();const url=new URL(location.href);if(q)url.searchParams.set('q',q);else url.searchParams.delete('q');url.searchParams.delete('tool');history.replaceState(null,'',url.pathname+url.search);});sort?.addEventListener('change',renderTools);$('#clearToolSearch')?.addEventListener('click',()=>{if(search)search.value='';renderTools();search?.focus();});$$('[data-category]').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.category||'all';renderTools();const url=new URL(location.href);url.searchParams.delete('tool');if(category!=='all')url.searchParams.set('category',category);else url.searchParams.delete('category');history.replaceState(null,'',url.pathname+url.search);}));
-const params=new URLSearchParams(location.search);if(params.get('category')&&categories[params.get('category')])category=params.get('category');if(search&&params.get('q'))search.value=params.get('q');renderTools();if(params.get('tool'))openTool(params.get('tool'));
-const homeSearch=$('#homeToolSearch');homeSearch?.addEventListener('keydown',e=>{if(e.key==='Enter'){location.href='tools.html?q='+encodeURIComponent(homeSearch.value.trim());}});homeSearch?.addEventListener('input',()=>{if(homeSearch.value.length>1){const t=tools.find(x=>(x.name+' '+x.tags).toLowerCase().includes(homeSearch.value.toLowerCase()));homeSearch.setAttribute('aria-description',t?'Suggested: '+t.name:'Search all tools');}});
+form?.addEventListener('submit',async e=>{
+ e.preventDefault();if(!activeTool)return;
+ const button=form.querySelector('button[type=submit]');if(button){button.disabled=true;button.textContent='RUNNING…';}
+ result.textContent='Processing…';
+ try{
+  const values={};
+  for(const f of activeTool.fields||[]){const el=form.elements.namedItem(f[0]);if(!el)throw Error('Missing input control: '+f[0]);values[f[0]]=f[3]==='file'?el.files?.[0]:el.value;}
+  const out=await activeTool.run(values);
+  result.textContent=typeof out==='string'?out:JSON.stringify(out,null,2);
+ }catch(err){result.textContent='ERROR: '+(err?.message||'The operation failed.');}
+ finally{if(button){button.disabled=false;button.textContent='RUN TOOL';}}
+});
+$$('[data-close-tool]').forEach(x=>x.addEventListener('click',closeTool));
+document.addEventListener('keydown',e=>{
+ if(modal&&!modal.hidden&&e.key==='Tab'){
+  const focusable=[...modal.querySelectorAll('button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[href],[tabindex]:not([tabindex="-1"])')].filter(x=>!x.hidden&&x.getAttribute('aria-hidden')!=='true');
+  if(focusable.length){const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
+ }
+ if(e.key==='Escape'&&modal&&!modal.hidden)closeTool();
+ if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'&&search){e.preventDefault();search.focus();}
+});
+$('#copyToolResult')?.addEventListener('click',async()=>{
+ const button=$('#copyToolResult'),value=result.textContent;
+ try{
+  if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(value);
+  else{const area=document.createElement('textarea');area.value=value;area.style.position='fixed';area.style.opacity='0';document.body.append(area);area.select();const ok=document.execCommand('copy');area.remove();if(!ok)throw Error('Copy command unavailable');}
+  button.textContent='COPIED';
+ }catch{button.textContent='COPY FAILED';}
+ setTimeout(()=>{button.textContent='COPY';},1400);
+});
+search?.addEventListener('input',()=>{renderTools();const q=search.value.trim(),url=new URL(location.href);if(q)url.searchParams.set('q',q);else url.searchParams.delete('q');url.searchParams.delete('tool');history.replaceState(null,'',url.pathname+url.search);});
+sort?.addEventListener('change',renderTools);
+$('#clearToolSearch')?.addEventListener('click',()=>{if(search)search.value='';renderTools();search?.focus();});
+const params=new URLSearchParams(location.search);
+if(params.get('category')&&Object.hasOwn(categories,params.get('category')))category=params.get('category');
+if(search&&params.get('q'))search.value=params.get('q');
+renderCategories();renderTools();
+if(params.get('tool'))openTool(params.get('tool'));
+const homeSearch=$('#homeToolSearch');
+homeSearch?.addEventListener('keydown',e=>{if(e.key==='Enter'){location.href='tools.html?q='+encodeURIComponent(homeSearch.value.trim());}});
+homeSearch?.addEventListener('input',()=>{const q=homeSearch.value.trim().toLowerCase();if(q.length>1){const t=tools.find(x=>(x.name+' '+x.tags+' '+x.desc).toLowerCase().includes(q));homeSearch.setAttribute('aria-description',t?'Suggested: '+t.name:'Search all tools');}});
 })();

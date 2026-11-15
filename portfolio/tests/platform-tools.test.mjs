@@ -49,6 +49,48 @@ const byId = id => {
   return tool;
 };
 
+
+test('IPv4 subnet boundaries preserve RFC 3021 /31 and single-address /32 behavior', () => {
+  const pointToPoint = byId('subnet').run({ip:'192.0.2.10',prefix:'31'});
+  assert.match(pointToPoint,/Network: 192\.0\.2\.10\/31/);
+  assert.match(pointToPoint,/Broadcast: 192\.0\.2\.11/);
+  assert.match(pointToPoint,/Usable hosts: 2/);
+  const single = byId('subnet').run({ip:'203.0.113.9',prefix:'32'});
+  assert.match(single,/First host: 203\.0\.113\.9/);
+  assert.match(single,/Last host: 203\.0\.113\.9/);
+  assert.match(single,/Usable hosts: 1/);
+  assert.throws(()=>byId('subnet').run({ip:'192.168.1.256',prefix:'24'}),/valid IPv4/);
+});
+
+test('IPv6 compression handles leading, trailing, all-zero and leftmost longest runs', () => {
+  assert.match(byId('ipv6').run({address:'::1'}),/Compressed: ::1/);
+  assert.match(byId('ipv6').run({address:'2001:db8::'}),/Compressed: 2001:db8::/);
+  assert.match(byId('ipv6').run({address:'::'}),/Compressed: ::/);
+  assert.match(byId('ipv6').run({address:'2001:0:0:1:0:0:1:1'}),/Compressed: 2001::1:0:0:1:1/);
+  assert.throws(()=>byId('ipv6').run({address:'2001::1::2'}),/standard hexadecimal IPv6/);
+});
+
+test('Set-Cookie auditor enforces prefix and SameSite=None invariants', () => {
+  const output = byId('cookies').run({cookies:[
+    '__Host-session=abc; Secure; Path=/; Domain=example.com',
+    'session=abc; SameSite=None',
+    '__Secure-id=1; HttpOnly',
+  ].join('\n')});
+  assert.match(output,/__Host- prefix requires Secure, Path=\/ and no Domain attribute/);
+  assert.match(output,/SameSite=None requires Secure/);
+  assert.match(output,/__Secure- prefix requires Secure/);
+});
+
+test('IP range summarizer emits aligned minimal CIDR blocks and rejects reversed ranges', () => {
+  const output = byId('range-cidr').run({start:'192.168.1.1',end:'192.168.1.6'});
+  assert.match(output,/192\.168\.1\.1\/32/);
+  assert.match(output,/192\.168\.1\.2\/31/);
+  assert.match(output,/192\.168\.1\.4\/31/);
+  assert.match(output,/192\.168\.1\.6\/32/);
+  assert.match(output,/CIDR blocks: 4/);
+  assert.throws(()=>byId('range-cidr').run({start:'192.168.1.6',end:'192.168.1.1'}),/End address must not be lower/);
+});
+
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);

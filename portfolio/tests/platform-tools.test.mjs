@@ -719,3 +719,34 @@ test('Shared input validation bounds text and rejects embedded NUL characters', 
     user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/id_ed25519'
   }).startsWith('ssh -p 22 -i '));
 });
+
+const termuxMarkup = await readFile(new URL('../termux.html', import.meta.url), 'utf8');
+const termuxSource = await readFile(new URL('../assets/termux.js', import.meta.url), 'utf8');
+const termuxStyles = await readFile(new URL('../assets/termux.css', import.meta.url), 'utf8');
+
+test('Termux workspace exposes official upstream projects, searchable categories and safe command generation', () => {
+  assert.match(homeMarkup, /href="termux\.html"/);
+  assert.match(termuxMarkup, /id="txProjectGrid"/);
+  assert.match(termuxMarkup, /id="txSearch"/);
+  assert.match(termuxMarkup, /id="command-builder"/);
+  assert.match(termuxMarkup, /OFFICIAL SOURCES FIRST/);
+  assert.match(termuxMarkup, /does not execute shell commands from the website/i);
+  assert.match(termuxStyles, /perspective:900px/);
+  assert.match(termuxStyles, /prefers-reduced-motion:reduce/);
+  const start = termuxSource.indexOf('const projects=[') + 'const projects='.length;
+  const end = termuxSource.indexOf('];\nconst categories=', start);
+  assert.ok(start >= 'const projects='.length && end > start, 'Termux project registry is present');
+  const registry = vm.runInNewContext(termuxSource.slice(start, end + 1));
+  assert.ok(registry.length >= 25, 'Termux catalog includes broad official and community coverage');
+  for (const project of registry) {
+    assert.ok(project.name && project.desc && project.use, 'project includes explanation and use case');
+    assert.match(project.url, /^https:\/\/github\.com\//, project.id + ' links to GitHub source');
+    assert.ok(['core','packages','addons','systems','gui','security','dev','docs','community'].includes(project.cat));
+  }
+  for (const repo of ['termux/termux-app','termux/termux-packages','termux/termux-api','termux/termux-boot','termux/termux-widget','termux/termux-x11','termux/proot-distro','termux/termux-services']) {
+    assert.ok(registry.some(project => project.url.endsWith('/' + repo)), repo + ' is catalogued');
+  }
+  assert.match(termuxSource, /const packages=\[/);
+  assert.match(termuxSource, /case'install-mosta'/);
+  assert.doesNotMatch(termuxSource, /eval\s*\(|new Function\s*\(/);
+});

@@ -627,3 +627,71 @@ test('Termux path inspector emits executable multiline read-only commands', () =
   assert.equal(commandLine,'ls -ld "$PREFIX" "$HOME" "$TMPDIR" "$HOME/storage" 2>&1');
   assert.ok(!all.includes('\\nls -ld'));
 });
+
+test('Kali journalctl builder enforces priority, unit, time and line bounds', () => {
+  const output = byId('kali-journalctl-builder').run({
+    unit:'ssh.service', since:"today's logs", priority:'warning', lines:'250'
+  });
+  assert.ok(output.includes("journalctl -u 'ssh.service' --since 'today'\\''s logs' -p warning -n 250"));
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning;id',lines:'10'}),/Invalid option for Priority/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning',lines:'0'}),/whole number from 1 to 10000/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning',lines:'10001'}),/whole number from 1 to 10000/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh;id',since:'1 hour ago',priority:'warning',lines:'10'}),/valid unit/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'today\\n--no-pager; id',priority:'warning',lines:'10'}),/valid unit and short time expression/);
+});
+
+test('Kali and Ubuntu UFW builders reject invalid enums, ports and source addresses', () => {
+  for (const id of ['kali-ufw-builder','ubuntu-ufw-builder']) {
+    const valid = byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.10'});
+    assert.match(valid,/allow from 192\\.0\\.2\\.10 to any port 443 proto tcp/);
+    assert.throws(()=>byId(id).run({action:'allow;id',port:'443',protocol:'tcp',source:''}),/Invalid option for Action/);
+    assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp;id',source:''}),/Invalid option for Protocol/);
+    assert.throws(()=>byId(id).run({action:'allow',port:'65536',protocol:'tcp',source:''}),/whole number from 1 to 65535/);
+    assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.999'}),/valid IPv4/);
+    assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.1; ufw disable'}),/valid IPv4/);
+  }
+});
+
+test('Linux find builder quotes paths and patterns and rejects traversal or invalid enums', () => {
+  const output = byId('linux-find-builder').run({
+    path:'/tmp/log archive', type:'f', pattern:'*.log; touch /tmp/pwned', days:'30'
+  });
+  assert.ok(output.includes("find '/tmp/log archive' -type f -name '*.log; touch /tmp/pwned' -mtime -30 -print"));
+  const home = byId('linux-find-builder').run({path:'$HOME/logs',type:'d',pattern:"O'Reilly*",days:'0'});
+  assert.ok(home.includes('find "$HOME"/logs -type d -name '));
+  assert.ok(home.includes("'O'\\''Reilly*'"));
+  assert.throws(()=>byId('linux-find-builder').run({path:'/var/log',type:'f;id',pattern:'*.log',days:'7'}),/Invalid option for Entry type/);
+  assert.throws(()=>byId('linux-find-builder').run({path:'/var/../etc',type:'f',pattern:'*',days:'7'}),/Parent traversal/);
+  assert.throws(()=>byId('linux-find-builder').run({path:'/var/log',type:'f',pattern:'*.log',days:'36501'}),/whole number from 0 to 36500/);
+  assert.throws(()=>byId('linux-find-builder').run({path:'$(id)',type:'f',pattern:'*',days:'7'}),/absolute or safe home-directory path/);
+});
+
+test('Ubuntu APT planner rejects unknown tasks and malformed package names', () => {
+  assert.equal(byId('ubuntu-apt-plan').run({task:'update-index',package:'curl'}).split('\\n')[0],'sudo apt update');
+  assert.throws(()=>byId('ubuntu-apt-plan').run({task:'update; rm -rf /',package:'curl'}),/Invalid option for Maintenance task/);
+  assert.throws(()=>byId('ubuntu-apt-plan').run({task:'install',package:'curl;id'}),/valid package name/);
+  assert.throws(()=>byId('ubuntu-apt-plan').run({task:'remove',package:'--purge'}),/valid package name/);
+  assert.ok(byId('ubuntu-apt-plan').run({task:'install',package:'python3-pip'}).includes('sudo apt install python3-pip'));
+});
+
+test('Kali route, Nmap and hash parsers return bounded deterministic results', () => {
+  const route = byId('kali-route-review').run({output:'default via 192.168.1.1 dev wlan0 metric 100\\n192.168.1.0/24 dev wlan0'});
+  assert.match(route,/Routes: 2/);
+  assert.match(route,/Default routes: 1/);
+  assert.match(route,/Interfaces: wlan0/);
+  assert.match(route,/\\[DEFAULT\\] default via 192\\.168\\.1\\.1/);
+  assert.match(byId('kali-route-review').run({output:'\\n\\n'}),/Routes: 0/);
+  assert.throws(()=>byId('kali-route-review').run({output:'x'.repeat(100001)}),/maximum 100,000 characters/);
+
+  const nmap = byId('kali-nmap-output-review').run({output:'PORT STATE SERVICE\\n22/tcp open ssh\\n443/tcp closed https'});
+  assert.match(nmap,/Parsed ports: 2/);
+  assert.match(nmap,/Open: 1/);
+  assert.match(byId('kali-nmap-output-review').run({output:'not an nmap table'}),/Parsed ports: 0/);
+  assert.throws(()=>byId('kali-nmap-output-review').run({output:'x'.repeat(100001)}),/maximum 100,000 characters/);
+
+  assert.match(byId('kali-hash-identify').run({hash:'a'.repeat(64)}),/SHA-256/);
+  assert.match(byId('kali-hash-identify').run({hash:'a'.repeat(33)}),/Unknown common digest length/);
+  assert.throws(()=>byId('kali-hash-identify').run({hash:'abc-123'}),/hexadecimal digest/);
+  assert.throws(()=>byId('kali-hash-identify').run({hash:'a'.repeat(257)}),/maximum 256 hexadecimal characters/);
+  assert.throws(()=>byId('kali-hash-identify').run({hash:'أ'.repeat(32)}),/hexadecimal digest/);
+});

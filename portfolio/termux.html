@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#081321">
+<meta name="description" content="MOSTA Termux engineering workspace: official Termux ecosystem, Android terminal workflows, package builder, security and networking tools, compatibility notes and GitHub sources.">
+<meta name="robots" content="index,follow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; upgrade-insecure-requests">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/portal.css">
+<link rel="stylesheet" href="assets/termux.css">
+<script src="assets/site.js" defer></script>
+<script src="assets/termux.js" defer></script>
+<title>MOSTA — Termux Engineering Workspace</title>
+</head><body class="portal termux-page" data-theme="dark">
+<a class="skip-link" href="#main-content">Skip to content</a>
+<header class="top"><div class="nav">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>MOSTA <span class="brand-sub">ENGINEERING TOOLBOX</span></a>
+<button class="menu" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteNav">MENU</button>
+<nav class="navlinks" id="siteNav" aria-label="Main navigation">
+<a href="index.html">Overview</a><a href="tools.html">All tools</a><a href="systems.html">Systems workspace</a><a class="active" href="termux.html" aria-current="page">Termux OS</a><a href="projects.html">Labs & projects</a><a href="auth.html">Workspace</a><a href="security.html">Security</a>
+</nav><div class="nav-actions"><button class="theme-switch" id="themeSwitch" type="button" aria-label="Toggle color theme">◐ LIGHT</button></div>
+</div></header>
+<main id="main-content">
+<section class="tx-hero"><div class="wrap">
+<div class="portal-kicker">ANDROID LINUX ENVIRONMENT / MOSTA FIELD WORKSPACE</div>
+<div class="tx-hero-grid">
+<div><div class="tx-eyebrow">TERMUX // CONTROL CENTER</div><h1>Android becomes<br><em>your Linux lab.</em></h1>
+<p class="portal-lead">A practical command center for Termux: discover the official ecosystem, understand what each project does, prepare package commands, connect MOSTA labs, and check Android compatibility before installing anything.</p>
+<div class="tx-hero-actions"><a class="tx-primary" href="#command-builder">OPEN COMMAND BUILDER ↘</a><a class="tx-secondary" href="#ecosystem">EXPLORE GITHUB PROJECTS</a></div>
+<div class="tx-trust-line"><span>OFFICIAL SOURCES FIRST</span><span>NO ROOT ASSUMPTIONS</span><span>COMMANDS ARE REVIEWED BEFORE COPY</span></div></div>
+<div class="tx-visual" aria-label="Layered 3D illustration of the Termux and MOSTA stack">
+<div class="tx-orbit tx-orbit-a"></div><div class="tx-orbit tx-orbit-b"></div>
+<div class="tx-stack">
+<div class="tx-layer tx-layer-android"><small>LAYER 01 / PLATFORM</small><b>ANDROID</b><span>Device · permissions · storage</span></div>
+<div class="tx-layer tx-layer-termux"><small>LAYER 02 / TERMINAL</small><b>TERMUX</b><span>Shell · APT · packages</span></div>
+<div class="tx-layer tx-layer-api"><small>LAYER 03 / BRIDGE</small><b>TERMUX API</b><span>Camera · sensors · clipboard</span></div>
+<div class="tx-layer tx-layer-mosta"><small>LAYER 04 / TOOLCHAIN</small><b>MOSTA</b><span>Labs · aliases · diagnostics</span></div>
+</div><div class="tx-visual-caption">A layered environment — not a rooted Android device.</div>
+</div></div>
+<div class="tx-metrics"><div><b>63</b><span>OFFICIAL ORG REPOSITORIES</span></div><div><b>9</b><span>CORE APP / PLUGIN PROJECTS</span></div><div><b>117</b><span>MOSTA WEB TOOLS</span></div><div><b>01</b><span>UNIFIED TERMUX WORKSPACE</span></div></div>
+</div></section>
+<section class="tx-section" id="ecosystem"><div class="wrap">
+<div class="tx-section-head"><div><div class="eyebrow">01 / OFFICIAL ECOSYSTEM</div><h2>Explore the Termux project family.</h2><p>Curated from the official <a href="https://github.com/termux" target="_blank" rel="noopener noreferrer">Termux GitHub organization</a> and its developer wiki. Search by project, purpose, or capability.</p></div><a class="tx-text-link" href="https://github.com/termux" target="_blank" rel="noopener noreferrer">OPEN TERMUX ON GITHUB ↗</a></div>
+<div class="tx-filterbar"><label class="tx-search"><span>⌕</span><input id="txSearch" type="search" placeholder="Search projects, e.g. API, X11, packages, SSH…" autocomplete="off"></label><div class="tx-filters" id="txFilters" aria-label="Filter project categories"></div></div>
+<div class="tx-results"><span id="txResultCount">Loading catalog…</span><span>PROJECT LINKS OPEN THE ORIGINAL UPSTREAM SOURCE</span></div>
+<div class="tx-project-grid" id="txProjectGrid" aria-live="polite"></div>
+<div class="tx-empty" id="txEmpty" hidden>No matching project. Try another term or category.</div>
+</div></section>
+<section class="tx-section tx-section-alt"><div class="wrap">
+<div class="tx-section-head"><div><div class="eyebrow">02 / HOW THE PIECES FIT</div><h2>From Android to a working toolchain.</h2><p>Understand the roles before installing packages or expecting desktop-Linux capabilities.</p></div></div>
+<div class="tx-architecture">
+<article><span>01</span><h3>Termux App</h3><p>Terminal emulator and user-space Linux environment. It provides the shell and package manager entry point.</p><a href="https://github.com/termux/termux-app" target="_blank" rel="noopener noreferrer">Source repository ↗</a></article>
+<article><span>02</span><h3>Termux Packages</h3><p>Build recipes and package repositories. Install command-line tools with <code>pkg</code> rather than assuming Debian paths.</p><a href="https://github.com/termux/termux-packages" target="_blank" rel="noopener noreferrer">Source repository ↗</a></article>
+<article><span>03</span><h3>Android Add-ons</h3><p>Optional bridges for Android features, boot scripts, widgets, themes, Tasker and X11 graphical sessions.</p><a href="https://github.com/termux/termux-api" target="_blank" rel="noopener noreferrer">Termux:API source ↗</a></article>
+<article><span>04</span><h3>MOSTA Layer</h3><p>Our launchers, aliases, lab wrappers and diagnostics unify supported tools without replacing upstream executables.</p><a href="../cyber-labs/mosta-terminal/">Mosta Terminal source ↗</a></article>
+</div>
+</div></section>
+<section class="tx-section" id="command-builder"><div class="wrap">
+<div class="tx-section-head"><div><div class="eyebrow">03 / INTERACTIVE COMMAND BUILDER</div><h2>Prepare Termux commands safely.</h2><p>Choose a task and packages. MOSTA generates a reviewable command; it does not execute shell commands from the website.</p></div><span class="tx-status">LOCAL COMMAND GENERATOR</span></div>
+<div class="tx-builder">
+<div class="tx-builder-controls">
+<label for="txTask">TASK</label><select id="txTask"><option value="bootstrap">Update and prepare Termux</option><option value="install">Install selected packages</option><option value="storage">Enable shared storage access</option><option value="ssh">Start SSH server</option><option value="doctor">Check MOSTA environment</option><option value="install-mosta">Install MOSTA command layer</option></select>
+<div class="tx-package-heading"><b>PACKAGE SELECTION</b><span>Allowlisted package names only</span></div>
+<div class="tx-package-list" id="txPackages"></div>
+<div class="tx-builder-note"><b>Before running:</b> read the generated command. Package availability can vary by Android version, repository state and device architecture.</div>
+</div>
+<div class="tx-command-panel"><div class="tx-command-top"><span>GENERATED SHELL COMMAND</span><span class="tx-live-dot">READY</span></div><pre id="txCommand" aria-live="polite"></pre><div class="tx-command-actions"><button type="button" id="txCopyCommand">COPY COMMAND</button><button type="button" id="txResetCommand">RESET</button></div><p id="txCopyStatus" role="status">The command is generated locally in your browser.</p></div>
+</div>
+</div></section>
+<section class="tx-section tx-section-alt"><div class="wrap">
+<div class="tx-section-head"><div><div class="eyebrow">04 / MOSTA ON TERMUX</div><h2>One command layer for your labs.</h2><p>Existing repository components that the website will progressively expose as guided workflows.</p></div><a class="tx-text-link" href="https://github.com/mostafa-frg/mostafa-frg/tree/feat/mosta-platform-redesign/cyber-labs/mosta-terminal" target="_blank" rel="noopener noreferrer">VIEW MOSTA TERMINAL ↗</a></div>
+<div class="tx-mosta-grid">
+<article><small>CORE LAUNCHERS</small><h3>mnet · mhttp · mpcap · msoc</h3><p>Network diagnostics, HTTP auditing, offline packet analysis and SOC/log workflows.</p></article>
+<article><small>NETWORK ALIASES</small><h3>mnmap · mdig · mtcpdump · mssh</h3><p>Branded wrappers pass arguments to the real upstream tools; they do not reimplement them.</p></article>
+<article><small>LAB COMMANDS</small><h3>mfim · mdet · mlog · mnorm</h3><p>File integrity, detection rules, log ingestion and normalization pipelines.</p></article>
+<article><small>ENVIRONMENT HEALTH</small><h3>mosta-doctor</h3><p>Checks Python, Git, command links, dependencies and optional tools; reports Android limitations.</p></article>
+</div>
+<div class="tx-install-strip"><div><b>Install from the repository on your device</b><p>Run this inside the cloned MOSTA repository on Termux. Review the installer before execution.</p></div><code>cd cyber-labs/mosta-terminal && ./install.sh && mosta-doctor</code></div>
+</div></section>
+<section class="tx-section"><div class="wrap">
+<div class="tx-section-head"><div><div class="eyebrow">05 / COMPATIBILITY & SECURITY</div><h2>Know what Android will and won't allow.</h2><p>Termux is powerful, but it is not identical to a rooted Kali workstation.</p></div></div>
+<div class="tx-compat-grid">
+<article class="tx-compat-good"><b>WORKS WELL IN USER SPACE</b><p>Python, Git, SSH client/server, HTTP tools, DNS utilities, local scripting, file processing, many TCP connect-based diagnostics and offline PCAP parsing.</p></article>
+<article class="tx-compat-warn"><b>DEVICE / PERMISSION DEPENDENT</b><p>Raw packet capture, monitor mode, packet injection, privileged scans, kernel features, background services and some native binaries. Root, supported chipset/driver, external hardware or a full Linux host may be required.</p></article>
+<article class="tx-compat-stop"><b>DO NOT ASSUME ROOT</b><p>Root-only packages are separate. PRoot distributions provide user-space environments, not real kernel privilege or wireless driver access.</p></article>
+</div>
+<div class="tx-safety-note"><b>Source and installation safety</b><p>Prefer official Termux app/add-on sources and official package repositories. Do not mix APKs signed by different distribution sources. Treat third-party APT repositories as untrusted until their maintainers, signing keys, build process and package provenance have been reviewed. Use security tools only on systems you own or are authorized to assess.</p><a href="https://github.com/termux/termux-app#installation" target="_blank" rel="noopener noreferrer">Official installation guidance ↗</a> · <a href="https://github.com/termux/termux-packages/wiki" target="_blank" rel="noopener noreferrer">Developer wiki ↗</a>
+</div>
+</div></section>
+</main>
+<footer class="portal-footer"><div class="wrap"><span>© <span data-year>2026</span> MOSTA ENGINEERING TOOLBOX</span><span>TERMUX / ANDROID / LINUX / NETWORKING / SECURITY</span><a href="security.html">SECURITY & PRIVACY</a><a href="index.html">BACK TO OVERVIEW</a></div></footer>
+</body></html>

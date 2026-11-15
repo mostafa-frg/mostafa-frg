@@ -87,7 +87,7 @@ function renderTools(){
   const h=document.createElement('h3');h.textContent=t.name;
   const p=document.createElement('p');p.textContent=t.desc;
   const tags=document.createElement('div');tags.className='directory-tool-tags';
-  (t.tags||'').split(/\\s+/).filter(Boolean).slice(0,3).forEach(tag=>{const chip=document.createElement('span');chip.textContent=tag;tags.append(chip);});
+  (t.tags||'').split(/\s+/).filter(Boolean).slice(0,3).forEach(tag=>{const chip=document.createElement('span');chip.textContent=tag;tags.append(chip);});
   const bottom=document.createElement('div');bottom.className='directory-tool-bottom';
   const cat=document.createElement('span');cat.className='tool-category-label';cat.textContent=categories[t.cat];
   const btn=document.createElement('button');btn.className='open-tool';btn.type='button';btn.textContent='OPEN WORKSPACE';btn.setAttribute('aria-label','Open '+t.name);btn.addEventListener('click',()=>openTool(t.id));

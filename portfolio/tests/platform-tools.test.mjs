@@ -637,13 +637,13 @@ test('Kali journalctl builder enforces priority, unit, time and line bounds', ()
   assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning',lines:'0'}),/whole number from 1 to 10000/);
   assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning',lines:'10001'}),/whole number from 1 to 10000/);
   assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh;id',since:'1 hour ago',priority:'warning',lines:'10'}),/valid unit/);
-  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'today\\n--no-pager; id',priority:'warning',lines:'10'}),/valid unit and short time expression/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'today\n--no-pager; id',priority:'warning',lines:'10'}),/valid unit and short time expression/);
 });
 
 test('Kali and Ubuntu UFW builders reject invalid enums, ports and source addresses', () => {
   for (const id of ['kali-ufw-builder','ubuntu-ufw-builder']) {
     const valid = byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.10'});
-    assert.match(valid,/allow from 192\\.0\\.2\\.10 to any port 443 proto tcp/);
+    assert.match(valid,/allow from 192\.0\.2\.10 to any port 443 proto tcp/);
     assert.throws(()=>byId(id).run({action:'allow;id',port:'443',protocol:'tcp',source:''}),/Invalid option for Action/);
     assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp;id',source:''}),/Invalid option for Protocol/);
     assert.throws(()=>byId(id).run({action:'allow',port:'65536',protocol:'tcp',source:''}),/whole number from 1 to 65535/);
@@ -667,7 +667,7 @@ test('Linux find builder quotes paths and patterns and rejects traversal or inva
 });
 
 test('Ubuntu APT planner rejects unknown tasks and malformed package names', () => {
-  assert.equal(byId('ubuntu-apt-plan').run({task:'update-index',package:'curl'}).split('\\n')[0],'sudo apt update');
+  assert.equal(byId('ubuntu-apt-plan').run({task:'update-index',package:'curl'}).startsWith('sudo apt update'));
   assert.throws(()=>byId('ubuntu-apt-plan').run({task:'update; rm -rf /',package:'curl'}),/Invalid option for Maintenance task/);
   assert.throws(()=>byId('ubuntu-apt-plan').run({task:'install',package:'curl;id'}),/valid package name/);
   assert.throws(()=>byId('ubuntu-apt-plan').run({task:'remove',package:'--purge'}),/valid package name/);
@@ -675,15 +675,15 @@ test('Ubuntu APT planner rejects unknown tasks and malformed package names', () 
 });
 
 test('Kali route, Nmap and hash parsers return bounded deterministic results', () => {
-  const route = byId('kali-route-review').run({output:'default via 192.168.1.1 dev wlan0 metric 100\\n192.168.1.0/24 dev wlan0'});
+  const route = byId('kali-route-review').run({output:'default via 192.168.1.1 dev wlan0 metric 100\n192.168.1.0/24 dev wlan0'});
   assert.match(route,/Routes: 2/);
   assert.match(route,/Default routes: 1/);
   assert.match(route,/Interfaces: wlan0/);
-  assert.match(route,/\\[DEFAULT\\] default via 192\\.168\\.1\\.1/);
-  assert.match(byId('kali-route-review').run({output:'\\n\\n'}),/Routes: 0/);
+  assert.match(route,/\[DEFAULT\] default via 192\.168\.1\.1/);
+  assert.match(byId('kali-route-review').run({output:'\n\n'}),/Routes: 0/);
   assert.throws(()=>byId('kali-route-review').run({output:'x'.repeat(100001)}),/maximum 100,000 characters/);
 
-  const nmap = byId('kali-nmap-output-review').run({output:'PORT STATE SERVICE\\n22/tcp open ssh\\n443/tcp closed https'});
+  const nmap = byId('kali-nmap-output-review').run({output:'PORT STATE SERVICE\n22/tcp open ssh\n443/tcp closed https'});
   assert.match(nmap,/Parsed ports: 2/);
   assert.match(nmap,/Open: 1/);
   assert.match(byId('kali-nmap-output-review').run({output:'not an nmap table'}),/Parsed ports: 0/);

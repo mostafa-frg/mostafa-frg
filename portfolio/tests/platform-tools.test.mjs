@@ -76,7 +76,7 @@ test('Set-Cookie auditor enforces prefix and SameSite=None invariants', () => {
     'session=abc; SameSite=None',
     '__Secure-id=1; HttpOnly',
   ].join('\n')});
-  assert.match(output,/__Host- prefix requires Secure, Path=\/ and no Domain attribute/);
+  assert.match(output,/__Host- requires Secure, Path=\/ and no Domain attribute/);
   assert.match(output,/SameSite=None requires Secure/);
   assert.match(output,/__Secure- prefix requires Secure/);
 });

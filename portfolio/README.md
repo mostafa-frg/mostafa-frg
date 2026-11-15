@@ -26,6 +26,13 @@ Open `index.html` in a browser. No build step or package installation is require
 - `dashboard.html` — authenticated workspace and admin controls
 - `404.html` — not-found page
 
+## Tool directory experience
+
+- `tools.html` is the primary utility directory, organized into five technical workspaces: Networking, Cybersecurity, SOC & Incident Response, Linux & Systems, and Developer Tools.
+- The directory provides live search, category filters, result counts, alphabetical sorting, and an empty-state recovery action.
+- Each utility opens a focused input/output workspace with keyboard dismissal, focus handling, copy output, and a clear local-processing or external-provider notice.
+- The home page links directly into all five domains and shows their current tool counts.
+
 ## Deployment
 
 - `.github/workflows/deploy-portfolio.yml` publishes `portfolio/` to GitHub Pages as a public static mirror.

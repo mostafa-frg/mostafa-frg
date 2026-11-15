@@ -142,7 +142,22 @@ function ipstr(n){return [24n,16n,8n,0n].map(s=>Number((n>>s)&255n)).join('.');}
 function domain(s){const d=String(s||'').trim().replace(/\.$/,'');if(!/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i.test(d))throw Error('Enter a valid public domain name.');return d;}
 function hex(b){return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 function shellQuote(value){return "'"+String(value??'').replace(/'/g,"'\\''")+"'";}
+function withValidatedInputs(tool){
+ const originalRun=tool.run;
+ tool.run=values=>{
+  const input={...(values||{})};
+  for(const field of tool.fields||[]){
+   const [key,label,defaultValue,type,options]=field;
+   if(input[key]===undefined&&defaultValue!==undefined)input[key]=defaultValue;
+   if(type==='select'&&(!Array.isArray(options)||!options.includes(String(input[key]))))
+    throw Error('Invalid option for '+label+'. Choose one of the listed values.');
+  }
+  return originalRun(input);
+ };
+ return tool;
+}
 const grid=$('#toolGrid'),modal=$('#toolModal'),form=$('#toolRunForm'),result=$('#toolResult'),search=$('#toolSearch'),sort=$('#toolSort');let category='all',activeTool=null,lastToolTrigger=null;
+tools.forEach(withValidatedInputs);
 function renderCategories(){
  const root=$('#categoryTabs');if(!root)return;
  root.replaceChildren();

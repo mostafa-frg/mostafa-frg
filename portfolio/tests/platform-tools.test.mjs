@@ -233,15 +233,15 @@ test('IPv4 analyzer classifies common special-purpose ranges instead of calling 
   assert.match(byId('ip-analyze').run({ip:'8.8.8.8'}), /Public or globally routable candidate/);
 });
 
-test('CSV converter supports escaped quotes, commas and multiline quoted fields', () => {
+test('CSV converter supports escaped quotes, commas, multiline fields and UTF-8 BOM', () => {
   const output = JSON.parse(byId('csv-json').run({
-    csv: 'name,notes\\r\\nAlice,"line one, with comma\\nline two"\\r\\nBob,"said ""hello"""',
+    csv: '\uFEFFname,notes\r\nAlice,"line one, with comma\nline two"\r\nBob,"said ""hello"""',
   }));
   assert.deepEqual(output, [
-    {name:'Alice',notes:'line one, with comma\\nline two'},
+    {name:'Alice',notes:'line one, with comma\nline two'},
     {name:'Bob',notes:'said "hello"'},
   ]);
-  assert.throws(() => byId('csv-json').run({csv:'name,notes\\nAlice,"unfinished'}), /Unclosed quoted field/);
+  assert.throws(() => byId('csv-json').run({csv:'name,notes\nAlice,"unfinished'}), /Unclosed quoted field/);
 });
 test('password generator guarantees selected character classes and requested length', () => {
   const password = byId('password').run({length:'32',symbols:'yes'});

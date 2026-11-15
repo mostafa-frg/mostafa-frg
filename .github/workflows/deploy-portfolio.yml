@@ -57,7 +57,7 @@ jobs:
         run: |
           set -euo pipefail
           ruby -e 'require "yaml"; YAML.load_file(".github/workflows/deploy-portfolio.yml", aliases: true)'
-          if grep -nF '\\n          ' .github/workflows/deploy-portfolio.yml; then
+          if grep -nF '\n          ' .github/workflows/deploy-portfolio.yml; then
             echo "::error::Literal escaped line break found in workflow YAML."
             exit 1
           fi

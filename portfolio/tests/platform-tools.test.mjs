@@ -23,6 +23,7 @@ const tools = vm.runInNewContext(`(()=>{ ${helpers}\n const registry=${registryL
   crypto: webcrypto,
   TextEncoder,
   TextDecoder,
+  AbortController,
   Uint8Array,
   atob,
   btoa,
@@ -156,6 +157,17 @@ test('all registered tools execute a valid representative input', async () => {
     }
   }
   assert.deepEqual(failures,[], 'Every tool should execute its representative input without an unexpected error');
+});
+
+test('external provider lookups use abortable request timeouts', async () => {
+  const externalLines=source.split(/\r?\n/).filter(line=>line.includes('external:true'));
+  assert.ok(externalLines.length>=6);
+  for(const line of externalLines)assert.match(line,/fetchWithTimeout\(/);
+  const sandbox={AbortController,setTimeout,clearTimeout,fetch:(_url,options)=>new Promise((resolve,reject)=>{
+    options.signal.addEventListener('abort',()=>reject(new Error('aborted')),{once:true});
+  })};
+  const request=vm.runInNewContext(`${helpers}; fetchWithTimeout('https://example.test',{},5)`,sandbox);
+  await assert.rejects(request,/External request timed out/);
 });
 
 test('select inputs reject values outside their declared allowlists', () => {

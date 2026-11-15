@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
 :root{--p-bg:#f4f7fb;--p-surface:#fff;--p-surface-2:#f8fafc;--p-ink:#152234;--p-muted:#64748b;--p-line:#dce5ee;--p-accent:#1769aa;--p-accent-2:#0f9f91;--p-shadow:0 14px 40px rgba(19,42,68,.08);--p-radius:18px;--p-mono:'DM Mono',ui-monospace,monospace;--p-font:'Manrope',Inter,system-ui,sans-serif}
 body.portal{margin:0;background:var(--p-bg);color:var(--p-ink);font-family:var(--p-font);font-size:15px}
 body.portal[data-theme=dark]{--p-bg:#0b1220;--p-surface:#111c2d;--p-surface-2:#162338;--p-ink:#edf4fb;--p-muted:#9aabc0;--p-line:#283b52;--p-accent:#70b8f5;--p-accent-2:#5ad3c2;--p-shadow:0 14px 40px rgba(0,0,0,.22)}

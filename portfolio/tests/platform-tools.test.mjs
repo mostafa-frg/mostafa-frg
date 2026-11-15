@@ -227,7 +227,7 @@ test('Dockerfile audit evaluates the final stage rather than earlier build stage
     'COPY --from=build /app /app',
     'ENTRYPOINT ["/app"]',
   ].join('\n')});
-  assert.match(unsafe,/final build stage may run as root/);
+  assert.match(unsafe,/No USER instruction found in the final build stage/);
   const hardened = byId('dockerfile-audit').run({dockerfile:[
     'FROM node:20 AS build',
     'USER node',

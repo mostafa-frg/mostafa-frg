@@ -697,3 +697,18 @@ test('Kali route, Nmap and hash parsers return bounded deterministic results', (
   assert.throws(()=>byId('kali-hash-identify').run({hash:'a'.repeat(257)}),/maximum 256 hexadecimal characters/);
   assert.throws(()=>byId('kali-hash-identify').run({hash:'أ'.repeat(32)}),/hexadecimal digest/);
 });
+
+test('Shared input validation bounds text and rejects embedded NUL characters', () => {
+  assert.throws(()=>byId('termux-ssh-builder').run({
+    user:'mms',host:'h'.repeat(4097),port:'22',identity:'~/.ssh/id_ed25519'
+  }),/Remote host input is too long \(maximum 4096 characters\)/);
+  assert.throws(()=>byId('termux-ssh-builder').run({
+    user:'mms',host:'example\\0.com',port:'22',identity:'~/.ssh/id_ed25519'
+  }),/Remote host input cannot contain NUL characters/);
+  assert.throws(()=>byId('case').run({
+    text:'x'.repeat(200001),mode:'upper'
+  }),/Text input is too long \(maximum 200000 characters\)/);
+  assert.equal(byId('termux-ssh-builder').run({
+    user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/id_ed25519'
+  }).startsWith('ssh -p 22 -i '),true);
+});

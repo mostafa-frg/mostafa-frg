@@ -157,7 +157,7 @@ test('all registered tools execute a valid representative input', async () => {
   assert.deepEqual(failures,[], 'Every tool should execute its representative input without an unexpected error');
 });
 
-test('select inputs reject values outside their declared allowlists and apply defaults', () => {
+test('select inputs reject values outside their declared allowlists', () => {
   let checked=0;
   for(const tool of tools){
     for(const field of tool.fields||[]){

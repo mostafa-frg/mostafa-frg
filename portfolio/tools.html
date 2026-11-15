@@ -1,7 +1,78 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d12"><meta name="description" content="Browse practical networking, cybersecurity, SOC operations, Linux and developer tools in the MOSTA technical toolbox."><meta name="robots" content="index,follow"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://speed.cloudflare.com https://cloudflare-dns.com https://api.ipify.org https://api.macvendors.com https://crt.sh; form-action 'self'; upgrade-insecure-requests"><link rel="stylesheet" href="assets/site.css"><link rel="stylesheet" href="assets/platform.css"><script src="assets/site.js" defer></script><script src="assets/platform.js" defer></script><title>Tool Directory — MOSTA</title></head>
-<body class="tool-directory"><header class="top"><div class="wrap nav"><a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>MOSTA <span class="brand-sub">TOOLBOX</span></a><button class="menu" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteNav">MENU</button><nav class="navlinks" id="siteNav" aria-label="Main navigation"><a href="index.html">Overview</a><a href="tools.html">All tools</a><a href="tools.html?category=networking">Networking</a><a href="tools.html?category=security">Security</a><a href="tools.html?category=soc">SOC</a><a href="tools.html?category=linux">Linux</a><a href="tools.html?category=developer">Developer</a><a href="projects.html">Labs</a><a href="auth.html">Workspace</a><a href="security.html">Trust</a></nav><div class="nav-actions"><button class="theme-switch" id="themeSwitch" type="button" aria-label="Toggle color theme">◐ DARK</button></div></div></header>
-<main id="main-content"><section class="directory-hero"><div class="wrap"><div class="eyebrow">MOSTA / TOOL DIRECTORY</div><h1>Find the right tool.<br><em>Get the job done.</em></h1><p class="platform-lead">Browse Networking, Cybersecurity, SOC, Linux and Developer utilities by domain or search by task. Open each tool in its own workspace with clear inputs, useful output and practical limitations.</p><div class="directory-search"><span>⌕</span><input id="toolSearch" type="search" placeholder="Search by name, task, protocol or keyword..." autocomplete="off" aria-label="Search the tool directory"><kbd>CTRL / ⌘ K</kbd></div><div class="directory-meta"><span id="toolCount">LOADING TOOLS</span><span>LOCAL-FIRST WHERE POSSIBLE</span><span>NO ACCOUNT REQUIRED</span></div></div></section>
-<section class="directory-layout"><div class="wrap"><div class="directory-toolbar"><div class="category-tabs" id="categoryTabs" aria-label="Filter tools by category"><button class="category-tab active" type="button" data-category="all">ALL TOOLS</button><button class="category-tab" type="button" data-category="networking">NETWORKING</button><button class="category-tab" type="button" data-category="security">CYBERSECURITY</button><button class="category-tab" type="button" data-category="soc">SOC / IR</button><button class="category-tab" type="button" data-category="linux">LINUX & SYSTEMS</button><button class="category-tab" type="button" data-category="developer">DEVELOPER</button></div><select id="toolSort" class="directory-sort" aria-label="Sort tools"><option value="featured">Featured first</option><option value="az">Name A–Z</option></select></div><div class="directory-content"><div class="directory-results-head"><div><div class="eyebrow" id="categoryEyebrow">COMPLETE TOOLBOX</div><h2 id="categoryTitle">All tools</h2></div><span id="resultCount">0 TOOLS</span></div><div class="tool-directory-grid" id="toolGrid" aria-live="polite"></div><div class="directory-empty" id="noTools" hidden>No tools match this search. Try another keyword or category.</div></div><div class="directory-notice"><b>Responsible use.</b> Tools that perform public lookups send the required query to the named external provider. Local tools process your input in this browser. Network diagnostics are limited to browser-supported HTTPS checks; this is not a port scanner, packet capture suite or ICMP tool. Only test systems and networks you own or are authorized to assess.</div></div></section>
-<div class="tool-modal" id="toolModal" hidden><div class="tool-modal-backdrop" data-close-tool></div><section class="tool-modal-panel" role="dialog" aria-modal="true" aria-labelledby="toolModalTitle"><div class="tool-modal-head"><div><div class="eyebrow" id="toolModalCategory">TOOL WORKSPACE</div><h2 id="toolModalTitle">Tool</h2></div><button class="modal-close" type="button" data-close-tool aria-label="Close tool">×</button></div><p class="tool-modal-description" id="toolModalDescription"></p><form id="toolRunForm" class="tool-run-form"></form><div class="tool-result-wrap"><div class="tool-result-head"><span>RESULT</span><button type="button" class="copy-result" id="copyToolResult">COPY OUTPUT</button></div><pre class="tool-modal-result" id="toolResult" aria-live="polite">Ready when you are.</pre></div><p class="tool-disclaimer" id="toolDisclaimer"></p></section></div></main>
-<footer class="footer"><div class="wrap footer-inner"><span>© <span data-year>2026</span> MOSTA TECHNICAL TOOLBOX</span><span>NETWORKING · SECURITY · SOC · SYSTEMS · DEVELOPMENT</span><a href="security.html">PRIVACY & SECURITY</a><a href="index.html">OVERVIEW</a></div></footer></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d12">
+<meta name="description" content="Explore 56 practical tools for network engineering, cybersecurity, SOC operations, Linux administration and software development.">
+<meta name="robots" content="index,follow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://speed.cloudflare.com https://cloudflare-dns.com https://api.ipify.org https://api.macvendors.com https://crt.sh; form-action 'self'; upgrade-insecure-requests">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/platform.css">
+<script src="assets/site.js" defer></script>
+<script src="assets/platform.js" defer></script>
+<title>Tool Directory — MOSTA</title>
+</head>
+<body class="tool-directory">
+<a class="skip-link" href="#main-content">Skip to tools</a>
+<header class="top">
+ <div class="wrap nav">
+  <a class="brand" href="index.html" aria-label="MOSTA home"><span class="brand-mark" aria-hidden="true"></span>MOSTA <span class="brand-sub">ENGINEERING WORKSPACE</span></a>
+  <button class="menu" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteNav">MENU</button>
+  <nav class="navlinks" id="siteNav" aria-label="Main navigation">
+   <a href="index.html">Overview</a><a class="active" href="tools.html" aria-current="page">Tool directory</a><a href="projects.html">Labs & projects</a><a href="systems.html">Systems</a><a href="security.html">Trust & security</a><a href="about.html">About</a>
+  </nav>
+  <div class="nav-actions"><button class="theme-switch" id="themeSwitch" type="button" aria-label="Toggle color theme">◐ DARK</button></div>
+ </div>
+</header>
+<main id="main-content">
+ <section class="directory-hero">
+  <div class="wrap directory-hero-inner">
+   <div class="directory-kicker"><span class="status-dot"></span> MOSTA / ENGINEERING TOOLBOX <span class="directory-version">56 UTILITIES · 5 DOMAINS</span></div>
+   <div class="directory-hero-grid">
+    <div><h1>Tools built for<br><em>technical work.</em></h1><p class="platform-lead">A practical workspace for network engineers, security analysts, system administrators and developers. Search by task, select a domain, and run a focused utility with transparent processing boundaries.</p></div>
+    <div class="directory-hero-aside"><div class="directory-stat"><strong>56</strong><span>TOOLS</span></div><div class="directory-stat"><strong>05</strong><span>DOMAINS</span></div><div class="directory-stat"><strong>01</strong><span>WORKSPACE</span></div><p>Local-first by default. External lookups are clearly identified before you run them.</p></div>
+   </div>
+   <div class="directory-search" role="search"><span aria-hidden="true">⌕</span><label class="visually-hidden" for="toolSearch">Search tools</label><input id="toolSearch" type="search" placeholder="Search tools, tasks, protocols or keywords…" autocomplete="off" aria-controls="toolGrid"><kbd>CTRL / ⌘ K</kbd></div>
+   <div class="directory-meta"><span id="toolCount">LOADING TOOL DIRECTORY</span><span>NO ACCOUNT REQUIRED FOR PUBLIC UTILITIES</span><span>AUTHORIZED USE ONLY</span></div>
+  </div>
+ </section>
+ <section class="directory-layout" aria-label="Tool directory">
+  <div class="wrap directory-shell">
+   <aside class="directory-sidebar" aria-label="Tool categories">
+    <div class="sidebar-heading"><span>WORKSPACES</span><span class="sidebar-live"><i></i> READY</span></div>
+    <div class="category-tabs" id="categoryTabs">
+     <button class="category-tab active" type="button" data-category="all" aria-pressed="true"><span class="category-tab-icon">▦</span><span>All tools</span><b data-category-count="all">56</b></button>
+     <button class="category-tab" type="button" data-category="networking" aria-pressed="false"><span class="category-tab-icon">⌁</span><span>Networking</span><b data-category-count="networking">17</b></button>
+     <button class="category-tab" type="button" data-category="security" aria-pressed="false"><span class="category-tab-icon">⛨</span><span>Cybersecurity</span><b data-category-count="security">15</b></button>
+     <button class="category-tab" type="button" data-category="soc" aria-pressed="false"><span class="category-tab-icon">◉</span><span>SOC & response</span><b data-category-count="soc">05</b></button>
+     <button class="category-tab" type="button" data-category="linux" aria-pressed="false"><span class="category-tab-icon">$_</span><span>Linux & systems</span><b data-category-count="linux">08</b></button>
+     <button class="category-tab" type="button" data-category="developer" aria-pressed="false"><span class="category-tab-icon">{ }</span><span>Developer</span><b data-category-count="developer">11</b></button>
+    </div>
+    <div class="sidebar-note"><span class="sidebar-note-icon">i</span><div><strong>Processing transparency</strong><p>Each utility identifies whether your input stays in the browser or is sent to an external provider.</p><a href="security.html">Read security notes ↗</a></div></div>
+    <a class="sidebar-project-link" href="projects.html"><span>Explore practical labs</span><b>↗</b></a>
+   </aside>
+   <div class="directory-content">
+    <div class="directory-toolbar">
+     <div class="directory-results-head"><div><div class="eyebrow" id="categoryEyebrow">COMPLETE TOOLBOX</div><h2 id="categoryTitle">All tools</h2><p id="directorySubhead">Choose a utility to open its dedicated workspace.</p></div><span id="resultCount" class="directory-result-count">56 TOOLS</span></div>
+     <label class="sort-control"><span>SORT BY</span><select id="toolSort" class="directory-sort" aria-label="Sort tools"><option value="featured">Recommended</option><option value="az">Name A–Z</option></select></label>
+    </div>
+    <div class="tool-directory-grid" id="toolGrid" aria-live="polite" aria-busy="false"></div>
+    <div class="directory-empty" id="noTools" hidden><span>⌕</span><strong>No matching tools</strong><p>Try a broader keyword or choose another workspace.</p><button type="button" id="clearToolSearch">Clear search</button></div>
+    <div class="directory-notice"><b>Responsible use.</b> Public lookups send the required query to the named provider. Browser-local utilities process input on this device. Browser diagnostics use HTTPS requests and do not provide raw ICMP, packet capture or port-scanning capability. Assess only systems you own or are authorized to test.</div>
+   </div>
+  </div>
+ </section>
+ <div class="tool-modal" id="toolModal" hidden>
+  <div class="tool-modal-backdrop" data-close-tool></div>
+  <section class="tool-modal-panel" role="dialog" aria-modal="true" aria-labelledby="toolModalTitle">
+   <div class="tool-modal-head"><div><div class="eyebrow" id="toolModalCategory">TOOL WORKSPACE</div><h2 id="toolModalTitle">Tool</h2></div><button class="modal-close" type="button" data-close-tool aria-label="Close tool">×</button></div>
+   <p class="tool-modal-description" id="toolModalDescription"></p>
+   <div class="tool-workspace-grid"><div class="tool-input-panel"><div class="workspace-panel-heading"><span>01 / INPUT</span><span>CONFIGURE</span></div><form id="toolRunForm" class="tool-run-form"></form></div><div class="tool-output-panel"><div class="workspace-panel-heading"><span>02 / OUTPUT</span><button type="button" class="copy-result" id="copyToolResult">COPY OUTPUT</button></div><pre class="tool-modal-result" id="toolResult" aria-live="polite" aria-atomic="true">Ready when you are.</pre></div></div>
+   <p class="tool-disclaimer" id="toolDisclaimer"></p>
+  </section>
+ </div>
+</main>
+<footer class="footer"><div class="wrap footer-inner"><span>© <span data-year>2026</span> MOSTA ENGINEERING WORKSPACE</span><span>NETWORKING · SECURITY · SOC · SYSTEMS · DEVELOPMENT</span><a href="security.html">PRIVACY & SECURITY</a><a href="index.html">OVERVIEW</a></div></footer>
+</body>
+</html>

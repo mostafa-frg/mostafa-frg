@@ -203,3 +203,41 @@ test('Dockerfile review flags root, mutable images, secret metadata and unsafe s
   assert.match(output,/ADD at line/);
   assert.throws(()=>byId('dockerfile-audit').run({dockerfile:'   '}),/Paste Dockerfile/);
 });
+
+
+test('password generator guarantees selected character classes and requested length', () => {
+  const password = byId('password').run({length:'32',symbols:'yes'});
+  assert.equal(password.split('\n')[0].length,32);
+  assert.match(password,/^[a-z]/m); // output is randomized; class checks follow below
+  const value = password.split('\n')[0];
+  assert.match(value,/[a-z]/);
+  assert.match(value,/[A-Z]/);
+  assert.match(value,/[2-9]/);
+  assert.match(value,/[!@#$%^&*()\-_=\+\[\]{}?]/);
+  const noSymbols = byId('password').run({length:'24',symbols:'no'}).split('\n')[0];
+  assert.equal(noSymbols.length,24);
+  assert.doesNotMatch(noSymbols,/[^a-zA-Z0-9]/);
+});
+
+test('Dockerfile audit evaluates the final stage rather than earlier build stages', () => {
+  const unsafe = byId('dockerfile-audit').run({dockerfile:[
+    'FROM node:20 AS build',
+    'USER node',
+    'RUN npm ci',
+    'FROM scratch',
+    'COPY --from=build /app /app',
+    'ENTRYPOINT ["/app"]',
+  ].join('\n')});
+  assert.match(unsafe,/final build stage may run as root/);
+  const hardened = byId('dockerfile-audit').run({dockerfile:[
+    'FROM node:20 AS build',
+    'USER node',
+    'RUN npm ci',
+    'FROM scratch',
+    'COPY --from=build /app /app',
+    'USER 65532:65532',
+    'ENTRYPOINT ["/app"]',
+  ].join('\n')});
+  assert.doesNotMatch(hardened,/final build stage may run as root/);
+  assert.doesNotMatch(hardened,/Base image is unpinned/);
+});

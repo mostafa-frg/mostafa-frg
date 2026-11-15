@@ -35,6 +35,7 @@ jobs:
           test -s portfolio/index.html
           test -s portfolio/projects.html
           test -s portfolio/tools.html\n          test -s portfolio/termux.html\n          test -s portfolio/assets/termux.js\n          test -s portfolio/assets/termux.css
+          test -s cyber-labs/mosta-terminal/WEB-BRIDGE-SECURITY.md
           test -s portfolio/security.html
           test -s portfolio/about.html
           test -s portfolio/contact.html
@@ -49,6 +50,14 @@ jobs:
           test -s portfolio/tests/regex-worker.test.mjs
           test -s portfolio/tests/platform-tools.test.mjs
           test -s portfolio/assets/mosta-mark.svg
+      - name: Validate workflow YAML and reject escaped line breaks
+        run: |
+          set -euo pipefail
+          ruby -e 'require "yaml"; YAML.load_file(".github/workflows/deploy-portfolio.yml", aliases: true)'
+          if grep -nF '\\n          ' .github/workflows/deploy-portfolio.yml; then
+            echo "::error::Literal escaped line break found in workflow YAML."
+            exit 1
+          fi
       - name: Check JavaScript syntax
         shell: bash
         run: |

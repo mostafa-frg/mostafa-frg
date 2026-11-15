@@ -590,7 +590,7 @@ test('Bash loop builder validates identifiers and constrains path expressions', 
   const lines = byId('bash-loop-builder').run({kind:'lines',source:'$HOME/logs/app.log'});
   assert.ok(lines.includes('done < "$HOME"/logs/app.log'));
   const glob = byId('bash-loop-builder').run({kind:'glob',source:'~/Downloads/*.txt'});
-  assert.ok(glob.includes('for file in ~/Downloads/*.txt'));
+  assert.ok(glob.includes('for file in "$HOME"/Downloads/*.txt'));
   for (const source of ['bad;id','$(id)','../../etc/passwd','name with spaces','a`id`']) {
     assert.throws(()=>byId('bash-loop-builder').run({kind:'lines',source}),undefined,source+' must be rejected');
   }
@@ -623,7 +623,7 @@ test('Termux path inspector emits executable multiline read-only commands', () =
   }
   const all = byId('termux-path-reference').run({target:'all'});
   assert.ok(all.includes('printf "PREFIX=%s\\nHOME=%s\\nTMPDIR=%s\\nPATH=%s\\n"'));
-  assert.ok(all.includes('ls -ld "$PREFIX" "$HOME" "$TMPDIR" "$HOME/storage" 2>&1'));
-  assert.ok(all.indexOf('\nls -ld') > 0, JSON.stringify(all));
+  const commandLine = all.split(/\r?\n/).find(line=>line.startsWith('ls -ld '));
+  assert.equal(commandLine,'ls -ld "$PREFIX" "$HOME" "$TMPDIR" "$HOME/storage" 2>&1');
   assert.ok(!all.includes('\\nls -ld'));
 });

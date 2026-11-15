@@ -265,6 +265,7 @@ test('shell command builders expand approved home paths and reject traversal', (
   const find=byId('linux-find-builder').run({path:'$HOME/logs',type:'f',pattern:'*.log',days:'7'});
   assert.match(find,/find "\$HOME"\/logs -type f -name '\*\.log'/);
   assert.throws(()=>byId('linux-find-builder').run({path:'~attacker/logs',type:'f',pattern:'*.log',days:'7'}),/absolute or home-directory path/i);
+  assert.throws(()=>byId('linux-find-builder').run({path:'$HOME/$(touch /tmp/pwned)',type:'f',pattern:'*.log',days:'7'}),/absolute or safe home-directory path/i);
   assert.throws(()=>byId('linux-find-builder').run({path:'$HOME/../etc',type:'f',pattern:'*.log',days:'7'}),/parent traversal/i);
 
   const loop=byId('bash-loop-builder').run({kind:'lines',source:'$HOME/logs.txt'});

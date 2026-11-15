@@ -240,6 +240,26 @@ test('Kali command builders validate targets and produce bounded defensive comma
   assert.match(byId('kali-wireshark-filter').run({protocol:'dns',ipaddr:'192.0.2.10',port:'53'}),/dns && ip.addr == 192.0.2.10/);
 });
 
+test('shell command builders expand approved home paths and reject traversal', () => {
+  const backup=byId('termux-backup-builder').run({source:'$HOME',destination:'$HOME/storage/shared/termux-home-backup.tar.gz'});
+  assert.match(backup,/tar -czf "\$HOME"\/storage\/shared\/termux-home-backup\.tar\.gz/);
+  assert.match(backup,/-C "\$HOME" \\./);
+  assert.throws(()=>byId('termux-backup-builder').run({source:'$HOME/../etc',destination:'$HOME/storage/shared/backup.tar.gz'}),/parent traversal/i);
+
+  const ssh=byId('termux-ssh-builder').run({user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/id_ed25519'});
+  assert.match(ssh,/-i "\$HOME"\/\.ssh\/id_ed25519/);
+  assert.throws(()=>byId('termux-ssh-builder').run({user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/../id'}),/parent traversal/i);
+
+  const find=byId('linux-find-builder').run({path:'$HOME/logs',type:'f',pattern:'*.log',days:'7'});
+  assert.match(find,/find "\$HOME"\/logs -type f -name '\*\.log'/);
+  assert.throws(()=>byId('linux-find-builder').run({path:'~attacker/logs',type:'f',pattern:'*.log',days:'7'}),/absolute or home-directory path/i);
+  assert.throws(()=>byId('linux-find-builder').run({path:'$HOME/../etc',type:'f',pattern:'*.log',days:'7'}),/parent traversal/i);
+
+  const loop=byId('bash-loop-builder').run({kind:'lines',source:'$HOME/logs.txt'});
+  assert.match(loop,/done < "\$HOME"\/logs\.txt/);
+  assert.throws(()=>byId('bash-loop-builder').run({kind:'array',source:'items;touch /tmp/pwned'}),/valid Bash variable name/i);
+});
+
 test('Linux and Ubuntu analyzers detect risky conditions in pasted command output', () => {
   assert.match(byId('linux-df-analyzer').run({output:'Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/sda1 1000 900 100 90% /',threshold:'80'}),/WARNING/);
   assert.match(byId('ubuntu-cloud-init-audit').run({config:'ssh_pwauth: true\ndisable_root: false\nsudo: ALL=(ALL) NOPASSWD:ALL'}),/passwordless sudo/);

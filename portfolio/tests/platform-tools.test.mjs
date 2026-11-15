@@ -176,7 +176,7 @@ test('select inputs reject values outside their declared allowlists', () => {
 test('homepage search and quick-access deep links resolve to real tool workspaces', () => {
   assert.match(homeMarkup,/id="homeToolSearch"/);
   assert.match(source,/homeSearch\?\.addEventListener\('keydown'/);
-  assert.match(source,/const initialTool=params\.get\('tool'\);if\(initialTool\)openTool\(initialTool\);/);
+  assert.match(source,/if\(params\.get\('tool'\)\)openTool\(params\.get\('tool'\)\);/);
   const deepLinks=[...homeMarkup.matchAll(/href="tools\.html\?tool=([^"]+)"/g)].map(match=>decodeURIComponent(match[1]));
   assert.ok(deepLinks.length>0,'Homepage exposes quick-access tool links');
   for(const id of deepLinks)assert.ok(tools.some(tool=>tool.id===id),'Homepage deep link resolves: '+id);

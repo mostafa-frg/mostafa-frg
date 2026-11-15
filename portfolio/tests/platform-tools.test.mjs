@@ -26,6 +26,21 @@ const tools = vm.runInNewContext(`(()=>{ ${helpers}\n return ${registryLiteral};
   btoa,
   URL,
   URLSearchParams,
+  fetch: async input => ({
+    ok: true,
+    status: 200,
+    async json() {
+      if (String(input).includes('ipify')) return { ip: '203.0.113.10' };
+      if (String(input).includes('crt.sh')) return [{ id: 7, common_name: 'example.com', not_before: '2026-01-01', not_after: '2027-01-01' }];
+      return { Status: 0, Answer: [{ name: 'example.com.', TTL: 300, data: '93.184.216.34' }] };
+    },
+    async text() { return 'Example Vendor'; },
+    async arrayBuffer() { return new ArrayBuffer(64); },
+  }),
+  performance,
+  document: { createElement() { let html = ''; return { set innerHTML(value) { html = value; }, get value() { return html.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&'); } }; } },
+  DOMParser: class { parseFromString() { return { querySelector() { return null; } }; } },
+  XMLSerializer: class { serializeToString() { return '<root><item>value</item></root>'; } },
 });
 const byId = id => {
   const tool = tools.find(item => item.id === id);
@@ -264,4 +279,29 @@ test('chmod calculator preserves setuid, setgid and sticky permission bits', () 
   const regular = byId('chmod').run({mode:'0644'});
   assert.match(regular,/Symbolic: rw-r--r--/);
   assert.match(regular,/Special bits: none/);
+});
+
+
+test('all browser-independent tools execute with representative inputs', async () => {
+  const overrides = {
+    hmac: { key: 'ci-test-key', message: 'MOSTA test message' },
+    strength: { password: 'CorrectHorseBatteryStaple!42' },
+    'hash-text': { text: 'MOSTA regression test' },
+    jwt: { token: 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0In0.signature' },
+    config: { config: 'enable secret test\ntransport input ssh\nlogin local' },
+    'ioc-extractor': { data: 'hxxps://evil[.]example/path bad[.]example 203.0.113.9 ' + 'a'.repeat(64) },
+    'hash-file': { file: { name: 'sample.txt', size: 3, async arrayBuffer() { return new Uint8Array([1,2,3]).buffer; } } },
+  };
+  const browserWorkerOnly = new Set(['regex']);
+  for (const tool of tools) {
+    if (browserWorkerOnly.has(tool.id)) continue;
+    const values = Object.fromEntries((tool.fields || []).map(field => [
+      field[0],
+      field[3] === 'file' ? { name: 'sample.txt', size: 3, async arrayBuffer() { return new Uint8Array([1,2,3]).buffer; } } : (field[2] ?? ''),
+    ]));
+    Object.assign(values, overrides[tool.id] || {});
+    const output = await tool.run(values);
+    assert.notEqual(output, undefined, tool.id + ' returned undefined');
+    assert.notEqual(output, null, tool.id + ' returned null');
+  }
 });

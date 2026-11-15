@@ -644,7 +644,7 @@ test('Kali and Ubuntu UFW builders reject invalid enums, ports and source addres
   for (const id of ['kali-ufw-builder','ubuntu-ufw-builder']) {
     const valid = byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.10'});
     assert.match(valid,/allow from 192\.0\.2\.10 to any port 443 proto tcp/);
-    assert.throws(()=>byId(id).run({action:'allow;id',port:'443',protocol:'tcp',source:''}),/Invalid option for Action/);
+    assert.throws(()=>byId(id).run({action:'allow;id',port:'443',protocol:'tcp',source:''}),/Invalid option for Rule action/);
     assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp;id',source:''}),/Invalid option for Protocol/);
     assert.throws(()=>byId(id).run({action:'allow',port:'65536',protocol:'tcp',source:''}),/whole number from 1 to 65535/);
     assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.999'}),/valid IPv4/);
@@ -667,7 +667,7 @@ test('Linux find builder quotes paths and patterns and rejects traversal or inva
 });
 
 test('Ubuntu APT planner rejects unknown tasks and malformed package names', () => {
-  assert.equal(byId('ubuntu-apt-plan').run({task:'update-index',package:'curl'}).startsWith('sudo apt update'));
+  assert.ok(byId('ubuntu-apt-plan').run({task:'update-index',package:'curl'}).startsWith('sudo apt update'));
   assert.throws(()=>byId('ubuntu-apt-plan').run({task:'update; rm -rf /',package:'curl'}),/Invalid option for Maintenance task/);
   assert.throws(()=>byId('ubuntu-apt-plan').run({task:'install',package:'curl;id'}),/valid package name/);
   assert.throws(()=>byId('ubuntu-apt-plan').run({task:'remove',package:'--purge'}),/valid package name/);

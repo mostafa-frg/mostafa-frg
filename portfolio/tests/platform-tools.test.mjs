@@ -8,6 +8,7 @@ import { TextDecoder } from 'node:util';
 const source = await readFile(new URL('../assets/platform.js', import.meta.url), 'utf8');
 const directoryMarkup = await readFile(new URL('../tools.html', import.meta.url), 'utf8');
 const homeMarkup = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+const siteSource = await readFile(new URL('../assets/site.js', import.meta.url), 'utf8');
 const registryStart = source.indexOf('const tools=') + 'const tools='.length;
 const registryMarker = source.indexOf('\n];\nfunction rows', registryStart);
 const helpersStart = source.indexOf('function rows(');
@@ -183,6 +184,12 @@ test('select inputs reject values outside their declared allowlists', () => {
     }
   }
   assert.ok(checked>=20,'Expected broad coverage of enumerated select fields');
+});
+
+test('quick navigation button is injected into existing nav actions without stealing the tool-search shortcut', () => {
+  assert.match(siteSource, /if\(!\$\('#openPalette'\)\)/);
+  assert.match(siteSource, /e\.shiftKey&&e\.key\.toLowerCase\(\)==='k'/);
+  assert.match(source, /e\.key\.toLowerCase\(\)==='k'&&search/);
 });
 
 test('homepage search and quick-access deep links resolve to real tool workspaces', () => {

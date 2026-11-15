@@ -151,6 +151,11 @@ function withValidatedInputs(tool){
   for(const field of tool.fields||[]){
    const [key,label,defaultValue,type,options]=field;
    if(input[key]===undefined&&defaultValue!==undefined)input[key]=defaultValue;
+   if(typeof input[key]==='string'){
+    const limit=type==='textarea'?200000:4096;
+    if(input[key].length>limit)throw Error(label+' input is too long (maximum '+limit+' characters).');
+    if(input[key].includes('\\0'))throw Error(label+' input cannot contain NUL characters.');
+   }
    if(type==='select'&&(!Array.isArray(options)||!options.includes(String(input[key]))))
     throw Error('Invalid option for '+label+'. Choose one of the listed values.');
   }

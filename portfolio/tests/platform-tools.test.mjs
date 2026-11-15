@@ -32,14 +32,14 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 52);
+  assert.equal(tools.length, 56);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 16);
-  assert.equal(tools.filter(tool => tool.cat === 'security').length, 13);
-  assert.equal(tools.filter(tool => tool.cat === 'soc').length, 4);
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 17);
+  assert.equal(tools.filter(tool => tool.cat === 'security').length, 15);
+  assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
   assert.equal(tools.filter(tool => tool.cat === 'linux').length, 8);
   assert.equal(tools.filter(tool => tool.cat === 'developer').length, 11);
 });
@@ -133,4 +133,73 @@ test('query string builder safely encodes values and preserves duplicate keys', 
   assert.match(output, /q=network\+security/);
   assert.match(output, /tag=linux&tag=security/);
   assert.match(output, /Parameter count: 3/);
+});
+
+
+test('every registered utility has a unique ID, description, category and executable handler', () => {
+  assert.equal(tools.length, 56);
+  for (const tool of tools) {
+    assert.match(tool.id, /^[a-z0-9-]+$/);
+    assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
+    assert.ok(tool.desc && tool.desc.length >= 35, tool.id + ' has a task description');
+    assert.ok(['networking','security','soc','linux','developer'].includes(tool.cat));
+    assert.equal(typeof tool.run, 'function', tool.id + ' has a run handler');
+    const fieldNames = (tool.fields || []).map(field => field[0]);
+    assert.equal(new Set(fieldNames).size, fieldNames.length, tool.id + ' has unique input names');
+  }
+});
+
+test('Cisco wildcard matcher handles subnet and non-contiguous wildcard masks', () => {
+  const match = byId('acl-match').run({network:'192.168.10.0',wildcard:'0.0.0.255',host:'192.168.10.25'});
+  assert.match(match,/PERMIT MATCH/);
+  assert.match(match,/192\.168\.10\.0/);
+  const noMatch = byId('acl-match').run({network:'192.168.10.0',wildcard:'0.0.0.255',host:'192.168.11.25'});
+  assert.match(noMatch,/NO MATCH/);
+  const nonContiguous = byId('acl-match').run({network:'10.0.0.0',wildcard:'0.255.0.255',host:'10.22.0.9'});
+  assert.match(nonContiguous,/Non-contiguous/);
+  assert.throws(()=>byId('acl-match').run({network:'10.0.0.0',wildcard:'0.0.0.0',host:'999.1.1.1'}),/valid IPv4/);
+});
+
+test('web access log analyzer groups status codes and detects suspicious paths', () => {
+  const output = byId('access-log-analyzer').run({log:[
+    '203.0.113.10 - - [15/Nov/2026:10:15:22 +0000] "GET /.env HTTP/1.1" 404 232',
+    '192.0.2.15 - - [15/Nov/2026:10:16:02 +0000] "POST /login HTTP/1.1" 401 512',
+    '203.0.113.10 - - [15/Nov/2026:10:17:10 +0000] "GET /wp-login.php HTTP/1.1" 404 232',
+  ].join('\n')});
+  assert.match(output,/Parsed requests: 3/);
+  assert.match(output,/4xx responses: 3/);
+  assert.match(output,/Suspicious-path matches: 2/);
+  assert.match(output,/203\.0\.113\.10 — 2/);
+  assert.throws(()=>byId('access-log-analyzer').run({log:'not an access log'}),/No supported/);
+});
+
+test('firewall reviewer identifies exposed management ports and broad inbound policy', () => {
+  const output = byId('firewall-review').run({rules:[
+    '*filter',
+    ':INPUT ACCEPT [0:0]',
+    '-A INPUT -p tcp --dport 22 -j ACCEPT',
+    '-A INPUT -p tcp --dport 3389 -j ACCEPT',
+    'COMMIT',
+  ].join('\n')});
+  assert.match(output,/INPUT chain default policy is ACCEPT/);
+  assert.match(output,/port 22/);
+  assert.match(output,/port 3389/);
+  const ufw = byId('firewall-review').run({rules:'22/tcp ALLOW Anywhere'});
+  assert.match(ufw,/UFW allows 22\/tcp/);
+});
+
+test('Dockerfile review flags root, mutable images, secret metadata and unsafe shell pipes', () => {
+  const output = byId('dockerfile-audit').run({dockerfile:[
+    'FROM ubuntu:latest',
+    'ARG API_TOKEN',
+    'RUN apt-get update && apt-get install -y curl',
+    'ADD . /app',
+    'RUN curl https://example.com/install.sh | sh',
+  ].join('\n')});
+  assert.match(output,/uses :latest/);
+  assert.match(output,/No USER instruction/);
+  assert.match(output,/Possible secret declared/);
+  assert.match(output,/piped directly to a shell/);
+  assert.match(output,/ADD at line/);
+  assert.throws(()=>byId('dockerfile-audit').run({dockerfile:'   '}),/Paste Dockerfile/);
 });

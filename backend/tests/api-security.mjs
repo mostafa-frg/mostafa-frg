@@ -54,7 +54,7 @@ a=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username
 a=await call('/api/auth/login',{method:'POST',ip:'12.0.0.1',body:{username:'bob',password:'amber-lantern-quartz-2026'}});const bob=ck(a);
 for(const [p,m] of [['/api/admin/users','GET'],['/api/admin/audit','GET'],['/api/admin/tool-access','GET'],['/api/admin/tools/subnet-calculator','POST']])t(`user blocked: ${m} ${p}`,(await call(p,{method:m,cookie:bob,body:m==='POST'?{enabled:true}:undefined})).s===403);
 t('tool default-deny for user',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'10.0.0.1',prefix:24}})).s===403);
-await call('/api/admin/tools/subnet-calculator',{method:'POST',cookie:adminCookie,body:{enabled:true}});
+await call('/api/admin/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}});
 a=await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}});t('user allowed after admin enables tool',a.s===200&&a.j.network==='192.168.10.0'&&a.j.usableHosts===254);
 t('unauthenticated API blocked',(await call('/api/tools')).s===401);
 a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 117-tool registry',a.s===200&&a.j.tools.length===117&&new Set(a.j.tools.map(x=>x.id)).size===117&&a.j.tools.some(x=>x.group==='Termux')&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));

@@ -749,7 +749,7 @@ test('Termux workspace exposes official upstream projects, searchable categories
   assert.match(termuxSource, /const packages=\[/);
   assert.match(termuxSource, /case'install-mosta'/);
   assert.doesNotMatch(termuxSource, /eval\s*\(|new Function\s*\(/);
-  assert.doesNotMatch(termuxSource, /fetch\\s*\\(|WebSocket|EventSource/);
+  assert.equal(termuxSource.includes('fetch(') || termuxSource.includes('WebSocket') || termuxSource.includes('EventSource'), false);
   assert.match(termuxMarkup, /connect-src 'self'/);
   assert.match(termuxMarkup, /form-action 'self'/);
   assert.match(termuxMarkup, /frame-ancestors 'none'/);

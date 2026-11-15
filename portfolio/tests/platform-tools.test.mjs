@@ -224,6 +224,25 @@ test('Dockerfile review flags root, mutable images, secret metadata and unsafe s
 });
 
 
+test('IPv4 analyzer classifies common special-purpose ranges instead of calling them public', () => {
+  assert.match(byId('ip-analyze').run({ip:'203.0.113.8'}), /Documentation range \(TEST-NET-3\)/);
+  assert.match(byId('ip-analyze').run({ip:'198.18.0.1'}), /Benchmarking range/);
+  assert.match(byId('ip-analyze').run({ip:'100.64.0.1'}), /CGNAT/);
+  assert.match(byId('ip-analyze').run({ip:'192.168.1.1'}), /Private-use address/);
+  assert.match(byId('ip-analyze').run({ip:'255.255.255.255'}), /Limited broadcast/);
+  assert.match(byId('ip-analyze').run({ip:'8.8.8.8'}), /Public or globally routable candidate/);
+});
+
+test('CSV converter supports escaped quotes, commas and multiline quoted fields', () => {
+  const output = JSON.parse(byId('csv-json').run({
+    csv: 'name,notes\\r\\nAlice,"line one, with comma\\nline two"\\r\\nBob,"said ""hello"""',
+  }));
+  assert.deepEqual(output, [
+    {name:'Alice',notes:'line one, with comma\\nline two'},
+    {name:'Bob',notes:'said "hello"'},
+  ]);
+  assert.throws(() => byId('csv-json').run({csv:'name,notes\\nAlice,"unfinished'}), /Unclosed quoted field/);
+});
 test('password generator guarantees selected character classes and requested length', () => {
   const password = byId('password').run({length:'32',symbols:'yes'});
   assert.equal(password.split('\n')[0].length,32);

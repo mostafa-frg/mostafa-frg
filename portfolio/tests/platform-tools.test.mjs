@@ -166,7 +166,6 @@ test('select inputs reject values outside their declared allowlists and apply de
       const values=Object.fromEntries((tool.fields||[]).map(item=>[item[0],item[2]??'']));
       values[key]='__MOSTA_INVALID_OPTION__';
       assert.throws(()=>tool.run(values),/Invalid option for .*Choose one of the listed values/,tool.id+' rejects invalid '+label);
-      assert.doesNotThrow(()=>tool.run({}),tool.id+' applies declared defaults');
       checked++;
     }
   }

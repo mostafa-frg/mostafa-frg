@@ -34,7 +34,10 @@ jobs:
           set -euo pipefail
           test -s portfolio/index.html
           test -s portfolio/projects.html
-          test -s portfolio/tools.html\n          test -s portfolio/termux.html\n          test -s portfolio/assets/termux.js\n          test -s portfolio/assets/termux.css
+          test -s portfolio/tools.html
+          test -s portfolio/termux.html
+          test -s portfolio/assets/termux.js
+          test -s portfolio/assets/termux.css
           test -s cyber-labs/mosta-terminal/WEB-BRIDGE-SECURITY.md
           test -s portfolio/security.html
           test -s portfolio/about.html
@@ -157,7 +160,9 @@ jobs:
               "portfolio/assets/site.js": 24_000,
               "portfolio/assets/site.css": 36_000,
               "portfolio/assets/tools.js": 24_000,
-              "portfolio/assets/tools.css": 8_000,\n              "portfolio/assets/termux.js": 22_000,\n              "portfolio/assets/termux.css": 24_000,
+              "portfolio/assets/tools.css": 8_000,
+              "portfolio/assets/termux.js": 22_000,
+              "portfolio/assets/termux.css": 24_000,
           }
           failures = []
           for name, limit in budgets.items():

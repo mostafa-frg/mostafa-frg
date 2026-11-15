@@ -7,6 +7,7 @@ import { TextDecoder } from 'node:util';
 
 const source = await readFile(new URL('../assets/platform.js', import.meta.url), 'utf8');
 const directoryMarkup = await readFile(new URL('../tools.html', import.meta.url), 'utf8');
+const homeMarkup = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const registryStart = source.indexOf('const tools=') + 'const tools='.length;
 const registryMarker = source.indexOf('\n];\nfunction rows', registryStart);
 const helpersStart = source.indexOf('function rows(');
@@ -170,6 +171,15 @@ test('select inputs reject values outside their declared allowlists', () => {
     }
   }
   assert.ok(checked>=20,'Expected broad coverage of enumerated select fields');
+});
+
+test('homepage search and quick-access deep links resolve to real tool workspaces', () => {
+  assert.match(homeMarkup,/id="homeToolSearch"/);
+  assert.match(source,/homeSearch\?\.addEventListener\('keydown'/);
+  assert.match(source,/const initialTool=params\.get\('tool'\);if\(initialTool\)openTool\(initialTool\);/);
+  const deepLinks=[...homeMarkup.matchAll(/href="tools\.html\?tool=([^"]+)"/g)].map(match=>decodeURIComponent(match[1]));
+  assert.ok(deepLinks.length>0,'Homepage exposes quick-access tool links');
+  for(const id of deepLinks)assert.ok(tools.some(tool=>tool.id===id),'Homepage deep link resolves: '+id);
 });
 
 test('tool registry has unique IDs and nine declared workspaces', () => {

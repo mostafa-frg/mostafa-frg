@@ -6,6 +6,7 @@ import { webcrypto } from 'node:crypto';
 import { TextDecoder } from 'node:util';
 
 const source = await readFile(new URL('../assets/platform.js', import.meta.url), 'utf8');
+const directoryMarkup = await readFile(new URL('../tools.html', import.meta.url), 'utf8');
 const registryStart = source.indexOf('const tools=') + 'const tools='.length;
 const registryMarker = source.indexOf('\n];\nfunction rows', registryStart);
 const helpersStart = source.indexOf('function rows(');
@@ -61,6 +62,22 @@ test('tool registry has unique IDs and five declared domains', () => {
   assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
   assert.equal(tools.filter(tool => tool.cat === 'linux').length, 8);
   assert.equal(tools.filter(tool => tool.cat === 'developer').length, 11);
+});
+
+
+test('tool directory exposes accessible navigation, search, category filters and a real tool workspace', () => {
+  assert.match(directoryMarkup, /<html lang="en">/);
+  assert.match(directoryMarkup, /<main id="main-content">/);
+  assert.match(directoryMarkup, /id="toolSearch"[^>]*type="search"/);
+  assert.match(directoryMarkup, /id="toolGrid"[^>]*aria-live="polite"/);
+  assert.match(directoryMarkup, /id="categoryTabs"/);
+  for (const category of ['all','networking','security','soc','linux','developer']) {
+    assert.match(directoryMarkup, new RegExp('data-category="' + category + '"'));
+  }
+  assert.match(directoryMarkup, /role="dialog" aria-modal="true"/);
+  assert.match(directoryMarkup, /id="toolRunForm"/);
+  assert.match(directoryMarkup, /id="toolResult" aria-live="polite"/);
+  assert.match(directoryMarkup, /id="clearToolSearch"/);
 });
 
 test('IOC extractor normalizes defanged indicators and classifies hashes', () => {

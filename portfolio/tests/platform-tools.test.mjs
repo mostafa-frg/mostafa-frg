@@ -572,3 +572,57 @@ test('all browser-independent tools execute with representative inputs', async (
     assert.notEqual(output, null, tool.id + ' returned null');
   }
 });
+
+test('Bash array builder preserves hostile-looking values as inert single arguments', () => {
+  const values = "plain value\nO'Reilly\n$(touch /tmp/mosta-pwned)\nvalue; rm -rf /";
+  const output = byId('bash-array-builder').run({values});
+  assert.ok(output.includes("'plain value'"));
+  assert.ok(output.includes("'O'\\''Reilly'"));
+  assert.ok(output.includes("'$(touch /tmp/mosta-pwned)'"));
+  assert.ok(output.includes("'value; rm -rf /'"));
+  assert.ok(output.includes('items=('));
+  assert.throws(()=>byId('bash-array-builder').run({values:Array.from({length:201},(_,i)=>String(i)).join('\n')}),/200 values/);
+});
+
+test('Bash loop builder validates identifiers and constrains path expressions', () => {
+  const array = byId('bash-loop-builder').run({kind:'array',source:'files'});
+  assert.ok(array.includes('for item in "${files[@]}"'));
+  const lines = byId('bash-loop-builder').run({kind:'lines',source:'$HOME/logs/app.log'});
+  assert.ok(lines.includes('done < "$HOME"/logs/app.log'));
+  const glob = byId('bash-loop-builder').run({kind:'glob',source:'~/Downloads/*.txt'});
+  assert.ok(glob.includes('for file in "$HOME"/Downloads/*.txt'));
+  for (const source of ['bad;id','$(id)','../../etc/passwd','name with spaces','a`id`']) {
+    assert.throws(()=>byId('bash-loop-builder').run({kind:'lines',source}),undefined,source+' must be rejected');
+  }
+  assert.throws(()=>byId('bash-loop-builder').run({kind:'array',source:'items;id'}),/valid Bash variable/);
+});
+
+test('Bash trap builder restricts handler names and supported signals', () => {
+  const output = byId('bash-trap-builder').run({handler:'cleanup_tmp',signals:'EXIT INT TERM'});
+  assert.ok(output.includes('TMP_DIR=""'));
+  assert.ok(output.includes('[[ -n "$TMP_DIR" && -d "$TMP_DIR" ]] && rm -rf -- "$TMP_DIR"'));
+  assert.ok(output.includes('trap cleanup_tmp EXIT'));
+  assert.ok(output.includes('trap cleanup_tmp INT'));
+  assert.ok(output.includes('trap cleanup_tmp TERM'));
+  assert.throws(()=>byId('bash-trap-builder').run({handler:'cleanup;id',signals:'EXIT'}),/valid function/);
+  assert.throws(()=>byId('bash-trap-builder').run({handler:'cleanup',signals:'EXIT SIGKILL'}),/only EXIT, INT, TERM or HUP/);
+  assert.throws(()=>byId('bash-trap-builder').run({handler:'cleanup',signals:''}),/only EXIT, INT, TERM or HUP/);
+});
+
+test('Termux path inspector emits executable multiline read-only commands', () => {
+  const targets = {
+    prefix:'ls -ld "$PREFIX" 2>&1',
+    home:'ls -ld "$HOME" 2>&1',
+    bin:'ls -ld "$PREFIX/bin" 2>&1',
+    etc:'ls -ld "$PREFIX/etc" 2>&1',
+    tmp:'ls -ld "$TMPDIR" 2>&1',
+    storage:'ls -ld "$HOME/storage" 2>&1',
+  };
+  for (const [target,expected] of Object.entries(targets)) {
+    assert.equal(byId('termux-path-reference').run({target}),expected,target);
+  }
+  const all = byId('termux-path-reference').run({target:'all'});
+  assert.ok(all.includes('printf "PREFIX=%s\\nHOME=%s\\nTMPDIR=%s\\nPATH=%s\\n"'));
+  assert.ok(all.includes('$PATH\nls -ld "$PREFIX" "$HOME" "$TMPDIR" "$HOME/storage" 2>&1'));
+  assert.ok(!all.includes('\\nls -ld'));
+});

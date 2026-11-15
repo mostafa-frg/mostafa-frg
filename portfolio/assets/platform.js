@@ -93,7 +93,7 @@ function renderTools(){
   const btn=document.createElement('button');btn.className='open-tool';btn.type='button';btn.textContent='OPEN WORKSPACE';btn.setAttribute('aria-label','Open '+t.name);btn.addEventListener('click',()=>openTool(t.id));
   bottom.append(cat,btn);card.append(top,h,p,tags,bottom);grid.append(card);
  }
- const counts={all:tools.length,networking:17,security:15,soc:5,linux:8,developer:11};
+ const counts={all:tools.length,...Object.fromEntries(Object.keys(categories).map(key=>[key,tools.filter(t=>t.cat===key).length]))};
  $('[data-category-count]').forEach(node=>{const key=node.dataset.categoryCount;node.textContent=String(counts[key]??0).padStart(2,'0');});
  const count=$('#resultCount');if(count)count.textContent=String(list.length).padStart(2,'0')+' / '+String(tools.length).padStart(2,'0')+' TOOLS';
  const total=$('#toolCount');if(total)total.textContent=tools.length+' UTILITIES · 5 DOMAINS';

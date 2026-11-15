@@ -3,7 +3,6 @@
   "name":"mostafa-frg",
   "main":"src/index.js",
   "compatibility_date":"2026-11-09",
-  "secrets":{"required":["IP_HASH_SECRET"]},
   "workers_dev":true,
   "previews":{
     "vars":{"APP_NAME":"MOSTA Preview"},

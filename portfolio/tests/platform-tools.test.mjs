@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
 import { webcrypto } from 'node:crypto';
+import { TextDecoder } from 'node:util';
 
 const source = await readFile(new URL('../assets/platform.js', import.meta.url), 'utf8');
 const registryStart = source.indexOf('const tools=') + 'const tools='.length;
@@ -19,7 +20,10 @@ const helpers = source.slice(helpersStart, helpersEnd);
 const tools = vm.runInNewContext(`(()=>{ ${helpers}\n return ${registryLiteral}; })()`, {
   crypto: webcrypto,
   TextEncoder,
+  TextDecoder,
   Uint8Array,
+  atob,
+  btoa,
   URL,
   URLSearchParams,
 });
@@ -239,4 +243,25 @@ test('Dockerfile audit evaluates the final stage rather than earlier build stage
   ].join('\n')});
   assert.doesNotMatch(hardened,/final build stage may run as root/);
   assert.doesNotMatch(hardened,/Base image is unpinned/);
+});
+
+
+test('Base64 encoder and decoder preserve UTF-8 text and reject malformed input', () => {
+  const input = 'MOSTA — الشبكات والأمن 🔐';
+  const encoded = byId('base64').run({ text: input, mode: 'encode' });
+  assert.match(encoded,/^[A-Za-z0-9+/]+={0,2}$/);
+  assert.equal(byId('base64').run({ text: encoded, mode: 'decode' }),input);
+  assert.throws(()=>byId('base64').run({text:'%%%not-base64%%%',mode:'decode'}),/Base64/);
+});
+
+test('chmod calculator preserves setuid, setgid and sticky permission bits', () => {
+  const setuid = byId('chmod').run({mode:'4755'});
+  assert.match(setuid,/Symbolic: rwsr-xr-x/);
+  assert.match(setuid,/Special bits: setuid/);
+  const sticky = byId('chmod').run({mode:'1777'});
+  assert.match(sticky,/Symbolic: rwxrwxrwt/);
+  assert.match(sticky,/Special bits: sticky/);
+  const regular = byId('chmod').run({mode:'0644'});
+  assert.match(regular,/Symbolic: rw-r--r--/);
+  assert.match(regular,/Special bits: none/);
 });

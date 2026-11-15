@@ -39,6 +39,12 @@ const tools = vm.runInNewContext(`(()=>{ ${helpers}\n return ${registryLiteral};
     async arrayBuffer() { return new ArrayBuffer(64); },
   }),
   performance,
+  setTimeout,
+  clearTimeout,
+  Worker: class {
+    postMessage() { this.onmessage?.({ data: { ok: true, matches: [] } }); }
+    terminate() {}
+  },
   document: { createElement() { let html = ''; return { set innerHTML(value) { html = value; }, get value() { return html.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&'); } }; } },
   DOMParser: class { parseFromString() { return { querySelector() { return null; } }; } },
   XMLSerializer: class { serializeToString() { return '<root><item>value</item></root>'; } },
@@ -89,6 +95,66 @@ test('IP range summarizer emits aligned minimal CIDR blocks and rejects reversed
   assert.match(output,/192\.168\.1\.6\/32/);
   assert.match(output,/CIDR blocks: 4/);
   assert.throws(()=>byId('range-cidr').run({start:'192.168.1.6',end:'192.168.1.1'}),/End address must not be lower/);
+});
+
+
+
+test('Linux signal reference returns canonical names for numeric and symbolic lookups', () => {
+  const numeric = byId('signals').run({query:'15'});
+  const symbolic = byId('signals').run({query:'SIGTERM'});
+  assert.match(numeric,/Signal: SIGTERM/);
+  assert.match(numeric,/Number: 15/);
+  assert.match(symbolic,/Signal: SIGTERM/);
+  assert.match(symbolic,/Number: 15/);
+  assert.match(byId('signals').run({query:'9'}),/Signal: SIGKILL/);
+  assert.match(byId('signals').run({query:'2'}),/Signal: SIGINT/);
+});
+
+test('tool processing labels distinguish external requests from local-only processing', () => {
+  const external = ['dns','public-ip','mac','latency','speed','crt'];
+  for (const tool of tools) {
+    assert.equal(Boolean(tool.external),external.includes(tool.id),tool.id+' external classification');
+  }
+  for (const id of ['hmac','csp','jwt']) assert.equal(byId(id).external,undefined,id+' must remain local');
+});
+
+test('all 56 registered tools execute a valid representative input', async () => {
+  const samples = {
+    key:'local-test-key',
+    message:'MOSTA integrity test',
+    password:'Correct-Horse-Battery-42!',
+    text:'MOSTA test input',
+    token:'eyJhbGciOiJub25lIn0.eyJzdWIiOiJkZW1vIn0.',
+    config:'enable secret test-secret\nno ip http server\ntransport input ssh\nlogin local\nexec-timeout 5 0',
+    left:'before\nsame',
+    right:'after\nsame',
+    query:'SIGTERM',
+    file:{name:'sample.txt',size:5,arrayBuffer:async()=>new TextEncoder().encode('hello').buffer},
+  };
+  const failures=[];
+  for (const tool of tools) {
+    const values={};
+    for (const field of tool.fields||[]) {
+      const [key,,defaultValue,type,options]=field;
+      if (type==='file') values[key]=samples.file;
+      else if (defaultValue!==undefined&&defaultValue!=='') values[key]=defaultValue;
+      else if (type==='select') values[key]=options?.[0]??'';
+      else if (Object.hasOwn(samples,key)) values[key]=samples[key];
+      else if (key==='domain') values[key]='example.com';
+      else if (key==='text'||key==='message') values[key]='MOSTA test input';
+      else if (key==='password') values[key]='Correct-Horse-Battery-42!';
+      else if (key==='token') values[key]=samples.token;
+      else values[key]='sample input';
+    }
+    try {
+      const output=await tool.run(values);
+      assert.ok(output!==undefined&&output!==null,String(tool.id)+' returned no output');
+      assert.ok(String(output).length>0,String(tool.id)+' returned empty output');
+    } catch (error) {
+      failures.push(tool.id+': '+(error?.message||String(error)));
+    }
+  }
+  assert.deepEqual(failures,[], 'Every tool should execute its representative input without an unexpected error');
 });
 
 test('tool registry has unique IDs and five declared domains', () => {

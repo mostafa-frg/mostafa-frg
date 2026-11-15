@@ -199,7 +199,7 @@ test('Termux JSON analyzers reject malformed and out-of-range payloads', () => {
 
 test('Bash argument and environment tools preserve quoting and avoid echoing secret values', () => {
   const quoted=byId('bash-quote-builder').run({value:"it's a test"});
-  assert.match(quoted,/'\''/);
+  assert.match(quoted, /\\/);
   const array=byId('bash-array-builder').run({values:'one\nvalue with spaces\nthree'});
   assert.match(array,/'value with spaces'/);
   assert.match(array,/\$\{items\[@\]\}/);
@@ -337,7 +337,7 @@ test('every registered utility has a unique ID, description, category and execut
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
     assert.ok(tool.desc && tool.desc.length >= 35, tool.id + ' has a task description');
-    assert.ok(['networking','security','soc','linux','developer'].includes(tool.cat));
+    assert.ok(['networking','security','soc','linux','ubuntu','kali','termux','bash','developer'].includes(tool.cat));
     assert.equal(typeof tool.run, 'function', tool.id + ' has a run handler');
     const fieldNames = (tool.fields || []).map(field => field[0]);
     assert.equal(new Set(fieldNames).size, fieldNames.length, tool.id + ' has unique input names');

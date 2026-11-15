@@ -243,7 +243,7 @@ test('Kali command builders validate targets and produce bounded defensive comma
 test('shell command builders expand approved home paths and reject traversal', () => {
   const backup=byId('termux-backup-builder').run({source:'$HOME',destination:'$HOME/storage/shared/termux-home-backup.tar.gz'});
   assert.match(backup,/tar -czf "\$HOME"\/storage\/shared\/termux-home-backup\.tar\.gz/);
-  assert.match(backup,/-C "\$HOME" \\./);
+  assert.match(backup,/-C "\$HOME" \./);
   assert.throws(()=>byId('termux-backup-builder').run({source:'$HOME/../etc',destination:'$HOME/storage/shared/backup.tar.gz'}),/parent traversal/i);
 
   const ssh=byId('termux-ssh-builder').run({user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/id_ed25519'});

@@ -118,7 +118,7 @@ test('tool processing labels distinguish external requests from local-only proce
   for (const id of ['hmac','csp','jwt']) assert.equal(byId(id).external,undefined,id+' must remain local');
 });
 
-test('all 56 registered tools execute a valid representative input', async () => {
+test('all registered tools execute a valid representative input', async () => {
   const samples = {
     key:'local-test-key',
     message:'MOSTA integrity test',
@@ -157,21 +157,69 @@ test('all 56 registered tools execute a valid representative input', async () =>
   assert.deepEqual(failures,[], 'Every tool should execute its representative input without an unexpected error');
 });
 
-test('tool registry has unique IDs and five declared domains', () => {
+test('tool registry has unique IDs and nine declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 56);
+  assert.equal(tools.length, 117);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
-    ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
+    ['bash','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 17);
-  assert.equal(tools.filter(tool => tool.cat === 'security').length, 15);
-  assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
-  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 8);
-  assert.equal(tools.filter(tool => tool.cat === 'developer').length, 11);
+  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,termux:13,bash:13,developer:11};
+  for(const [category,count] of Object.entries(expected))
+    assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
 
+
+
+test('new operating-system workspaces contain real handlers and explicit command-only boundaries', async () => {
+  const required = [
+    'termux-pkg-builder','termux-storage-setup','termux-battery-json','termux-boot-builder',
+    'bash-quote-builder','bash-array-builder','bash-script-audit','bash-check-command',
+    'kali-nmap-builder','kali-tcpdump-filter','kali-monitor-capability','kali-suid-audit',
+    'linux-find-builder','linux-df-analyzer','linux-process-review',
+    'ubuntu-apt-plan','ubuntu-netplan-review','ubuntu-apparmor-audit','ubuntu-cloud-init-audit',
+  ];
+  for (const id of required) {
+    const tool=byId(id);
+    assert.equal(typeof tool.run,'function',id+' handler');
+  }
+  for (const tool of tools.filter(x=>x.mode==='command')) {
+    assert.match(String(await tool.run(Object.fromEntries((tool.fields||[]).map(f=>[f[0],f[2]??''])))),/./,tool.id+' generated output');
+  }
+  assert.match(byId('kali-nmap-builder').disclaimer,/authorized/i);
+  assert.match(byId('ubuntu-ufw-builder').disclaimer,/remote access/i);
+});
+
+test('Termux JSON analyzers reject malformed and out-of-range payloads', () => {
+  assert.match(byId('termux-battery-json').run({payload:'{"percentage":72}'}),/72%/);
+  assert.throws(()=>byId('termux-battery-json').run({payload:'{"percentage":140}'}),/0 to 100/);
+  assert.throws(()=>byId('termux-wifi-json').run({payload:'not json'}),/valid JSON/);
+});
+
+test('Bash argument and environment tools preserve quoting and avoid echoing secret values', () => {
+  const quoted=byId('bash-quote-builder').run({value:"it's a test"});
+  assert.match(quoted,/'\''/);
+  const array=byId('bash-array-builder').run({values:'one\nvalue with spaces\nthree'});
+  assert.match(array,/'value with spaces'/);
+  assert.match(array,/\$\{items\[@\]\}/);
+  const audit=byId('bash-env-audit').run({content:'API_TOKEN=super-secret-value\nAPP_ENV=prod'});
+  assert.match(audit,/API_TOKEN appears sensitive/);
+  assert.doesNotMatch(audit,/super-secret-value/);
+});
+
+test('Kali command builders validate targets and produce bounded defensive commands', () => {
+  const cmd=byId('kali-nmap-builder').run({target:'192.0.2.0/24',profile:'common-ports',timing:'3'});
+  assert.match(cmd,/nmap -sT --top-ports 100 -T3/);
+  assert.throws(()=>byId('kali-nmap-builder').run({target:'192.0.2.0/33',profile:'common-ports',timing:'3'}),/0 to 32/);
+  assert.match(byId('kali-wireshark-filter').run({protocol:'dns',ipaddr:'192.0.2.10',port:'53'}),/dns && ip.addr == 192.0.2.10/);
+});
+
+test('Linux and Ubuntu analyzers detect risky conditions in pasted command output', () => {
+  assert.match(byId('linux-df-analyzer').run({output:'Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/sda1 1000 900 100 90% /',threshold:'80'}),/WARNING/);
+  assert.match(byId('ubuntu-cloud-init-audit').run({config:'ssh_pwauth: true\ndisable_root: false\nsudo: ALL=(ALL) NOPASSWD:ALL'}),/passwordless sudo/);
+  assert.match(byId('ubuntu-source-audit').run({sources:'deb [trusted=yes] http://repo.example.test stable main'}),/trusted=yes/);
+});
 
 test('tool directory exposes accessible navigation, search, category filters and a real tool workspace', () => {
   assert.match(directoryMarkup, /<html lang="en">/);
@@ -179,9 +227,12 @@ test('tool directory exposes accessible navigation, search, category filters and
   assert.match(directoryMarkup, /id="toolSearch"[^>]*type="search"/);
   assert.match(directoryMarkup, /id="toolGrid"[^>]*aria-live="polite"/);
   assert.match(directoryMarkup, /id="categoryTabs"/);
-  for (const category of ['all','networking','security','soc','linux','developer']) {
-    assert.match(directoryMarkup, new RegExp('data-category="' + category + '"'));
+  for (const category of ['all','networking','security','soc','linux','ubuntu','kali','termux','bash','developer']) {
+    assert.match(source, new RegExp(category));
   }
+  assert.match(directoryMarkup,/id="categoryTabs"/);
+  assert.match(source,/function renderCategories\(\)/);
+  assert.match(source,/function setCategory\(/);
   assert.match(directoryMarkup, /role="dialog" aria-modal="true"/);
   assert.match(directoryMarkup, /id="toolRunForm"/);
   assert.match(directoryMarkup, /id="toolResult" aria-live="polite"/);
@@ -281,7 +332,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 56);
+  assert.equal(tools.length, 117);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');

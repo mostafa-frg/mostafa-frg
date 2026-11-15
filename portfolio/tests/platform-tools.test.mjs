@@ -208,7 +208,6 @@ test('Dockerfile review flags root, mutable images, secret metadata and unsafe s
 test('password generator guarantees selected character classes and requested length', () => {
   const password = byId('password').run({length:'32',symbols:'yes'});
   assert.equal(password.split('\n')[0].length,32);
-  assert.match(password,/^[a-z]/m); // output is randomized; class checks follow below
   const value = password.split('\n')[0];
   assert.match(value,/[a-z]/);
   assert.match(value,/[A-Z]/);

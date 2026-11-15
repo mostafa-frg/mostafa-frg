@@ -18,7 +18,7 @@ assert.ok(helpersStart >= 0 && helpersEnd > helpersStart, 'pure tool helpers exi
 
 const registryLiteral = source.slice(registryStart, registryMarker + 2);
 const helpers = source.slice(helpersStart, helpersEnd);
-const tools = vm.runInNewContext(`(()=>{ ${helpers}\n return ${registryLiteral}; })()`, {
+const tools = vm.runInNewContext(`(()=>{ ${helpers}\n const registry=${registryLiteral}; registry.forEach(withValidatedInputs); return registry; })()`, {
   crypto: webcrypto,
   TextEncoder,
   TextDecoder,
@@ -155,6 +155,22 @@ test('all registered tools execute a valid representative input', async () => {
     }
   }
   assert.deepEqual(failures,[], 'Every tool should execute its representative input without an unexpected error');
+});
+
+test('select inputs reject values outside their declared allowlists and apply defaults', () => {
+  let checked=0;
+  for(const tool of tools){
+    for(const field of tool.fields||[]){
+      if(field[3]!=='select')continue;
+      const [key,label,, ,options]=field;
+      const values=Object.fromEntries((tool.fields||[]).map(item=>[item[0],item[2]??'']));
+      values[key]='__MOSTA_INVALID_OPTION__';
+      assert.throws(()=>tool.run(values),/Invalid option for .*Choose one of the listed values/,tool.id+' rejects invalid '+label);
+      assert.doesNotThrow(()=>tool.run({}),tool.id+' applies declared defaults');
+      checked++;
+    }
+  }
+  assert.ok(checked>=20,'Expected broad coverage of enumerated select fields');
 });
 
 test('tool registry has unique IDs and nine declared workspaces', () => {

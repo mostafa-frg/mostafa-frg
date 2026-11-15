@@ -574,10 +574,12 @@ test('all browser-independent tools execute with representative inputs', async (
 });
 
 test('Bash array builder preserves hostile-looking values as inert single arguments', () => {
-  const values = "plain value\nO'Reilly\n$(touch /tmp/mosta-pwned)\nvalue; rm -rf /";
+  const values = "plain value\nO'Reilly\n$HOME\n\`id\`\n$(touch /tmp/mosta-pwned)\nvalue; rm -rf /";
   const output = byId('bash-array-builder').run({values});
   assert.ok(output.includes("'plain value'"));
   assert.ok(output.includes("'O'\\''Reilly'"));
+  assert.ok(output.includes("'$HOME'"));
+  assert.ok(output.includes("'\`id\`'"));
   assert.ok(output.includes("'$(touch /tmp/mosta-pwned)'"));
   assert.ok(output.includes("'value; rm -rf /'"));
   assert.ok(output.includes('items=('));

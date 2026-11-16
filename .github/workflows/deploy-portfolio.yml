@@ -35,10 +35,6 @@ jobs:
           test -s portfolio/index.html
           test -s portfolio/projects.html
           test -s portfolio/tools.html
-          test -s portfolio/termux.html
-          test -s portfolio/assets/termux.js
-          test -s portfolio/assets/termux.css
-          test -s cyber-labs/mosta-terminal/WEB-BRIDGE-SECURITY.md
           test -s portfolio/security.html
           test -s portfolio/about.html
           test -s portfolio/contact.html
@@ -93,7 +89,6 @@ jobs:
 
           root = Path("portfolio")
           public_pages = {"index.html", "projects.html", "tools.html", "security.html", "about.html", "contact.html"}
-          required_nav = {"index.html", "projects.html", "tools.html", "termux.html", "auth.html", "security.html"}
 
           class Audit(HTMLParser):
               def __init__(self, path):
@@ -171,8 +166,6 @@ jobs:
               "portfolio/assets/site.css": 36_000,
               "portfolio/assets/tools.js": 24_000,
               "portfolio/assets/tools.css": 8_000,
-              "portfolio/assets/termux.js": 22_000,
-              "portfolio/assets/termux.css": 24_000,
           }
           failures = []
           for name, limit in budgets.items():

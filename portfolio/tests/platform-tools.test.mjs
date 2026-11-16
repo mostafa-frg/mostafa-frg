@@ -204,12 +204,12 @@ test('homepage search and quick-access deep links resolve to real tool workspace
 test('tool registry has unique IDs and nine declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 117);
+  assert.equal(tools.length, 104);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
-    ['bash','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
+    ['bash','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
   );
-  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,termux:13,bash:13,developer:11};
+  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,bash:13,developer:11};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -218,7 +218,7 @@ test('tool registry has unique IDs and nine declared workspaces', () => {
 
 test('new operating-system workspaces contain real handlers and explicit command-only boundaries', async () => {
   const required = [
-    'termux-pkg-builder','termux-storage-setup','termux-battery-json','termux-boot-builder',
+    
     'bash-quote-builder','bash-array-builder','bash-script-audit','bash-check-command',
     'kali-nmap-builder','kali-tcpdump-filter','kali-monitor-capability','kali-suid-audit',
     'linux-find-builder','linux-df-analyzer','linux-process-review',
@@ -233,12 +233,6 @@ test('new operating-system workspaces contain real handlers and explicit command
   }
   assert.match(byId('kali-nmap-builder').disclaimer,/authorized/i);
   assert.match(byId('ubuntu-ufw-builder').disclaimer,/remote access/i);
-});
-
-test('Termux JSON analyzers reject malformed and out-of-range payloads', () => {
-  assert.match(byId('termux-battery-json').run({payload:'{"percentage":72}'}),/72%/);
-  assert.throws(()=>byId('termux-battery-json').run({payload:'{"percentage":140}'}),/0 to 100/);
-  assert.throws(()=>byId('termux-wifi-json').run({payload:'not json'}),/valid JSON/);
 });
 
 test('Bash argument and environment tools preserve quoting and avoid echoing secret values', () => {
@@ -260,14 +254,14 @@ test('Kali command builders validate targets and produce bounded defensive comma
 });
 
 test('shell command builders expand approved home paths and reject traversal', () => {
-  const backup=byId('termux-backup-builder').run({source:'$HOME',destination:'$HOME/storage/shared/termux-home-backup.tar.gz'});
-  assert.match(backup,/tar -czf "\$HOME"\/storage\/shared\/termux-home-backup\.tar\.gz/);
+  const backup=byId('Linux terminal-backup-builder').run({source:'$HOME',destination:'$HOME/storage/shared/Linux terminal-home-backup.tar.gz'});
+  assert.match(backup,/tar -czf "\$HOME"\/storage\/shared\/Linux terminal-home-backup\.tar\.gz/);
   assert.match(backup,/-C "\$HOME" \./);
-  assert.throws(()=>byId('termux-backup-builder').run({source:'$HOME/../etc',destination:'$HOME/storage/shared/backup.tar.gz'}),/parent traversal/i);
+  assert.throws(()=>byId('Linux terminal-backup-builder').run({source:'$HOME/../etc',destination:'$HOME/storage/shared/backup.tar.gz'}),/parent traversal/i);
 
-  const ssh=byId('termux-ssh-builder').run({user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/id_ed25519'});
+  const ssh=byId('Linux terminal-ssh-builder').run({user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/id_ed25519'});
   assert.match(ssh,/-i "\$HOME"\/\.ssh\/id_ed25519/);
-  assert.throws(()=>byId('termux-ssh-builder').run({user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/../id'}),/parent traversal/i);
+  assert.throws(()=>byId('Linux terminal-ssh-builder').run({user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/../id'}),/parent traversal/i);
 
   const find=byId('linux-find-builder').run({path:'$HOME/logs',type:'f',pattern:'*.log',days:'7'});
   assert.match(find,/find "\$HOME"\/logs -type f -name '\*\.log'/);
@@ -292,7 +286,7 @@ test('tool directory exposes accessible navigation, search, category filters and
   assert.match(directoryMarkup, /id="toolSearch"[^>]*type="search"/);
   assert.match(directoryMarkup, /id="toolGrid"[^>]*aria-live="polite"/);
   assert.match(directoryMarkup, /id="categoryTabs"/);
-  for (const category of ['all','networking','security','soc','linux','ubuntu','kali','termux','bash','developer']) {
+  for (const category of ['all','networking','security','soc','linux','ubuntu','kali','Linux terminal','bash','developer']) {
     assert.match(source, new RegExp(category));
   }
   assert.match(directoryMarkup,/id="categoryTabs"/);
@@ -402,7 +396,7 @@ test('every registered utility has a unique ID, description, category and execut
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
     assert.ok(tool.desc && tool.desc.length >= 35, tool.id + ' has a task description');
-    assert.ok(['networking','security','soc','linux','ubuntu','kali','termux','bash','developer'].includes(tool.cat));
+    assert.ok(['networking','security','soc','linux','ubuntu','kali','Linux terminal','bash','developer'].includes(tool.cat));
     assert.equal(typeof tool.run, 'function', tool.id + ' has a run handler');
     const fieldNames = (tool.fields || []).map(field => field[0]);
     assert.equal(new Set(fieldNames).size, fieldNames.length, tool.id + ' has unique input names');
@@ -618,7 +612,7 @@ test('Bash trap builder restricts handler names and supported signals', () => {
   assert.throws(()=>byId('bash-trap-builder').run({handler:'cleanup',signals:''}),/only EXIT, INT, TERM or HUP/);
 });
 
-test('Termux path inspector emits executable multiline read-only commands', () => {
+test('Linux terminal path inspector emits executable multiline read-only commands', () => {
   const targets = {
     prefix:'ls -ld "$PREFIX" 2>&1',
     home:'ls -ld "$HOME" 2>&1',
@@ -628,9 +622,9 @@ test('Termux path inspector emits executable multiline read-only commands', () =
     storage:'ls -ld "$HOME/storage" 2>&1',
   };
   for (const [target,expected] of Object.entries(targets)) {
-    assert.equal(byId('termux-path-reference').run({target}),expected,target);
+    assert.equal(byId('Linux terminal-path-reference').run({target}),expected,target);
   }
-  const all = byId('termux-path-reference').run({target:'all'});
+  const all = byId('Linux terminal-path-reference').run({target:'all'});
   assert.ok(all.includes('printf "PREFIX=%s\\nHOME=%s\\nTMPDIR=%s\\nPATH=%s\\n"'));
   const commandLine = all.split(/\r?\n/).find(line=>line.startsWith('ls -ld '));
   assert.equal(commandLine,'ls -ld "$PREFIX" "$HOME" "$TMPDIR" "$HOME/storage" 2>&1');
@@ -706,51 +700,51 @@ test('Kali route, Nmap and hash parsers return bounded deterministic results', (
 });
 
 test('Shared input validation bounds text and rejects embedded NUL characters', () => {
-  assert.throws(()=>byId('termux-ssh-builder').run({
+  assert.throws(()=>byId('Linux terminal-ssh-builder').run({
     user:'mms',host:'h'.repeat(4097),port:'22',identity:'~/.ssh/id_ed25519'
   }),/Remote host input is too long \(maximum 4096 characters\)/);
-  assert.throws(()=>byId('termux-ssh-builder').run({
+  assert.throws(()=>byId('Linux terminal-ssh-builder').run({
     user:'mms',host:'example'+String.fromCharCode(0)+'.com',port:'22',identity:'~/.ssh/id_ed25519'
   }),/Remote host input cannot contain NUL characters/);
   assert.throws(()=>byId('case').run({
     text:'x'.repeat(200001),mode:'upper'
   }),/Text input is too long \(maximum 200000 characters\)/);
-  assert.ok(byId('termux-ssh-builder').run({
+  assert.ok(byId('Linux terminal-ssh-builder').run({
     user:'mms',host:'192.0.2.20',port:'22',identity:'~/.ssh/id_ed25519'
   }).startsWith('ssh -p 22 -i '));
 });
 
-const termuxMarkup = await readFile(new URL('../termux.html', import.meta.url), 'utf8');
-const termuxSource = await readFile(new URL('../assets/termux.js', import.meta.url), 'utf8');
-const termuxStyles = await readFile(new URL('../assets/termux.css', import.meta.url), 'utf8');
+const Linux terminalMarkup = await readFile(new URL('../Linux terminal.html', import.meta.url), 'utf8');
+const Linux terminalSource = await readFile(new URL('../assets/Linux terminal.js', import.meta.url), 'utf8');
+const Linux terminalStyles = await readFile(new URL('../assets/Linux terminal.css', import.meta.url), 'utf8');
 
-test('Termux workspace exposes official upstream projects, searchable categories and safe command generation', () => {
-  assert.match(homeMarkup, /href="termux\.html"/);
-  assert.match(termuxMarkup, /id="txProjectGrid"/);
-  assert.match(termuxMarkup, /id="txSearch"/);
-  assert.match(termuxMarkup, /id="command-builder"/);
-  assert.match(termuxMarkup, /OFFICIAL SOURCES FIRST/);
-  assert.match(termuxMarkup, /does not execute shell commands from the website/i);
-  assert.match(termuxStyles, /perspective:900px/);
-  assert.match(termuxStyles, /prefers-reduced-motion:reduce/);
-  const start = termuxSource.indexOf('const projects=[') + 'const projects='.length;
-  const end = termuxSource.indexOf('];\nconst categories=', start);
-  assert.ok(start >= 'const projects='.length && end > start, 'Termux project registry is present');
-  const registry = vm.runInNewContext(termuxSource.slice(start, end + 1));
-  assert.ok(registry.length >= 25, 'Termux catalog includes broad official and community coverage');
+test('Linux terminal workspace exposes official upstream projects, searchable categories and safe command generation', () => {
+  assert.match(homeMarkup, /href="Linux terminal\.html"/);
+  assert.match(Linux terminalMarkup, /id="txProjectGrid"/);
+  assert.match(Linux terminalMarkup, /id="txSearch"/);
+  assert.match(Linux terminalMarkup, /id="command-builder"/);
+  assert.match(Linux terminalMarkup, /OFFICIAL SOURCES FIRST/);
+  assert.match(Linux terminalMarkup, /does not execute shell commands from the website/i);
+  assert.match(Linux terminalStyles, /perspective:900px/);
+  assert.match(Linux terminalStyles, /prefers-reduced-motion:reduce/);
+  const start = Linux terminalSource.indexOf('const projects=[') + 'const projects='.length;
+  const end = Linux terminalSource.indexOf('];\nconst categories=', start);
+  assert.ok(start >= 'const projects='.length && end > start, 'Linux terminal project registry is present');
+  const registry = vm.runInNewContext(Linux terminalSource.slice(start, end + 1));
+  assert.ok(registry.length >= 25, 'Linux terminal catalog includes broad official and community coverage');
   for (const project of registry) {
     assert.ok(project.name && project.desc && project.use, 'project includes explanation and use case');
     assert.match(project.url, /^https:\/\/github\.com\//, project.id + ' links to GitHub source');
     assert.ok(['core','packages','addons','systems','gui','security','dev','docs','community'].includes(project.cat));
   }
-  for (const repo of ['termux/termux-app','termux/termux-packages','termux/termux-api','termux/termux-boot','termux/termux-widget','termux/termux-x11','termux/proot-distro','termux/termux-services']) {
+  for (const repo of ['Linux terminal/Linux terminal-app','Linux terminal/Linux terminal-packages','Linux terminal/Linux terminal-api','Linux terminal/Linux terminal-boot','Linux terminal/Linux terminal-widget','Linux terminal/Linux terminal-x11','Linux terminal/proot-distro','Linux terminal/Linux terminal-services']) {
     assert.ok(registry.some(project => project.url.endsWith('/' + repo)), repo + ' is catalogued');
   }
-  assert.match(termuxSource, /const packages=\[/);
-  assert.match(termuxSource, /case'install-mosta'/);
-  assert.doesNotMatch(termuxSource, /eval\s*\(|new Function\s*\(/);
-  assert.equal(termuxSource.includes('fetch(') || termuxSource.includes('WebSocket') || termuxSource.includes('EventSource'), false);
-  assert.match(termuxMarkup, /connect-src 'self'/);
-  assert.match(termuxMarkup, /form-action 'self'/);
-  assert.match(termuxMarkup, /frame-ancestors 'none'/);
+  assert.match(Linux terminalSource, /const packages=\[/);
+  assert.match(Linux terminalSource, /case'install-mosta'/);
+  assert.doesNotMatch(Linux terminalSource, /eval\s*\(|new Function\s*\(/);
+  assert.equal(Linux terminalSource.includes('fetch(') || Linux terminalSource.includes('WebSocket') || Linux terminalSource.includes('EventSource'), false);
+  assert.match(Linux terminalMarkup, /connect-src 'self'/);
+  assert.match(Linux terminalMarkup, /form-action 'self'/);
+  assert.match(Linux terminalMarkup, /frame-ancestors 'none'/);
 });

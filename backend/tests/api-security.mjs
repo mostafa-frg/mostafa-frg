@@ -58,7 +58,8 @@ t('user tool catalog is empty before explicit grant',(await call('/api/tools',{c
 t('legacy global tool grant route is unavailable',(await call('/api/admin/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}})).s===404);
 const charlieCreate=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:'charlie',password:'violet-bridge-orbit-93'}});const charlieId=charlieCreate.j.id;
 const charlie=ck(await call('/api/auth/login',{method:'POST',ip:'12.0.0.3',body:{username:'charlie',password:'violet-bridge-orbit-93'}}));
-await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}});
+const grant=await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}});
+t('admin grants subnet to bob account',grant.s===200&&grant.j?.userId===bobId&&grant.j?.tool==='subnet'&&grant.j?.userAccess===true,grant.s+' '+JSON.stringify(grant.j));
 a=await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}});t('user allowed only after account-scoped grant',a.s===200&&a.j.network==='192.168.10.0'&&a.j.usableHosts===254);
 a=await call('/api/tools',{cookie:bob});t('tool catalog exposes granted tool to bob only',a.s===200&&a.j.tools.some(x=>x.id==='subnet')&&a.j.tools.length===1);
 a=await call('/api/tools/subnet',{method:'POST',cookie:charlie,body:{ip:'192.168.10.10',prefix:24}});t('same tool remains denied for another account',a.s===403);

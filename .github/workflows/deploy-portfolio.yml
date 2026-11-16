@@ -88,6 +88,7 @@ jobs:
 
           root = Path("portfolio")
           public_pages = {"index.html", "projects.html", "tools.html", "security.html", "about.html", "contact.html"}
+          required_nav = {"index.html", "projects.html", "tools.html", "auth.html", "security.html"}
 
           class Audit(HTMLParser):
               def __init__(self, path):

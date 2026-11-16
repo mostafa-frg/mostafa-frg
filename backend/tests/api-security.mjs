@@ -54,8 +54,15 @@ a=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username
 a=await call('/api/auth/login',{method:'POST',ip:'12.0.0.1',body:{username:'bob',password:'amber-lantern-quartz-2026'}});const bob=ck(a);
 for(const [p,m] of [['/api/admin/users','GET'],['/api/admin/audit','GET'],['/api/admin/tool-access','GET'],['/api/admin/tools/subnet-calculator','POST']])t(`user blocked: ${m} ${p}`,(await call(p,{method:m,cookie:bob,body:m==='POST'?{enabled:true}:undefined})).s===403);
 t('tool default-deny for user',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'10.0.0.1',prefix:24}})).s===403);
-await call('/api/admin/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}});
-a=await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}});t('user allowed after admin enables tool',a.s===200&&a.j.network==='192.168.10.0'&&a.j.usableHosts===254);
+const charlieCreate=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:'charlie',password:'violet-bridge-orbit-93'}});const charlieId=charlieCreate.j.id;
+const charlie=ck(await call('/api/auth/login',{method:'POST',ip:'12.0.0.3',body:{username:'charlie',password:'violet-bridge-orbit-93'}}));
+await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}});
+a=await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}});t('user allowed only after account-scoped grant',a.s===200&&a.j.network==='192.168.10.0'&&a.j.usableHosts===254);
+a=await call('/api/tools',{cookie:bob});t('tool catalog exposes granted tool to bob only',a.s===200&&a.j.tools.some(x=>x.id==='subnet')&&a.j.tools.length===1);
+a=await call('/api/tools/subnet',{method:'POST',cookie:charlie,body:{ip:'192.168.10.10',prefix:24}});t('same tool remains denied for another account',a.s===403);
+await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:false}});
+t('revoked account-scoped grant blocks tool immediately',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}})).s===403);
+t('ungranted account tool catalog remains empty',(await call('/api/tools',{cookie:charlie})).j.tools.length===0);
 t('unauthenticated API blocked',(await call('/api/tools')).s===401);
 a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 104-tool registry',a.s===200&&a.j.tools.length===104&&new Set(a.j.tools.map(x=>x.id)).size===104&&!a.j.tools.some(x=>/termux/i.test(x.group+' '+x.id))&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
 await call('/api/admin/users/'+bobId+'/disable',{method:'POST',cookie:adminCookie,body:{}});

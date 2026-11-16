@@ -57,10 +57,20 @@ jobs:
         run: |
           set -euo pipefail
           ruby -e 'require "yaml"; YAML.load_file(".github/workflows/deploy-portfolio.yml", aliases: true)'
-          if grep -nF '\n          ' .github/workflows/deploy-portfolio.yml; then
-            echo "::error::Literal escaped line break found in workflow YAML."
-            exit 1
-          fi
+          python3 - <<'PY'
+          from pathlib import Path
+
+          slash = chr(92)
+          needle = slash + "n" + (" " * 10)
+          workflow = Path(".github/workflows/deploy-portfolio.yml")
+          failures = [
+              number
+              for number, line in enumerate(workflow.read_text(encoding="utf-8").splitlines(), 1)
+              if needle in line and "needle =" not in line
+          ]
+          if failures:
+              raise SystemExit(f"Literal escaped line break found on line(s): {failures}")
+          PY
       - name: Check JavaScript syntax
         shell: bash
         run: |

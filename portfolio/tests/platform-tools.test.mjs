@@ -9,12 +9,13 @@ const source = await readFile(new URL('../assets/platform.js', import.meta.url),
 const directoryMarkup = await readFile(new URL('../tools.html', import.meta.url), 'utf8');
 const homeMarkup = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 const siteSource = await readFile(new URL('../assets/site.js', import.meta.url), 'utf8');
-const registryStart = source.indexOf('const tools=') + 'const tools='.length;
+const registryDeclaration = /(?:const|let)\s+tools\s*=/.exec(source);
+const registryStart = registryDeclaration ? registryDeclaration.index + registryDeclaration[0].length : -1;
 const registryMarker = source.indexOf('\n];\nfunction rows', registryStart);
 const helpersStart = source.indexOf('function rows(');
 const helpersEnd = source.indexOf('const grid=', helpersStart);
 
-assert.ok(registryStart >= 'const tools='.length, 'tool registry exists');
+assert.ok(registryStart > 0, 'tool registry exists');
 assert.ok(registryMarker > registryStart, 'tool registry closes before UI initialization');
 assert.ok(helpersStart >= 0 && helpersEnd > helpersStart, 'pure tool helpers exist');
 

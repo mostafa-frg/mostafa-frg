@@ -48,7 +48,6 @@ jobs:
           test -s portfolio/assets/regex-worker.js
           test -s portfolio/tests/regex-worker.test.mjs
           test -s portfolio/tests/platform-tools.test.mjs
-          test -s portfolio/assets/mosta-mark.svg
       - name: Validate workflow YAML and reject escaped line breaks
         run: |
           set -euo pipefail

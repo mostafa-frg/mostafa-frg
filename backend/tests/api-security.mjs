@@ -54,6 +54,8 @@ a=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username
 a=await call('/api/auth/login',{method:'POST',ip:'12.0.0.1',body:{username:'bob',password:'amber-lantern-quartz-2026'}});const bob=ck(a);
 for(const [p,m] of [['/api/admin/users','GET'],['/api/admin/audit','GET'],['/api/admin/tool-access','GET'],['/api/admin/tools/subnet-calculator','POST']])t(`user blocked: ${m} ${p}`,(await call(p,{method:m,cookie:bob,body:m==='POST'?{enabled:true}:undefined})).s===403);
 t('tool default-deny for user',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'10.0.0.1',prefix:24}})).s===403);
+t('user tool catalog is empty before explicit grant',(await call('/api/tools',{cookie:bob})).j.tools.length===0);
+t('legacy global tool grant route is unavailable',(await call('/api/admin/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}})).s===404);
 const charlieCreate=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:'charlie',password:'violet-bridge-orbit-93'}});const charlieId=charlieCreate.j.id;
 const charlie=ck(await call('/api/auth/login',{method:'POST',ip:'12.0.0.3',body:{username:'charlie',password:'violet-bridge-orbit-93'}}));
 await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}});

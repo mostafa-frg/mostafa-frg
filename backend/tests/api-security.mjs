@@ -75,6 +75,7 @@ for(const p of ['/dashboard.html','/dashboard','/dashboard/','/DASHBOARD.html'])
 const red=await call('/dashboard.html');t('redirect carries security headers',!!red.r.headers.get('content-security-policy')&&red.r.headers.get('x-frame-options')==='DENY'&&red.r.headers.get('strict-transport-security'));
 const authed=await call('/dashboard',{cookie:adminCookie});t('authed /dashboard served (assets canonicalise .html -> extensionless)',authed.s===200);
 const authRed=await call('/auth',{cookie:adminCookie});t('authed /auth -> dashboard',authRed.s===302&&/dashboard/.test(authRed.r.headers.get('location')));
+for(const p of ['/tools.html','/tools']){const x=await call(p);t('anonymous tool directory requires sign-in: '+p,x.s===302&&/\/auth\.html$/.test(x.r.headers.get('location')||''));}
 for(const p of ['/api/health','/api/nope','/api/auth/me','/tools.html','/auth.html']){const x=await call(p);const h=x.r.headers;t('headers on '+p+' ('+x.s+')',!!h.get('content-security-policy')&&h.get('x-content-type-options')==='nosniff'&&h.get('x-frame-options')==='DENY'&&!!h.get('strict-transport-security'));}
 const health=await call('/api/health');t('health verifies D1 schema readiness',health.s===200&&health.j.database==='ok'&&health.j.security==='ok');
 t('API cache-control no-store',(await call('/api/health')).r.headers.get('cache-control')==='no-store');

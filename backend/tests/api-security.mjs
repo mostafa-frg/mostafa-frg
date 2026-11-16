@@ -57,7 +57,7 @@ t('tool default-deny for user',(await call('/api/tools/subnet',{method:'POST',co
 await call('/api/admin/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}});
 a=await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}});t('user allowed after admin enables tool',a.s===200&&a.j.network==='192.168.10.0'&&a.j.usableHosts===254);
 t('unauthenticated API blocked',(await call('/api/tools')).s===401);
-a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 117-tool registry',a.s===200&&a.j.tools.length===117&&new Set(a.j.tools.map(x=>x.id)).size===117&&a.j.tools.some(x=>x.group==='Termux')&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
+a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 104-tool registry',a.s===200&&a.j.tools.length===104&&new Set(a.j.tools.map(x=>x.id)).size===117&&!a.j.tools.some(x=>/termux/i.test(x.group+' '+x.id))&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
 await call('/api/admin/users/'+bobId+'/disable',{method:'POST',cookie:adminCookie,body:{}});
 t('disable revokes live session',(await call('/api/auth/me',{cookie:bob})).s===401);
 t('disabled user cannot log in',(await call('/api/auth/login',{method:'POST',ip:'12.0.0.2',body:{username:'bob',password:'amber-lantern-quartz-2026'}})).s===401);

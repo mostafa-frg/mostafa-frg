@@ -201,7 +201,7 @@ test('homepage search and quick-access deep links resolve to real tool workspace
   for(const id of deepLinks)assert.ok(tools.some(tool=>tool.id===id),'Homepage deep link resolves: '+id);
 });
 
-test('tool registry has unique IDs and nine declared workspaces', () => {
+test('tool registry has unique IDs and eight declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
   assert.equal(tools.length, 104);

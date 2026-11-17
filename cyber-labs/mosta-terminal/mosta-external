@@ -63,9 +63,7 @@ case "$NAME" in
   mmicro) tool="micro"; label="MICRO" ;;
   mfiglet) tool="figlet"; label="FIGLET" ;;
   mtoilet) tool="toilet"; label="TOILET" ;;
-  mtermux-info) tool="termux-info"; label="TERMUX INFO" ;;
-  mtermux-storage) tool="termux-setup-storage"; label="TERMUX STORAGE" ;;
-  *) echo "Unknown Mosta external command: $NAME" >&2; exit 2 ;;
+  *) echo "Unknown Linux desktop command: $NAME" >&2; exit 2 ;;
 esac
 command -v "$tool" >/dev/null 2>&1 || {
   printf '%s\n' "ERROR: $tool is not installed on this system."

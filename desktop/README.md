@@ -1,6 +1,6 @@
 # DeskOps — Desktop Engineering & Security Toolkit
 
-A cross-platform command-line toolkit for Windows 10/11, Linux desktops and macOS. It uses only the Python standard library; no Android, Termux, root access, external Python packages, telemetry, account, or cloud service is required.
+A cross-platform command-line toolkit for Windows 10/11, Linux desktops and macOS (the CI matrix exercises Windows, Ubuntu and macOS). It uses only the Python standard library; no Android, Termux, root access, external Python packages, telemetry, account, or cloud service is required.
 
 ## Privacy model
 
@@ -61,7 +61,13 @@ Checks exactly one explicitly supplied endpoint. It is not a port scanner.
 
 Reviews HSTS, CSP, clickjacking controls, MIME-sniffing protection, Referrer-Policy, and Permissions-Policy. It sends a GET request with a one-byte Range hint, does not intentionally download the response body, and follows normal HTTP redirects. Use only on systems you own or are authorized to assess. This is not a full application security test.
 
-### 6. Local web access-log summary
+### 6. TLS certificate inspection
+
+    python -m deskops tls-check example.com --port 443
+
+Uses the operating system's trusted certificate store and hostname verification. Reports TLS version, negotiated cipher, subject/issuer, SANs, expiry and SHA-256 certificate fingerprint. It does not disable certificate verification.
+
+### 7. Local web access-log summary
 
     python -m deskops log-summary ./access.log --json
 

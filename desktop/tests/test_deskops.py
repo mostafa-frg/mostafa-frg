@@ -280,5 +280,41 @@ class DeskOpsTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(output.getvalue())["ssh_failed"], 1)
 
+
+    def test_auth_summary_aggregates_ssh_pam_and_sudo_without_usernames(self):
+        log = self.root / "auth.log"
+        log.write_text(
+            "Nov 17 10:00:00 host sshd[100]: Failed password for invalid user admin from 192.0.2.55 port 44000 ssh2\n"
+            "Nov 17 10:00:01 host sshd[101]: Accepted publickey for operator from 192.0.2.88 port 44001 ssh2\n"
+            "Nov 17 10:00:02 host sshd[102]: Invalid user guest from 2001:db8:abcd:12::1 port 44002\n"
+            "Nov 17 10:00:03 host sudo[103]: operator : TTY=pts/0 ; PWD=/root ; USER=root ; COMMAND=/bin/id\n"
+            "Nov 17 10:00:04 host pam_unix(sshd:auth): authentication failure; rhost=192.0.2.99 user=root\n",
+            encoding="utf-8",
+        )
+        result = deskops.auth_summary(log)
+        self.assertEqual(result["ssh_failed"], 1)
+        self.assertEqual(result["ssh_accepted"], 1)
+        self.assertEqual(result["invalid_user_events"], 2)
+        self.assertEqual(result["pam_failures"], 1)
+        self.assertEqual(result["sudo_events"], 1)
+        self.assertEqual(result["failed_auth_total"], 2)
+        serialized = json.dumps(result)
+        for secret in ("operator", "admin", "guest", "192.0.2.55", "/bin/id", "2001:db8"):
+            self.assertNotIn(secret, serialized)
+
+    def test_auth_summary_rejects_symlink_and_missing_file(self):
+        missing = self.root / "missing.log"
+        with self.assertRaises(ValueError):
+            deskops.auth_summary(missing)
+        target = self.root / "real.log"
+        target.write_text("no events\n", encoding="utf-8")
+        link = self.root / "link.log"
+        try:
+            link.symlink_to(target)
+        except (OSError, NotImplementedError):
+            self.skipTest("Symlink creation is unavailable on this platform")
+        with self.assertRaisesRegex(ValueError, "regular"):
+            deskops.auth_summary(link)
+
 if __name__ == "__main__":
     unittest.main()

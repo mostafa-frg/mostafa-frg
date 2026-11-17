@@ -113,6 +113,16 @@ Aggregates common Linux OpenSSH, PAM, and sudo text-log events, including failed
 
 Aggregates common OpenSSH, PAM, and sudo events: failed and accepted SSH authentication, invalid-user attempts, PAM failures, and sudo event counts. It does not export usernames, raw IP addresses, or sudo command contents. Source addresses are grouped into IPv4 /24 or IPv6 /48 networks. It reads a local text log only; it does not invoke journalctl, access the live journal, or modify log files. Windows Event Logs and vendor-specific formats are not supported.
 
+
+### 11. ZIP archive safety audit
+
+    python -m deskops archive-audit ./download.zip
+    python -m deskops archive-audit ./download.zip --json
+
+Inspects ZIP central-directory metadata without extracting or executing entries. It flags absolute and parent-traversal paths, duplicate normalized paths, symbolic links, encrypted entries, executable-looking extensions, unusually large declared files, and extreme compression ratios. High-severity metadata hazards produce the block_extraction_pending_review assessment; review-only findings produce review_before_extraction.
+
+This is a pre-extraction triage aid, not an antivirus engine. It does not decompress entries, scan file contents, validate publisher signatures, or guarantee an archive is safe. Do not extract an archive solely because this tool reports no metadata hazards.
+
 ## Exit codes
 
 - 0: command completed successfully (or endpoint is reachable).

@@ -1,18 +1,16 @@
-# Mosta Terminal
+# Linux Desktop CLI Layer
 
-A practical Linux/Termux command layer for the repository labs and selected native networking tools.
+A command layer for running the repository's Python labs and selected native Linux networking utilities from a desktop Linux shell.
 
-Mosta is branding only. The real upstream command names remain unchanged.
+The launcher is optional. Every lab remains independently runnable with Python; the aliases are convenience wrappers and do not rename or reimplement upstream tools.
 
 ## Requirements
 
-- Termux on Android or a Linux shell
-- Bash
+- Desktop Linux distribution
+- Bash and GNU core utilities
 - Python 3.10+
 - Git
-- Python dependencies are installed from each lab requirements.txt
-
-Termux packages are managed with pkg. The official Termux repositories provide packages such as Nmap, DNS utilities, and netcat variants. Android permissions can still limit privileged packet operations.
+- Dependencies listed by an individual lab, where required
 
 ## Installation
 
@@ -22,22 +20,12 @@ From the repository root:
     chmod +x install.sh
     ./install.sh
 
-The installer:
+The installer creates links under ~/.local/bin, installs the declared Python lab requirements, and adds that directory to existing Bash/Zsh startup files. Reload the shell, then run:
 
-1. Detects Termux.
-2. Installs Python and Git if needed.
-3. Installs the repository Python dependencies.
-4. Installs the core Termux networking set on Termux.
-5. Creates symlinked commands under ~/.local/bin.
-6. Adds ~/.local/bin to existing Bash/Zsh rc files.
-7. Leaves a health check at mosta-doctor.
-
-Reload the shell after installation.
-
-## Mosta commands
-
-    mosta
     mosta-doctor
+    mosta
+
+## Repository lab commands
 
     mnet
     mhttp
@@ -46,48 +34,41 @@ Reload the shell after installation.
     mconf
     mroute
     mtriage
-    mtool
+    mfim
+    mdet
+    mlog
+    mnorm
+    mpipe
+    mvlan
+    mfw
+    mospf
+    mstp
+    mnat
+    macl
+    msnmp
+    msyslog
+    mflow
+    mipam
+    msubnet
+    mtopo
+    mad
+    mpriv
+    mreport
+    mdns
+    mmon
+    mscan
+    mauto
 
-Native networking tools are exposed with Mosta branding:
+Run mosta for the full command index and mosta-doctor to inspect installed dependencies.
 
-    mnmap
-    mnc
-    mdig
-    mtcpdump
-    msocat
-    mtracepath
-    mtraceroute
-    mwhois
-    mcurl
-    mwget
-    mssh
+## Native Linux commands
 
-The wrapper passes arguments directly to the real executable.
+The wrapper layer exposes commands such as mnmap, mnc, mdig, mtcpdump, msocat, mtracepath, mtraceroute, mwhois, mcurl, mwget, and mssh. Each wrapper passes arguments to the real upstream executable. A wrapper exits with an explicit error if its upstream command is missing.
 
-Example:
+Optional utilities such as TShark, Wireshark, Scapy, Aircrack-ng, Kismet, Zeek, Suricata, and web assessment tools must be installed and configured separately using their official Linux distribution channels.
 
-    mnmap --version
+## Validation and boundaries
 
-The banner is added before the real Nmap output; Nmap itself is not renamed or reimplemented.
+Run mosta-doctor after installation. The health check distinguishes required commands from optional tools; it does not claim an optional package is installed when it is absent.
 
-## External tool installation
-
-On Termux, the core set can be installed or refreshed with:
-
-    mosta-external-install
-
-The core set is deliberately limited to portable networking and administration utilities. Tools requiring root, additional repositories, GUI components, or device-specific Android privileges are not falsely marked as installed.
-
-For example, tshark/Wireshark-related functionality and mtr can involve additional Termux repositories or Android/root limitations, so they are treated separately rather than forced into the base installer.
-
-## Validation
-
-Run:
-
-    mosta-doctor
-
-The health check verifies the repository, Python, Git, Mosta commands, Python lab dependencies, and the core external networking tools. On Termux it also reports Android-specific privilege limitations.
-
-## Design rule
-
-The Mosta layer is an execution and installation layer. It does not rename, replace, or reimplement Nmap, Netcat, tcpdump, Scapy, or other upstream tools. Security testing should remain limited to systems and networks you own or are explicitly authorized to test.
+The layer does not run arbitrary commands on remote systems, bypass permissions, or guarantee hardware-dependent packet capture. Use diagnostics and security tools only on systems you own or are explicitly authorized to test.

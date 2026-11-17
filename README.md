@@ -24,6 +24,14 @@ The browser-based workspace currently registers 104 utilities for networking, cy
 
 Browser-local tools process supplied data in the browser. External lookups identify their provider and send only the query required for that lookup.
 
+## Terminal and CLI library
+
+The public terminal catalog contains 24 upstream-linked command-line tools for Termux and Debian/Ubuntu. Each entry provides environment-specific installation, verification and removal commands, operational caveats, troubleshooting guidance, and links to the original source and documentation. The site generates commands only; it does not execute them or bundle third-party binaries.
+
+The future roadmap reserves eight entries for ESP32 and firmware workflows, including esptool, ESP-IDF, Arduino CLI, PlatformIO, OpenOCD, firmware inspection, serial consoles, and USB-UART drivers. These are marked as planned and are not presented as install-ready instructions.
+
+Browse the [Terminal & CLI Library](portfolio/terminal-tools.html).
+
 ## Network and security labs
 
 The [cyber-labs directory](cyber-labs/README.md) contains independent Python labs for subnetting, routing, VLANs, ACLs, configuration auditing, PCAP analysis, log normalization, detection rules, file integrity, and incident triage.

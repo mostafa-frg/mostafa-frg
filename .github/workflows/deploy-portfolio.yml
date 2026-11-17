@@ -35,6 +35,7 @@ jobs:
           test -s portfolio/index.html
           test -s portfolio/projects.html
           test -s portfolio/tools.html
+          test -s portfolio/terminal-tools.html
           test -s portfolio/security.html
           test -s portfolio/about.html
           test -s portfolio/contact.html
@@ -45,9 +46,13 @@ jobs:
           test -s portfolio/assets/site.js
           test -s portfolio/assets/tools.css
           test -s portfolio/assets/tools.js
+          test -s portfolio/assets/terminal-tools.js
+          test -s portfolio/assets/terminal-tools.css
+          test -s portfolio/assets/terminal-tools.json
           test -s portfolio/assets/regex-worker.js
           test -s portfolio/tests/regex-worker.test.mjs
           test -s portfolio/tests/platform-tools.test.mjs
+          test -s portfolio/tests/terminal-tools.test.mjs
       - name: Validate workflow YAML and reject escaped line breaks
         run: |
           set -euo pipefail
@@ -78,6 +83,10 @@ jobs:
         run: node --test portfolio/tests/regex-worker.test.mjs
       - name: Test every registered engineering tool and UI workflow regressions
         run: node --test portfolio/tests/platform-tools.test.mjs
+      - name: Validate terminal catalog JSON
+        run: python3 -m json.tool portfolio/assets/terminal-tools.json > /dev/null
+      - name: Test terminal catalog data, commands and roadmap
+        run: node --test portfolio/tests/terminal-tools.test.mjs
       - name: Audit HTML links, navigation and external links
         shell: bash
         run: |
@@ -87,7 +96,7 @@ jobs:
           from pathlib import Path
 
           root = Path("portfolio")
-          public_pages = {"index.html", "projects.html", "tools.html", "security.html", "about.html", "contact.html"}
+          public_pages = {"index.html", "projects.html", "tools.html", "terminal-tools.html", "security.html", "about.html", "contact.html"}
           required_nav = {"index.html", "projects.html", "tools.html", "auth.html", "security.html"}
 
           class Audit(HTMLParser):
@@ -166,6 +175,9 @@ jobs:
               "portfolio/assets/site.css": 36_000,
               "portfolio/assets/tools.js": 24_000,
               "portfolio/assets/tools.css": 8_000,
+              "portfolio/assets/terminal-tools.js": 12_000,
+              "portfolio/assets/terminal-tools.css": 10_000,
+              "portfolio/assets/terminal-tools.json": 40_000,
           }
           failures = []
           for name, limit in budgets.items():

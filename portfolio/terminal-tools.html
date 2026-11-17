@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#f4f7fb">
+<meta name="description" content="A curated terminal tools catalog for Termux, Debian and Ubuntu, with upstream sources, install commands, verification, removal and troubleshooting guidance.">
+<meta name="robots" content="index,follow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; form-action 'self'; upgrade-insecure-requests">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="stylesheet" href="assets/portal.css">
+<link rel="stylesheet" href="assets/terminal-tools.css">
+<script src="assets/site.js" defer></script>
+<script src="assets/terminal-tools.js" defer></script>
+<title>Terminal & CLI Library | Engineering Workspace</title>
+</head>
+<body class="portal terminal-library">
+<a class="skip-link" href="#main-content">Skip to terminal library</a>
+<header class="top"><div class="nav">
+<a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>ENGINEERING WORKSPACE <span class="brand-sub">TERMINAL LIBRARY</span></a>
+<button class="menu" id="menuToggle" type="button" aria-expanded="false" aria-controls="siteNav">MENU</button>
+<nav class="navlinks" id="siteNav" aria-label="Main navigation">
+<a href="index.html">Overview</a>
+<a href="tools.html">All tools</a>
+<a class="active" href="terminal-tools.html" aria-current="page">Terminal library</a>
+<a href="systems.html">Systems workspace</a>
+<a href="projects.html">Labs & projects</a>
+<a href="auth.html">Workspace</a>
+<a href="security.html">Security</a>
+</nav>
+<div class="nav-actions"><button class="theme-switch" id="themeSwitch" type="button" aria-label="Toggle color theme">◐ DARK</button></div>
+</div></header>
+<main id="main-content">
+<section class="portal-hero terminal-hero"><div class="wrap">
+<div class="portal-kicker">Curated CLI catalog / install guides / upstream-first</div>
+<h1>Terminal tools.<br><em>Ready to understand and install.</em></h1>
+<p class="terminal-lead">A practical directory for Termux and Debian/Ubuntu terminal workflows. Every entry links to its upstream project and includes an install command, verification command, removal command, operational notes and common troubleshooting guidance. The website prepares commands only; it never executes them on your device.</p>
+<div class="terminal-stats">
+<div class="terminal-stat"><strong id="terminalToolCount">24</strong><span>CATALOG ENTRIES</span></div>
+<div class="terminal-stat"><strong>02</strong><span>INSTALL TARGETS</span></div>
+<div class="terminal-stat"><strong>08</strong><span>FUTURE FIRMWARE WORKFLOWS</span></div>
+</div>
+<div class="terminal-controls">
+<label class="visually-hidden" for="terminalToolSearch">Search terminal tools</label>
+<input class="terminal-search" id="terminalToolSearch" type="search" placeholder="Search tools, packages, commands or tasks…" autocomplete="off">
+<label class="terminal-environment">INSTALL TARGET
+<select id="installEnvironment" aria-label="Choose installation environment">
+<option value="termux">Termux (pkg)</option>
+<option value="debian">Debian / Ubuntu (APT)</option>
+</select>
+</label>
+</div>
+<div class="terminal-bootstrap">
+<div class="terminal-bootstrap-item"><span>TERMUX · UPDATE PACKAGES</span><code>pkg update && pkg upgrade</code><button class="terminal-copy" type="button" data-copy="pkg update && pkg upgrade">COPY</button></div>
+<div class="terminal-bootstrap-item"><span>DEBIAN / UBUNTU · UPDATE INDEX</span><code>sudo apt update</code><button class="terminal-copy" type="button" data-copy="sudo apt update">COPY</button></div>
+</div>
+<p class="terminal-lead">Use the official <a href="https://github.com/termux/termux-app#installation" target="_blank" rel="noopener noreferrer">Termux installation guidance</a> and <a href="https://github.com/termux/termux-packages" target="_blank" rel="noopener noreferrer">Termux package repository</a>. Do not mix APK sources with different signing keys.</p>
+</div></section>
+<section class="terminal-section"><div class="wrap">
+<div class="terminal-section-head"><div><div class="eyebrow">CURRENT CATALOG</div><h2>Installable terminal tools</h2><p>Choose a category, select your environment and expand any tool for its instructions.</p></div><span class="terminal-count">UPSTREAM-LINKED · COMMANDS ONLY</span></div>
+<nav class="terminal-filters" id="terminalCategoryTabs" aria-label="Filter terminal tool categories"></nav>
+<div class="terminal-tool-grid" id="terminalToolGrid" aria-live="polite" aria-busy="false"></div>
+<div class="terminal-no-results" id="terminalNoResults" hidden>No matching tools. Try a different search or category.</div>
+<p class="terminal-status" id="terminalLibraryStatus" role="status" aria-live="polite">Loading catalog metadata…</p>
+<div class="terminal-policy">
+<strong>Installation and trust boundary.</strong> Termux package names were checked against the official Termux package repository metadata on 17 November 2026; that check does not mean the package was installed or runtime-tested on every Android device. Debian/Ubuntu commands target APT-based systems. Fedora, Arch, macOS and native Windows instructions will be added only after separate verification. Review every command before running it. Do not use unknown mirrors or execute unreviewed downloaded scripts.
+</div>
+</div></section>
+<section class="terminal-section" id="firmware-roadmap"><div class="wrap">
+<div class="terminal-section-head"><div><div class="eyebrow">FUTURE WORKSPACE</div><h2>ESP32, firmware & flashing</h2><p>Reserved now for the next expansion. These entries are research links, not install guides yet.</p></div><span class="terminal-count">PLANNED · NOT READY</span></div>
+<div class="terminal-roadmap-grid" id="firmwareRoadmapGrid"></div>
+<div class="terminal-policy"><strong>Destructive-operation policy.</strong> Firmware write and flash-erase instructions will be published only after board identification, tool-version checks, backup guidance, serial-driver verification and a clear warning for irreversible operations. The platform will not offer a blind one-click erase action.</div>
+</div></section>
+</main>
+<footer class="portal-footer"><div class="wrap">
+<span>© <span data-year>2026</span> ENGINEERING WORKSPACE</span>
+<span>TERMUX · LINUX TERMINAL · BASH · NETWORKING · FIRMWARE ROADMAP</span>
+<a href="security.html">SECURITY & PRIVACY</a><a href="index.html">OVERVIEW</a>
+</div></footer>
+</body>
+</html>

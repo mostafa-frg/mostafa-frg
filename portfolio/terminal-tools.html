@@ -65,6 +65,12 @@
 <div class="terminal-policy">
 <strong>Installation and trust boundary.</strong> Termux package names were checked against the official Termux package repository metadata on 17 November 2026; that check does not mean the package was installed or runtime-tested on every Android device. Debian/Ubuntu commands target APT-based systems. Fedora, Arch, macOS and native Windows instructions will be added only after separate verification. Review every command before running it. Do not use unknown mirrors or execute unreviewed downloaded scripts.
 </div>
+<div class="terminal-install-help-grid">
+<article class="terminal-install-help"><strong>Termux mirror or repository errors</strong><p>If package downloads fail, open the repository selector, choose an official mirror, then refresh the package index. Do not mix APK signing sources.</p><code>termux-change-repo</code><button class="terminal-copy" type="button" data-copy="termux-change-repo">COPY</button></article>
+<article class="terminal-install-help"><strong>APT cannot locate a package</strong><p>Refresh package lists and confirm the Ubuntu/Debian release and enabled repositories before trying another package name.</p><code>sudo apt update</code><button class="terminal-copy" type="button" data-copy="sudo apt update">COPY</button></article>
+<article class="terminal-install-help"><strong>Command not found after installation</strong><p>Open a new shell, inspect PATH and check the package's actual executable name. Debian/Ubuntu may expose fd as fdfind and bat as batcat.</p><code>command -v TOOL_NAME</code><button class="terminal-copy" type="button" data-copy="command -v TOOL_NAME">COPY</button></article>
+<article class="terminal-install-help"><strong>Permission denied or Root required</strong><p>Do not run every command as root. Termux does not provide sudo by default, and Android kernel/SELinux restrictions cannot be fixed by installing another package.</p><code>id</code><button class="terminal-copy" type="button" data-copy="id">COPY</button></article>
+</div>
 </div></section>
 <section class="terminal-section" id="firmware-roadmap"><div class="wrap">
 <div class="terminal-section-head"><div><div class="eyebrow">FUTURE WORKSPACE</div><h2>ESP32, firmware & flashing</h2><p>Reserved now for the next expansion. These entries are research links, not install guides yet.</p></div><span class="terminal-count">PLANNED · NOT READY</span></div>

@@ -88,6 +88,9 @@ test('page exposes accessible search, environment selection, category filters an
   assert.match(html, /pkg update && pkg upgrade/);
   assert.match(html, /sudo apt update/);
   assert.match(html, /Termux installation guidance/);
+  assert.match(html, /termux-change-repo/);
+  assert.match(html, /command -v TOOL_NAME/);
+  assert.match(html, /APT cannot locate a package/);
   assert.match(styles, /@media\(max-width:720px\)/);
   assert.match(styles, /focus/);
 });

@@ -63,3 +63,11 @@
 .terminal-library .terminal-bootstrap-item code{min-width:0;overflow-wrap:anywhere;color:var(--p-ink);font:11px var(--p-mono)}
 .terminal-library .terminal-lead a{color:var(--p-accent);text-decoration:underline;text-underline-offset:3px}
 @media(max-width:720px){.terminal-library .terminal-bootstrap{grid-template-columns:1fr}}
+
+.terminal-library .terminal-install-help-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}
+.terminal-library .terminal-install-help{min-width:0;padding:13px;border:1px solid var(--p-line);border-radius:10px;background:var(--p-surface)}
+.terminal-library .terminal-install-help strong{display:block;color:var(--p-ink);font-size:11px;margin-bottom:6px}
+.terminal-library .terminal-install-help p{min-height:66px;margin:0 0 10px;color:var(--p-muted);font-size:10px;line-height:1.65}
+.terminal-library .terminal-install-help code{display:block;overflow-wrap:anywhere;margin-bottom:8px;color:var(--p-accent);font:10px var(--p-mono)}
+@media(max-width:950px){.terminal-library .terminal-install-help-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.terminal-library .terminal-install-help-grid{grid-template-columns:1fr}.terminal-library .terminal-install-help p{min-height:0}}

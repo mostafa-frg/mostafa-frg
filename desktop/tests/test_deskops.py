@@ -392,5 +392,53 @@ class DeskOpsTests(unittest.TestCase):
         with redirect_stdout(StringIO()):
             self.assertEqual(deskops.main(["archive-audit", str(review_archive), "--json"]), 1)
 
+
+    def test_file_triage_identifies_pdf_and_calculates_sha256(self):
+        import hashlib
+        sample = self.root / "report.pdf"
+        payload = b"%PDF-1.7\nexample document"
+        sample.write_bytes(payload)
+        result = deskops.file_triage(sample)
+        self.assertEqual(result["detected_type"], "PDF document")
+        self.assertEqual(result["category"], "document")
+        self.assertTrue(result["extension_matches"])
+        self.assertEqual(result["sha256"], hashlib.sha256(payload).hexdigest())
+        self.assertEqual(result["size"], len(payload))
+
+    def test_file_triage_flags_executable_signature_and_extension_mismatch(self):
+        sample = self.root / "photo.jpg"
+        sample.write_bytes(b"MZ" + bytes(100))
+        result = deskops.file_triage(sample)
+        codes = {item["code"] for item in result["findings"]}
+        self.assertEqual(result["category"], "executable")
+        self.assertIn("extension_mismatch", codes)
+        self.assertIn("executable_file", codes)
+        self.assertFalse(result["extension_matches"])
+
+    def test_file_triage_unknown_empty_and_cli_json(self):
+        sample = self.root / "unknown.bin"
+        sample.write_bytes(b"")
+        result = deskops.file_triage(sample)
+        self.assertEqual(result["category"], "unknown")
+        self.assertEqual(result["size"], 0)
+        output = StringIO()
+        with redirect_stdout(output):
+            code = deskops.main(["file-triage", str(sample), "--json"])
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(output.getvalue())["category"], "unknown")
+
+    def test_file_triage_rejects_missing_and_symlink_paths(self):
+        with self.assertRaises(ValueError):
+            deskops.file_triage(self.root / "missing.bin")
+        target = self.root / "target.bin"
+        target.write_bytes(b"%PDF-")
+        link = self.root / "link.bin"
+        try:
+            link.symlink_to(target)
+        except (OSError, NotImplementedError):
+            self.skipTest("Symlinks are unavailable on this platform")
+        with self.assertRaisesRegex(ValueError, "regular file"):
+            deskops.file_triage(link)
+
 if __name__ == "__main__":
     unittest.main()

@@ -4,10 +4,11 @@ A cross-platform command-line toolkit for Windows 10/11, Linux desktops and macO
 
 ## Privacy model
 
-- File hashing, manifest verification, and access-log analysis run locally.
+- File hashing, manifest verification, access-log analysis, and authentication-log analysis run locally.
 - No telemetry, analytics, background service, account, or automatic upload.
 - File manifests store relative paths, sizes, and cryptographic digests — never absolute paths.
 - Access-log reports count client addresses but do not print or export the addresses.
+- Authentication-log reports omit usernames, raw IP addresses, and sudo command contents; source addresses are grouped into IPv4 /24 or IPv6 /48 networks.
 - DNS queries use the operating system's configured resolver. TCP checks connect only to the single host and port explicitly supplied.
 - HTTP header audit sends a small HTTP request to the URL you explicitly provide; TLS inspection opens a verified connection to the host you specify. Those destinations receive normal network requests from your machine.
 - No passwords, tokens, browser profiles, environment variables, or personal files are collected.
@@ -95,6 +96,14 @@ Reads classic Ethernet PCAP files locally and reports packet totals, IPv4/IPv6 c
     python -m deskops subnet 10.20.0.0/16 --json
 
 Calculates the normalized network, prefix, subnet mask, wildcard mask, broadcast address, total address count, and usable host range. /31 point-to-point networks and /32 single-host routes are handled explicitly. The calculation is local and generates no network traffic. IPv6 input is rejected with a clear message because this command currently focuses on IPv4 planning.
+
+
+### 10. Linux authentication-log summary
+
+    python -m deskops auth-summary ./auth.log
+    python -m deskops auth-summary /var/log/auth.log --json
+
+Aggregates common Linux OpenSSH, PAM, and sudo text-log events, including failed and accepted SSH authentication, invalid-user attempts, PAM authentication failures, and sudo activity. It does not output usernames, raw source IP addresses, or sudo command contents; source IPs are grouped into IPv4 /24 or IPv6 /48 networks. The command reads a local file only and does not access the network or modify the log. It supports common text exports, not journald binary data, Windows event logs, or every vendor-specific format. Protect original logs as sensitive evidence and only analyze files you are authorized to access.
 
 ## Exit codes
 

@@ -123,6 +123,16 @@ Inspects ZIP central-directory metadata without extracting or executing entries.
 
 This is a pre-extraction triage aid, not an antivirus engine. It does not decompress entries, scan file contents, validate publisher signatures, or guarantee an archive is safe. Do not extract an archive solely because this tool reports no metadata hazards.
 
+
+### 12. Local file signature triage
+
+    python -m deskops file-triage ./downloaded-file
+    python -m deskops file-triage ./downloaded-file --json
+
+Reads the file locally, computes its SHA-256 digest, identifies common magic-byte signatures (including PE/ELF/Mach-O executables, PDF, common images, ZIP/GZIP/7z/RAR, OLE, SQLite, and RTF), and flags extension mismatches or executable-format signatures. It does not execute, load, extract, or upload the file.
+
+Signature matching is heuristic and does not scan file contents. A recognized type or clean result is not a malware verdict; verify provenance and signatures with trusted security software before opening or running untrusted files.
+
 ## Exit codes
 
 - 0: command completed successfully with no blocking findings.

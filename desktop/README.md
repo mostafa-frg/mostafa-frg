@@ -105,6 +105,14 @@ Calculates the normalized network, prefix, subnet mask, wildcard mask, broadcast
 
 Aggregates common Linux OpenSSH, PAM, and sudo text-log events, including failed and accepted SSH authentication, invalid-user attempts, PAM authentication failures, and sudo activity. It does not output usernames, raw source IP addresses, or sudo command contents; source IPs are grouped into IPv4 /24 or IPv6 /48 networks. The command reads a local file only and does not access the network or modify the log. It supports common text exports, not journald binary data, Windows event logs, or every vendor-specific format. Protect original logs as sensitive evidence and only analyze files you are authorized to access.
 
+
+### 10. Linux authentication-log summary
+
+    python -m deskops auth-summary ./auth.log
+    python -m deskops auth-summary ./auth.log --json
+
+Aggregates common OpenSSH, PAM, and sudo events: failed and accepted SSH authentication, invalid-user attempts, PAM failures, and sudo event counts. It does not export usernames, raw IP addresses, or sudo command contents. Source addresses are grouped into IPv4 /24 or IPv6 /48 networks. It reads a local text log only; it does not invoke journalctl, access the live journal, or modify log files. Windows Event Logs and vendor-specific formats are not supported.
+
 ## Exit codes
 
 - 0: command completed successfully (or endpoint is reachable).

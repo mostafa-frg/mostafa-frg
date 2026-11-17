@@ -427,6 +427,12 @@ class DeskOpsTests(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(json.loads(output.getvalue())["category"], "unknown")
 
+    def test_file_triage_returns_review_exit_for_executable_signature(self):
+        sample = self.root / "download.jpg"
+        sample.write_bytes(b"MZ" + bytes(40))
+        with redirect_stdout(StringIO()):
+            self.assertEqual(deskops.main(["file-triage", str(sample), "--json"]), 1)
+
     def test_file_triage_rejects_missing_and_symlink_paths(self):
         with self.assertRaises(ValueError):
             deskops.file_triage(self.root / "missing.bin")

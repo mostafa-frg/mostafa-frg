@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cross-platform, local-first desktop diagnostics. Python standard library only."""
 from __future__ import annotations
-import argparse, hashlib, json, re, socket, ssl, struct, sys, time, urllib.error, urllib.parse, urllib.request
+import argparse, hashlib, ipaddress, json, re, socket, ssl, struct, sys, time, urllib.error, urllib.parse, urllib.request
 from collections import Counter
 from pathlib import Path, PurePosixPath
 
@@ -197,6 +197,29 @@ def log_summary(path: Path) -> dict:
             "privacy": "Client addresses are counted but never included in this report."}
 
 
+
+def subnet_info(value: str) -> dict:
+    """Calculate IPv4 subnet boundaries locally; no network traffic is generated."""
+    if not value or value.strip() != value or any(c.isspace() for c in value):
+        raise ValueError("Provide one IPv4 address or CIDR network")
+    try:
+        network = ipaddress.ip_network(value, strict=False)
+    except ValueError as exc:
+        raise ValueError(f"Invalid IP network: {exc}") from exc
+    if not isinstance(network, ipaddress.IPv4Network):
+        raise ValueError("The subnet calculator currently supports IPv4 only")
+    usable = network.num_addresses if network.prefixlen >= 31 else max(0, network.num_addresses - 2)
+    first = network.network_address if network.prefixlen >= 31 else network.network_address + 1
+    last = network.broadcast_address if network.prefixlen >= 31 else network.broadcast_address - 1
+    return {
+        "input": value, "network": str(network.network_address),
+        "cidr": str(network), "prefix_length": network.prefixlen,
+        "netmask": str(network.netmask), "wildcard_mask": str(network.hostmask),
+        "broadcast": str(network.broadcast_address),
+        "total_addresses": network.num_addresses, "usable_hosts": usable,
+        "first_usable": str(first), "last_usable": str(last),
+    }
+
 PCAP_MAGICS = {
     b"\xd4\xc3\xb2\xa1": "<",
     b"\xa1\xb2\xc3\xd4": ">",
@@ -338,6 +361,7 @@ def main(argv=None) -> int:
     p.add_argument("--timeout", type=float, default=8.0); p.add_argument("--json", action="store_true")
     p = sub.add_parser("tls-check", help="Inspect a verified TLS certificate on one endpoint"); p.add_argument("host"); p.add_argument("--port", type=int, default=443); p.add_argument("--timeout", type=float, default=5.0); p.add_argument("--json", action="store_true")
     p = sub.add_parser("log-summary", help="Summarize a local Apache/Nginx access log"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
+    p = sub.add_parser("subnet", help="Calculate IPv4 subnet boundaries and host capacity"); p.add_argument("network"); p.add_argument("--json", action="store_true")
     p = sub.add_parser("pcap-summary", help="Summarize an offline classic Ethernet PCAP without exposing payloads"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     try:
@@ -349,6 +373,7 @@ def main(argv=None) -> int:
         elif args.command == "http-audit": result = http_audit(args.url, args.timeout)
         elif args.command == "tls-check": result = tls_check(args.host, args.port, args.timeout)
         elif args.command == "pcap-summary": result = pcap_summary(args.file)
+        elif args.command == "subnet": result = subnet_info(args.network)
         else: result = log_summary(args.file)
         _emit(result, getattr(args, "json", False))
         if args.command == "tcp" and not result["open"]: return 2

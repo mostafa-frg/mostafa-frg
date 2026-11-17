@@ -198,5 +198,32 @@ class DeskOpsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "record header"):
             deskops.pcap_summary(capture)
 
+
+    def test_subnet_calculates_standard_ipv4_network(self):
+        result = deskops.subnet_info("192.168.10.77/24")
+        self.assertEqual(result["network"], "192.168.10.0")
+        self.assertEqual(result["broadcast"], "192.168.10.255")
+        self.assertEqual(result["netmask"], "255.255.255.0")
+        self.assertEqual(result["wildcard_mask"], "0.0.0.255")
+        self.assertEqual(result["usable_hosts"], 254)
+        self.assertEqual(result["first_usable"], "192.168.10.1")
+        self.assertEqual(result["last_usable"], "192.168.10.254")
+
+    def test_subnet_handles_point_to_point_and_single_host_prefixes(self):
+        point_to_point = deskops.subnet_info("192.0.2.0/31")
+        self.assertEqual(point_to_point["usable_hosts"], 2)
+        self.assertEqual(point_to_point["first_usable"], "192.0.2.0")
+        self.assertEqual(point_to_point["last_usable"], "192.0.2.1")
+        single = deskops.subnet_info("192.0.2.7/32")
+        self.assertEqual(single["usable_hosts"], 1)
+        self.assertEqual(single["first_usable"], "192.0.2.7")
+        self.assertEqual(single["last_usable"], "192.0.2.7")
+
+    def test_subnet_rejects_ipv6_and_malformed_input(self):
+        with self.assertRaisesRegex(ValueError, "IPv4 only"):
+            deskops.subnet_info("2001:db8::1/64")
+        with self.assertRaises(ValueError):
+            deskops.subnet_info("192.168.1.1/99")
+
 if __name__ == "__main__":
     unittest.main()

@@ -262,8 +262,8 @@ jobs:
           curl -fsSL --max-redirs 5 "$SITE_ORIGIN/assets/platform.js" -o "$tmp/platform.js"
           node --check "$tmp/platform.js"
           tool_count="$(grep -oE "\\{id:'[a-z0-9-]+'" "$tmp/platform.js" | sort -u | wc -l)"
-          if [ "$tool_count" -lt 66 ]; then
-            echo "::error::Expected at least 66 unique tool definitions; found $tool_count."
+          if [ "$tool_count" -lt 74 ]; then
+            echo "::error::Expected at least 74 unique tool definitions; found $tool_count."
             exit 1
           fi
           grep -q "id:'subnet'" "$tmp/platform.js"
@@ -295,4 +295,4 @@ jobs:
           done
           printf '%s\n' "$headers" | grep -qi '^x-frame-options: DENY'
           printf '%s\n' "$headers" | grep -qi '^x-content-type-options: nosniff'
-          echo "Live platform, 66 tool definitions, browser-tool handlers, regex worker, and security headers passed."
+          echo "Live platform, 74 tool definitions, browser-tool handlers, regex worker, and security headers passed."

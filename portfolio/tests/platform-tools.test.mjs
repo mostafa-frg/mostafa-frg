@@ -51,15 +51,15 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 66);
+  assert.equal(tools.length, 74);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 20);
-  assert.equal(tools.filter(tool => tool.cat === 'security').length, 17);
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 23);
+  assert.equal(tools.filter(tool => tool.cat === 'security').length, 21);
   assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
-  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 9);
+  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 10);
   assert.equal(tools.filter(tool => tool.cat === 'developer').length, 15);
 });
 
@@ -156,7 +156,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 66);
+  assert.equal(tools.length, 74);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -339,4 +339,26 @@ test('converter and calculator tools added in platform-v2 return correct results
   assert.match(await r('hash-id', { hash: '5d41402abc4b2a76b9719d911017c592' }), /MD5/);
   assert.match(await r('umask', { umask: '022' }), /0644/);
   assert.match(await r('http-status', { code: '404' }), /Not Found/);
+});
+
+test('Nmap, Wireshark, Termux, Kali and OSINT helper tools validate input and build output', async () => {
+  const r = (id, v) => byId(id).run(v);
+  const d = Object.fromEntries(byId('nmap-builder').fields.map(f => [f[0], f[2]]));
+  assert.match(await r('nmap-builder', d), /^nmap -sn -T3 -oN scan\.txt 192\.168\.1\.0\/24/);
+  assert.throws(() => byId('nmap-builder').run({ ...d, target: 'x; rm -rf /' }), /Target/);
+  assert.throws(() => byId('nmap-builder').run({ ...d, target: '-iL /etc/passwd' }), /Target/);
+  assert.throws(() => byId('nmap-builder').run({ ...d, ports: '1;2' }), /Ports/);
+  const np = byId('nmap-parser').fields[0][2];
+  assert.match(await r('nmap-parser', { out: np }), /Open: 2/);
+  assert.match(await r('wireshark-filter', { proto: 'tcp', host: '192.168.1.10', port: '443' }), /ip\.addr == 192\.168\.1\.10 && tcp\.port == 443/);
+  assert.throws(() => byId('wireshark-filter').run({ proto: 'dns', host: '', port: '53' }), /Port applies/);
+  assert.match(await r('tshark-builder', { iface: 'eth0', filter: 'tcp port 443', count: '10', file: 'a.pcapng' }), /tshark -i eth0 -f "tcp port 443" -c 10 -w a\.pcapng/);
+  assert.throws(() => byId('tshark-builder').run({ iface: 'eth0', filter: 'a"; id', count: '10', file: 'a.pcapng' }), /Filter/);
+  assert.throws(() => byId('tshark-builder').run({ iface: 'eth0', filter: '', count: '10', file: '../x.pcapng' }), /Output/);
+  assert.match(await r('termux-setup', { profile: 'Networking tools' }), /pkg install -y nmap/);
+  assert.match(await r('kali-reference', { q: 'packet' }), /wireshark/);
+  assert.match(await r('osint-domain', { domain: 'example.com' }), /site:example\.com/);
+  const eh = await r('email-header', { h: byId('email-header').fields[0][2] });
+  assert.match(eh, /Reply-To domain differs/);
+  assert.match(eh, /dkim=fail/);
 });

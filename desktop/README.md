@@ -88,6 +88,14 @@ Parses common Apache/Nginx combined access-log lines. The report contains aggreg
 
 Reads classic Ethernet PCAP files locally and reports packet totals, IPv4/IPv6 counts, TCP/UDP/ICMP/other protocol counts, and the most common destination ports. It does not transmit packets, perform a live capture, export packet payloads, or include source/destination IP addresses in the report. VLAN-tagged Ethernet and IPv4 fragmentation are handled conservatively; IPv6 extension-header traversal is not implemented. PCAPNG and non-Ethernet capture formats are rejected explicitly. Use captures you own or are authorized to analyze.
 
+
+### 9. IPv4 subnet calculator
+
+    python -m deskops subnet 192.168.10.77/24
+    python -m deskops subnet 10.20.0.0/16 --json
+
+Calculates the normalized network, prefix, subnet mask, wildcard mask, broadcast address, total address count, and usable host range. /31 point-to-point networks and /32 single-host routes are handled explicitly. The calculation is local and generates no network traffic. IPv6 input is rejected with a clear message because this command currently focuses on IPv4 planning.
+
 ## Exit codes
 
 - 0: command completed successfully (or endpoint is reachable).

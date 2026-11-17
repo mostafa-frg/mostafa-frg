@@ -1,6 +1,6 @@
 # Desktop installation and downloads
 
-This project is intended for desktop and laptop computers. Android, Termux, and mobile installation are out of scope.
+This project is intended for desktop and laptop computers running Windows, Linux, or macOS.
 
 ## Option A — Download from GitHub without Git
 
@@ -31,7 +31,7 @@ py -3 -m deskops --help
 - Windows 10/11, a supported Linux desktop distribution, or macOS.
 - Python 3.10+ for the DeskOps Python package.
 - Git is optional when using GitHub's ZIP download.
-- No mobile device, Termux, account, telemetry, or cloud login is required to run local commands.
+- No account, telemetry, or cloud login is required to run local commands.
 
 ## Privacy
 

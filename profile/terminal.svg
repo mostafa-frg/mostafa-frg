@@ -1,30 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="360" viewBox="0 0 900 360" role="img" aria-label="Mosta terminal banner with project statistics">
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="300" viewBox="0 0 900 300" role="img" aria-label="Desktop engineering toolkit terminal preview">
 <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0d1117"/><stop offset="1" stop-color="#111a2b"/></linearGradient></defs>
-<rect width="900" height="360" rx="14" fill="url(#bg)" stroke="#30363d"/>
+<rect width="900" height="300" rx="14" fill="url(#bg)" stroke="#30363d"/>
 <rect width="900" height="38" rx="14" fill="#161b22"/><rect y="24" width="900" height="14" fill="#161b22"/>
 <circle cx="24" cy="19" r="6" fill="#ff5f56"/><circle cx="44" cy="19" r="6" fill="#ffbd2e"/><circle cx="64" cy="19" r="6" fill="#27c93f"/>
-<text x="88" y="24" fill="#8b949e" font-family="monospace" font-size="13">mostafa@lab: ~/mostafa-frg/cyber-labs</text>
+<text x="88" y="24" fill="#8b949e" font-family="monospace" font-size="13">engineering@desktop: ~/workspace</text>
 <g font-family="monospace" font-size="17">
-<text x="28" y="66" fill="#3fb950">$ <tspan fill="#c9d1d9">mnet subnet 192.168.10.10/24</tspan></text>
-<g font-size="18"><text x="40" y="96" fill="#1f6feb" xml:space="preserve"> __  __  ___  ____ _____  _    </text>
-<text x="40" y="116" fill="#388bfd" xml:space="preserve">|  \/  |/ _ \/ ___|_   _|/ \   </text>
-<text x="40" y="136" fill="#58a6ff" xml:space="preserve">| |\/| | | | \___ \ | | / _ \  </text>
-<text x="40" y="156" fill="#79c0ff" xml:space="preserve">| |  | | |_| |___) || |/ ___ \ </text>
-<text x="40" y="176" fill="#a5d6ff" xml:space="preserve">|_|  |_|\___/|____/ |_/_/   \_\</text></g>
-<text x="40" y="214" fill="#8b949e">=======================================</text>
-<text x="40" y="238" fill="#c9d1d9">Network &amp; Security Toolkit <tspan fill="#8b949e">&#183; v1.1.0</tspan></text>
-<text x="40" y="262" fill="#58a6ff">> NETWORK TOOLKIT <tspan fill="#8b949e">&#183; by Mostafa Mahmoud</tspan></text>
-<text x="40" y="286" fill="#d29922">! Authorized use only</text>
-</g>
-<g font-family="monospace" font-size="15">
-<rect x="520" y="70" width="350" height="250" rx="10" fill="#0d1117" stroke="#30363d"/>
-<text x="540" y="100" fill="#8b949e">repository facts</text>
-<text x="540" y="132" fill="#c9d1d9">33  <tspan fill="#8b949e">command-line tools</tspan></text>
-<text x="540" y="160" fill="#c9d1d9">3   <tspan fill="#8b949e">local web labs (Flask)</tspan></text>
-<text x="540" y="188" fill="#c9d1d9">42  <tspan fill="#8b949e">pytest tests</tspan></text>
-<text x="540" y="216" fill="#c9d1d9">3   <tspan fill="#8b949e">Docker Compose labs</tspan></text>
-<text x="540" y="244" fill="#c9d1d9">3.8+ <tspan fill="#8b949e">Python (static check)</tspan></text>
-<text x="540" y="278" fill="#3fb950">tested on Linux</text>
-<text x="540" y="300" fill="#8b949e">Termux: not yet tested</text>
+<text x="28" y="72" fill="#3fb950">$ <tspan fill="#c9d1d9">python -m deskops --help</tspan></text>
+<text x="40" y="112" fill="#58a6ff">DESKTOP ENGINEERING &amp; SECURITY TOOLKIT</text>
+<text x="40" y="146" fill="#c9d1d9">[+] File hashing and integrity verification</text>
+<text x="40" y="176" fill="#c9d1d9">[+] DNS and single-endpoint diagnostics</text>
+<text x="40" y="206" fill="#c9d1d9">[+] HTTP security-header review</text>
+<text x="40" y="236" fill="#c9d1d9">[+] Local access-log analysis</text>
+<text x="40" y="272" fill="#3fb950">LOCAL-FIRST · NO TELEMETRY · WINDOWS + LINUX</text>
 </g>
 </svg>

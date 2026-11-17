@@ -1,4 +1,6 @@
 import json
+from contextlib import redirect_stdout
+from io import StringIO
 import socket
 import tempfile
 import unittest
@@ -119,6 +121,28 @@ class DeskOpsTests(unittest.TestCase):
         self.assertEqual(result["verification"], "passed")
         self.assertIn("example.test", result["subject_alt_names"])
         raw.close.assert_called_once()
+
+
+    @patch("deskops.urllib.request.urlopen")
+    def test_http_audit_flags_https_redirect_downgrade(self, urlopen):
+        response = Mock()
+        response.status = 200
+        response.headers.items.return_value = []
+        response.geturl.return_value = "http://example.test/"
+        urlopen.return_value = response
+        result = deskops.http_audit("https://example.test/")
+        control = next(x for x in result["checks"] if x["control"] == "HTTPS redirect integrity")
+        self.assertEqual(control["status"], "review")
+
+    def test_emit_supports_human_and_json_output(self):
+        human = StringIO()
+        with redirect_stdout(human):
+            deskops._emit({"digest": "abc123", "size": 3})
+        self.assertIn("Digest: abc123", human.getvalue())
+        machine = StringIO()
+        with redirect_stdout(machine):
+            deskops._emit({"digest": "abc123"}, as_json=True)
+        self.assertEqual(json.loads(machine.getvalue()), {"digest": "abc123"})
 
     def test_log_summary_does_not_disclose_client_addresses(self):
         log = self.root / "access.log"

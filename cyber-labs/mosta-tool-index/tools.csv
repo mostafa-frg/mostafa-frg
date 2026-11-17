@@ -1,64 +1,62 @@
 name,alias,platform,category,purpose
-Nmap,mnmap,Linux+Termux,network,authorized service discovery
-Netcat,mnc,Linux+Termux,network,TCP/UDP connectivity
-Tcpdump,mtcpdump,Linux+Termux,packet,packet capture
-TShark,mtshark,Linux+Termux,packet,CLI packet analysis
+Nmap,mnmap,Linux Desktop,network,authorized service discovery
+Netcat,mnc,Linux Desktop,network,TCP/UDP connectivity
+Tcpdump,mtcpdump,Linux Desktop,packet,packet capture
+TShark,mtshark,Linux Desktop,packet,CLI packet analysis
 Wireshark,mwireshark,Linux,packet,GUI packet analysis
-Scapy,mscapy,Linux+Termux,packet,packet analysis
-Aircrack-ng,maircrack,Linux+Termux,wireless,authorized Wi-Fi auditing
+Scapy,mscapy,Linux Desktop,packet,packet analysis
+Aircrack-ng,maircrack,Linux Desktop,wireless,authorized Wi-Fi auditing
 Kismet,mkismet,Linux,wireless,wireless monitoring
 Burp Suite,mburp,Linux,web,HTTP security testing
 OWASP ZAP,mzap,Linux,web,web security testing
-Nikto,mnikto,Linux+Termux,web,web assessment
-ffuf,mffuf,Linux+Termux,web,content discovery
-dig,mdig,Linux+Termux,dns,DNS diagnostics
-MTR,mmtr,Linux+Termux,network,path diagnostics
-John the Ripper,mjohn,Linux+Termux,audit,offline password auditing
+Nikto,mnikto,Linux Desktop,web,web assessment
+ffuf,mffuf,Linux Desktop,web,content discovery
+dig,mdig,Linux Desktop,dns,DNS diagnostics
+MTR,mmtr,Linux Desktop,network,path diagnostics
+John the Ripper,mjohn,Linux Desktop,audit,offline password auditing
 Hashcat,mhashcat,Linux,password,offline password auditing
-Hydra,mhydra,Linux+Termux,audit,authorized credential testing
+Hydra,mhydra,Linux Desktop,audit,authorized credential testing
 Zeek,mzeek,Linux,monitoring,network security monitoring
 Suricata,msuricata,Linux,monitoring,IDS/IPS
 Metasploit,mmetsploit,Linux,lab,authorized exploitation research
-SQLMap,msqlmap,Linux+Termux,web,authorized SQL injection testing
+SQLMap,msqlmap,Linux Desktop,web,authorized SQL injection testing
 SearchSploit,msearchsploit,Linux,reference,local exploit reference search
-Socat,msocat,Linux+Termux,network,relay and socket diagnostics
-traceroute,mtraceroute,Linux+Termux,network,path diagnostics
-tracepath,mtracepath,Linux+Termux,network,path MTU diagnostics
-whois,mwhois,Linux+Termux,dns,domain registration lookup
-curl,mcurl,Linux+Termux,web,HTTP requests
-wget,mwget,Linux+Termux,web,file retrieval
-OpenSSH,mssh,Linux+Termux,remote,secure remote shell
-Masscan,mmasscan,Linux+Termux,network,authorized high-speed port discovery
+Socat,msocat,Linux Desktop,network,relay and socket diagnostics
+traceroute,mtraceroute,Linux Desktop,network,path diagnostics
+tracepath,mtracepath,Linux Desktop,network,path MTU diagnostics
+whois,mwhois,Linux Desktop,dns,domain registration lookup
+curl,mcurl,Linux Desktop,web,HTTP requests
+wget,mwget,Linux Desktop,web,file retrieval
+OpenSSH,mssh,Linux Desktop,remote,secure remote shell
+Masscan,mmasscan,Linux Desktop,network,authorized high-speed port discovery
 WhatWeb,mwhatweb,Linux,web,web technology fingerprinting
 wifite,mwifite,Linux,wireless,authorized Wi-Fi auditing automation
-dnsrecon,mdnsrecon,Linux+Termux,dns,DNS enumeration for authorized domains
+dnsrecon,mdnsrecon,Linux Desktop,dns,DNS enumeration for authorized domains
 dnsenum,mdnsenum,Linux,dns,DNS enumeration for authorized domains
-nslookup,mnslookup,Linux+Termux,dns,DNS lookup
-ss (iproute2),mss,Linux+Termux,network,socket statistics
-iproute2,mip,Linux+Termux,network,interfaces routes and neighbour diagnostics
-iputils,mping,Linux+Termux,network,ICMP reachability checks
-procps,mps,Linux+Termux,system,process listing
-procps,mtop,Linux+Termux,system,interactive process monitoring
-jq,mjq,Linux+Termux,data,JSON filtering and extraction
-OpenSSL,mopenssl,Linux+Termux,crypto,TLS and cryptographic diagnostics
-iperf3,miperf3,Linux+Termux,network,throughput testing between authorized endpoints
-ipcalc,mipcalc,Linux+Termux,network,IPv4 subnet calculations
-htop,mhtop,Linux+Termux,system,interactive process monitoring
-tmux,mtmux,Linux+Termux,terminal,multiplexed terminal sessions
-rsync,mrsync,Linux+Termux,transfer,file synchronization
-lsof,mlsof,Linux+Termux,system,open files and sockets
-coreutils,msha256sum,Linux+Termux,integrity,SHA-256 file hashing
-file,mfile,Linux+Termux,system,file type identification
-net-tools,mnetstat,Linux+Termux,network,legacy network statistics
-net-tools,mifconfig,Linux+Termux,network,legacy interface inspection
-strace,mstrace,Linux+Termux,system,process syscall tracing
-ripgrep,mripgrep,Linux+Termux,developer,fast text search
-fd,mfd,Linux+Termux,developer,fast file discovery
-fzf,mfzf,Linux+Termux,developer,fuzzy selection
-tree,mtree,Linux+Termux,system,directory tree display
-ncdu,mncdu,Linux+Termux,system,disk usage inspection
-micro,mmicro,Linux+Termux,editor,terminal text editor
-figlet,mfiglet,Linux+Termux,terminal,ASCII text banners
-toilet,mtoilet,Linux+Termux,terminal,ASCII text banners
-Termux tools,mtermux-info,Linux+Termux,android,Termux environment diagnostics
-Termux tools,mtermux-storage,Linux+Termux,android,request shared storage access
+nslookup,mnslookup,Linux Desktop,dns,DNS lookup
+ss (iproute2),mss,Linux Desktop,network,socket statistics
+iproute2,mip,Linux Desktop,network,interfaces routes and neighbour diagnostics
+iputils,mping,Linux Desktop,network,ICMP reachability checks
+procps,mps,Linux Desktop,system,process listing
+procps,mtop,Linux Desktop,system,interactive process monitoring
+jq,mjq,Linux Desktop,data,JSON filtering and extraction
+OpenSSL,mopenssl,Linux Desktop,crypto,TLS and cryptographic diagnostics
+iperf3,miperf3,Linux Desktop,network,throughput testing between authorized endpoints
+ipcalc,mipcalc,Linux Desktop,network,IPv4 subnet calculations
+htop,mhtop,Linux Desktop,system,interactive process monitoring
+tmux,mtmux,Linux Desktop,terminal,multiplexed terminal sessions
+rsync,mrsync,Linux Desktop,transfer,file synchronization
+lsof,mlsof,Linux Desktop,system,open files and sockets
+coreutils,msha256sum,Linux Desktop,integrity,SHA-256 file hashing
+file,mfile,Linux Desktop,system,file type identification
+net-tools,mnetstat,Linux Desktop,network,legacy network statistics
+net-tools,mifconfig,Linux Desktop,network,legacy interface inspection
+strace,mstrace,Linux Desktop,system,process syscall tracing
+ripgrep,mripgrep,Linux Desktop,developer,fast text search
+fd,mfd,Linux Desktop,developer,fast file discovery
+fzf,mfzf,Linux Desktop,developer,fuzzy selection
+tree,mtree,Linux Desktop,system,directory tree display
+ncdu,mncdu,Linux Desktop,system,disk usage inspection
+micro,mmicro,Linux Desktop,editor,terminal text editor
+figlet,mfiglet,Linux Desktop,terminal,ASCII text banners
+toilet,mtoilet,Linux Desktop,terminal,ASCII text banners

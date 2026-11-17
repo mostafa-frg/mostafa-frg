@@ -43,4 +43,4 @@ A successful CI run is evidence for the tested code paths only; it is not a guar
 
 ## License and third-party tools
 
-Review the license and each tool's upstream license before redistribution. External utilities are not bundled or silently installed by this repository.
+No repository-wide open-source license has been selected yet; public visibility does not itself grant redistribution rights. External utilities are not bundled or silently installed, and each upstream tool has its own license.

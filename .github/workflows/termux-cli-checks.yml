@@ -32,6 +32,11 @@ jobs:
           done
           bash -n cyber-labs/mosta-terminal/mosta-external
           test -s cyber-labs/mosta-terminal/TERMUX-GUIDE.md
+          test -x cyber-labs/mosta-terminal/install.sh
+          test -x cyber-labs/mosta-terminal/mosta-external-install.sh
+          test -x cyber-labs/mosta-terminal/mosta-external
+          test -x cyber-labs/mosta-terminal/mosta-doctor.sh
+          test -x cyber-labs/mosta-terminal/mosta-tools
           grep -q "TERMUX-GUIDE.md" README.md
       - name: Test fixed upstream command mappings
         shell: bash

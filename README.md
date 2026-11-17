@@ -22,6 +22,7 @@ The DeskOps package uses Python 3.10+ and the Python standard library:
 - IPv4 subnet planning, including `/31` point-to-point and `/32` single-host cases.
 - Offline classic Ethernet PCAP summaries with protocol and destination-port counts; packet payloads and IP addresses are not included in reports.
 - Local Linux authentication-log summaries for SSH, PAM, and sudo events, with usernames and raw IP addresses excluded from reports.
+- ZIP archive safety audits that flag path traversal, symbolic links, duplicate paths, encrypted entries, executable extensions, and suspicious compression metadata without extracting files.
 - Offline tests and a cross-platform GitHub Actions matrix.
 
 Quick start:

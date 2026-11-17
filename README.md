@@ -35,7 +35,6 @@ On Windows, use `py -3` if `python` is not on PATH. GitHub's **Code → Download
 
 The CLI catalog is designed for desktop/laptop operating systems only. It covers Windows 10/11, Linux distributions, and macOS. It links to upstream projects and explains platform-specific installation routes, verification, and limitations. It does not bundle third-party executables or run installation commands.
 
-**Mobile operating systems and Android terminal environments are out of scope.**
 
 ## Engineering workspace and labs
 

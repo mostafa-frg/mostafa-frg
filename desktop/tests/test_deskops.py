@@ -160,5 +160,43 @@ class DeskOpsTests(unittest.TestCase):
         self.assertNotIn("192.0.2.10", serialized)
         self.assertNotIn("token=secret", serialized)
 
+
+    def test_pcap_summary_counts_udp_without_disclosing_addresses(self):
+        import struct
+        capture = self.root / "sample.pcap"
+        ethernet = bytes.fromhex("00112233445566778899aabb0800")
+        ipv4 = bytes.fromhex("4500001c0000000040110000c0000201c0000202")
+        udp = struct.pack("!HHHH", 53000, 53, 8, 0)
+        frame = ethernet + ipv4 + udp
+        global_header = bytes.fromhex("d4c3b2a1") + struct.pack("<HHIIII", 2, 4, 0, 0, 65535, 1)
+        record = struct.pack("<IIII", 1, 0, len(frame), len(frame))
+        capture.write_bytes(global_header + record + frame)
+        result = deskops.pcap_summary(capture)
+        self.assertEqual(result["packets"], 1)
+        self.assertEqual(result["ipv4_packets"], 1)
+        self.assertEqual(result["protocols"], {"udp": 1})
+        self.assertEqual(result["top_destination_ports"], [{"port": 53, "packets": 1}])
+        serialized = json.dumps(result)
+        self.assertNotIn("192.0.2.1", serialized)
+        self.assertNotIn("192.0.2.2", serialized)
+
+    def test_pcap_summary_rejects_pcapng_and_non_ethernet(self):
+        capture = self.root / "unsupported.pcap"
+        capture.write_bytes(b"\x0a\x0d\x0d\x0a" + bytes(40))
+        with self.assertRaisesRegex(ValueError, "classic PCAP"):
+            deskops.pcap_summary(capture)
+        global_header = bytes.fromhex("d4c3b2a1") + __import__("struct").pack("<HHIIII", 2, 4, 0, 0, 65535, 101)
+        capture.write_bytes(global_header)
+        with self.assertRaisesRegex(ValueError, "Ethernet"):
+            deskops.pcap_summary(capture)
+
+    def test_pcap_summary_rejects_truncated_record_header(self):
+        capture = self.root / "truncated.pcap"
+        capture.write_bytes(
+            bytes.fromhex("d4c3b2a1") + __import__("struct").pack("<HHIIII", 2, 4, 0, 0, 65535, 1) + b"short"
+        )
+        with self.assertRaisesRegex(ValueError, "record header"):
+            deskops.pcap_summary(capture)
+
 if __name__ == "__main__":
     unittest.main()

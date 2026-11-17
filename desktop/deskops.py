@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cross-platform, local-first desktop diagnostics. Python standard library only."""
 from __future__ import annotations
-import argparse, hashlib, json, re, socket, sys, urllib.error, urllib.parse, urllib.request
+import argparse, hashlib, json, re, socket, ssl, sys, time, urllib.error, urllib.parse, urllib.request
 from collections import Counter
 from pathlib import Path, PurePosixPath
 
@@ -128,6 +128,8 @@ def http_audit(url: str, timeout: float = 8.0) -> dict:
     def check(name, passed, detail):
         checks.append({"control": name, "status": "pass" if passed else "review", "detail": detail})
     https = scheme == "https"
+    downgraded = parsed.scheme == "https" and scheme != "https"
+    check("HTTPS redirect integrity", not downgraded, "No HTTPS downgrade" if not downgraded else "HTTPS redirected to HTTP")
     check("Strict-Transport-Security", not https or "strict-transport-security" in headers,
           "Present" if "strict-transport-security" in headers else ("Missing on HTTPS" if https else "Not applicable to HTTP"))
     check("Content-Security-Policy", "content-security-policy" in headers,
@@ -145,6 +147,35 @@ def http_audit(url: str, timeout: float = 8.0) -> dict:
             "server_header_exposed": "server" in headers,
             "powered_by_header_exposed": "x-powered-by" in headers,
             "note": "Header review only; not a complete application security assessment."}
+
+
+def tls_check(host: str, port: int = 443, timeout: float = 5.0) -> dict:
+    if not host or host.strip() != host or any(c.isspace() for c in host):
+        raise ValueError("Provide one hostname or IP address")
+    if not 1 <= port <= 65535 or not 0.1 <= timeout <= 30:
+        raise ValueError("Port must be 1–65535 and timeout 0.1–30 seconds")
+    context = ssl.create_default_context()
+    raw = socket.create_connection((host, port), timeout=timeout)
+    try:
+        with context.wrap_socket(raw, server_hostname=host) as connection:
+            cert = connection.getpeercert()
+            der = connection.getpeercert(binary_form=True)
+            if not cert or not der:
+                raise ValueError("Peer did not provide a verifiable certificate")
+            expiry = ssl.cert_time_to_seconds(cert["notAfter"])
+            sans = [value for kind, value in cert.get("subjectAltName", ()) if kind in {"DNS", "IP Address"}]
+            fingerprint = hashlib.sha256(der).hexdigest()
+            return {
+                "host": host, "port": port, "tls_version": connection.version(),
+                "cipher": connection.cipher()[0] if connection.cipher() else None,
+                "subject": cert.get("subject", ()), "issuer": cert.get("issuer", ()),
+                "subject_alt_names": sans, "expires_at": cert["notAfter"],
+                "days_remaining": int((expiry - time.time()) // 86400),
+                "sha256_fingerprint": ":".join(fingerprint[i:i+2] for i in range(0, len(fingerprint), 2)),
+                "verification": "passed",
+            }
+    finally:
+        raw.close()
 
 LOG_RE = re.compile(r'^(?P<ip>\S+) \S+ \S+ \[[^]]+\] "(?P<method>[A-Z]+) (?P<target>\S+) \S+" (?P<status>\d{3}) \S+')
 def log_summary(path: Path) -> dict:
@@ -187,6 +218,7 @@ def main(argv=None) -> int:
     p.add_argument("--timeout", type=float, default=3.0); p.add_argument("--json", action="store_true")
     p = sub.add_parser("http-audit", help="Review HTTP response security headers"); p.add_argument("url")
     p.add_argument("--timeout", type=float, default=8.0); p.add_argument("--json", action="store_true")
+    p = sub.add_parser("tls-check", help="Inspect a verified TLS certificate on one endpoint"); p.add_argument("host"); p.add_argument("--port", type=int, default=443); p.add_argument("--timeout", type=float, default=5.0); p.add_argument("--json", action="store_true")
     p = sub.add_parser("log-summary", help="Summarize a local Apache/Nginx access log"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     try:
@@ -196,6 +228,7 @@ def main(argv=None) -> int:
         elif args.command == "dns": result = dns_lookup(args.host, args.family)
         elif args.command == "tcp": result = tcp_check(args.host, args.port, args.timeout)
         elif args.command == "http-audit": result = http_audit(args.url, args.timeout)
+        elif args.command == "tls-check": result = tls_check(args.host, args.port, args.timeout)
         else: result = log_summary(args.file)
         _emit(result, getattr(args, "json", False))
         if args.command == "tcp" and not result["open"]: return 2

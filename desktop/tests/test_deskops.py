@@ -225,5 +225,60 @@ class DeskOpsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             deskops.subnet_info("192.168.1.1/99")
 
+
+    def test_auth_summary_aggregates_linux_auth_events_without_leaking_identity(self):
+        log = self.root / "auth.log"
+        log.write_text(
+            "Nov 17 host sshd[101]: Failed password for invalid user intruder from 203.0.113.9 port 22 ssh2\n"
+            "Nov 17 host sshd[102]: Accepted publickey for alice from 198.51.100.22 port 22 ssh2\n"
+            "Nov 17 host sshd[103]: Invalid user guest from 203.0.113.77 port 22\n"
+            "Nov 17 host sshd[104]: pam_unix(sshd:auth): authentication failure; rhost=2001:db8::5 user=secret\n"
+            "Nov 17 host sudo[105]: operator : TTY=pts/0 ; COMMAND=cat /etc/shadow\n"
+            "Nov 17 host kernel: unrelated system event\n",
+            encoding="utf-8",
+        )
+        result = deskops.auth_summary(log)
+        self.assertEqual(result["lines_scanned"], 6)
+        self.assertEqual(result["ssh_failed"], 1)
+        self.assertEqual(result["ssh_accepted"], 1)
+        self.assertEqual(result["pam_failures"], 1)
+        self.assertEqual(result["invalid_user_events"], 2)
+        self.assertEqual(result["sudo_events"], 1)
+        self.assertEqual(result["failed_auth_total"], 2)
+        self.assertEqual(result["unique_source_networks"], 3)
+        networks = {item["network"] for item in result["top_source_networks"]}
+        self.assertIn("203.0.113.0/24", networks)
+        self.assertIn("198.51.100.0/24", networks)
+        self.assertIn("2001:db8::/48", networks)
+        serialized = json.dumps(result)
+        for private_value in ("intruder", "alice", "guest", "secret", "203.0.113.9",
+                              "198.51.100.22", "2001:db8::5", "/etc/shadow"):
+            self.assertNotIn(private_value, serialized)
+
+    def test_auth_summary_rejects_missing_files_and_symlinks(self):
+        with self.assertRaises(ValueError):
+            deskops.auth_summary(self.root / "missing.log")
+        target = self.root / "real.log"
+        target.write_text("empty\n", encoding="utf-8")
+        link = self.root / "linked.log"
+        try:
+            link.symlink_to(target)
+        except (OSError, NotImplementedError):
+            self.skipTest("Symlinks are unavailable on this platform")
+        with self.assertRaisesRegex(ValueError, "regular"):
+            deskops.auth_summary(link)
+
+    def test_auth_summary_cli_emits_json(self):
+        log = self.root / "auth-cli.log"
+        log.write_text(
+            "Nov 17 host sshd[201]: Failed password for root from 192.0.2.55 port 22 ssh2\n",
+            encoding="utf-8",
+        )
+        output = StringIO()
+        with redirect_stdout(output):
+            code = deskops.main(["auth-summary", str(log), "--json"])
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(output.getvalue())["ssh_failed"], 1)
+
 if __name__ == "__main__":
     unittest.main()

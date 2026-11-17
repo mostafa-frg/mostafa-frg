@@ -3,7 +3,7 @@ import socket
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -100,7 +100,7 @@ class DeskOpsTests(unittest.TestCase):
     def test_tls_check_reports_verified_certificate(self, connect, make_context):
         raw = Mock()
         connect.return_value = raw
-        tls = Mock()
+        tls = MagicMock()
         tls.__enter__.return_value = tls
         tls.getpeercert.side_effect = [
             {"subject": ((("commonName", "example.test"),),),

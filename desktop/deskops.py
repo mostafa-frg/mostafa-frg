@@ -543,6 +543,8 @@ def main(argv=None) -> int:
         _emit(result, getattr(args, "json", False))
         if args.command == "tcp" and not result["open"]: return 2
         if args.command == "manifest" and args.action == "verify" and not result["ok"]: return 2
+        if args.command == "archive-audit" and result["high_findings"]: return 2
+        if args.command == "archive-audit" and result["review_findings"]: return 1
         return 0
     except (OSError, ValueError, json.JSONDecodeError, zipfile.BadZipFile) as exc:
         print(f"deskops: {exc}", file=sys.stderr); return 2

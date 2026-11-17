@@ -1,192 +1,46 @@
-<div align="center">
+# Engineering & Security Toolkit
 
-# Mostafa Mahmoud
+A public collection of desktop utilities, engineering references, and controlled cybersecurity labs. The repository is organized for repeatable use, transparent behavior, and verification through automated tests.
 
-**IT Support • Networking • Linux • Cybersecurity**
+## Desktop toolkit
 
-<img src="./profile/terminal.svg" alt="Terminal">
+The DeskOps package provides cross-platform utilities for Windows 10/11, Linux desktops, and macOS. It requires Python 3.10+ and uses only the standard library.
 
-Practical network engineering, security testing, Linux administration, and defensive security labs.
+- File hashing and integrity baselines
+- DNS resolution and single-endpoint TCP checks
+- HTTP security-header review
+- Local Apache/Nginx access-log summaries
+- No telemetry, automatic uploads, credential collection, or background service
 
-[![Lab Checks](https://github.com/mostafa-frg/mostafa-frg/actions/workflows/lab-checks.yml/badge.svg)](https://github.com/mostafa-frg/mostafa-frg/actions/workflows/lab-checks.yml)
+Start here: [Desktop Toolkit documentation](desktop/README.md).
 
-</div>
+## Engineering workspace
 
-<div align="center">
+The browser-based workspace contains practical tools for networking, cybersecurity, SOC analysis, Linux administration, Bash, and developer workflows.
 
-![Python](https://img.shields.io/badge/Python-3.8%2B%20(static%20check)-3776AB?logo=python&logoColor=white)
-![Platform](https://img.shields.io/badge/Linux-tested-2ea44f)
-![Termux](https://img.shields.io/badge/Termux-guide%20available%20%E2%80%A2%20device%20QA%20pending-yellow)
-![Tools](https://img.shields.io/badge/CLI%20toolkit%20%2B%20web%20labs-0ea5e9)
-![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20unittest-8b5cf6)
-![License](https://img.shields.io/badge/use-authorized%20only-orange)
+- Open the application source in [portfolio](portfolio/).
+- Browse the [tool library](portfolio/tools.html).
+- Read the [security and privacy notes](portfolio/security.html).
 
-</div>
+Browser-local tools process supplied data in the browser. External lookups identify their provider and send only the query required for that lookup.
 
----
+## Network and security labs
 
-## Preview
-
-![Mosta toolkit in action](profile/demo.png)
-
-*Real output from `mnet`, `mlog` and `mdet`, rendered from an actual run.*
-
-Every Python tool and `m*` command opens with the Mosta banner in an interactive terminal:
-
-```text
-   __  __  ___  ____ _____  _
-  |  \/  |/ _ \/ ___|_   _|/ \
-  | |\/| | | | \___ \ | | / _ \
-  | |  | | |_| |___) || |/ ___ \
-  |_|  |_|\___/|____/ |_/_/   \_\
-╭──────────────────────────────────────╮
-│ ▸ NETWORK TOOLKIT                    │
-│ Network & Security Toolkit · v1.1.0  │
-│ by Mostafa Mahmoud                   │
-│ ⚠ Authorized use only                │
-╰──────────────────────────────────────╯
-```
-
----
-
-## About
-
-I build small, testable tools around the work I actually want to do: troubleshooting networks, validating configurations, analyzing security data, and automating repetitive tasks.
-
-The repository is intentionally practical. Most labs take local input or supplied evidence rather than depending on a live production environment.
-
-## Focus
-
-- Network engineering and troubleshooting
-- Linux administration and shell tooling
-- Web and API security
-- SOC and log analysis
-- Security testing in controlled environments
-- Network automation
-
-## Projects
-
-### Network Engineering & Security
-
-| Project | What it does | Command |
-|---|---|---|
-| [Network Toolkit](cyber-labs/network-toolkit/) | subnet, DNS, TCP connectivity, and inventory diagnostics | `mnet` |
-| [Network Security Lab](cyber-labs/network-security-lab/) | authorized TCP service inventory with JSON reporting | `mscan` |
-| [Network Monitor](cyber-labs/network-monitor/) | periodic TCP health checks with JSONL events | `mmon` |
-| [Subnet Planner](cyber-labs/subnet-planner/) | IPv4 subnet allocation and capacity planning | `msubnet` |
-| [IPAM Lab](cyber-labs/ipam/) | CSV-backed IPv4 address allocation | `mipam` |
-| [VLAN Lab](cyber-labs/vlan-lab/) | access/trunk and VLAN consistency validation | `mvlan` |
-| [Firewall Rule Validator](cyber-labs/firewall-rule-validator/) | offline ACL overlap, conflict, and shadowing checks | `mfw` |
-| [Network Config Auditor](cyber-labs/network-config-auditor/) | Cisco-style configuration security checks | `mcfg` |
-| [Network Automation Lab](cyber-labs/network-automation-lab/) | repeatable IOS-style configuration generation | `mauto` |
-| [Topology Builder](cyber-labs/topology-builder/) | CSV-to-Graphviz topology generation | `mtopo` |
-| [NetFlow Analyzer](cyber-labs/netflow-parser/) | offline traffic-flow aggregation | `mflow` |
-| [DNS & DHCP Lab](cyber-labs/dns-dhcp-lab/) | local DNS/DHCP troubleshooting lab | `mdns` |
-| [PCAP Analysis Lab](cyber-labs/pcap-analysis/) | offline packet and DNS analysis | `mpcap` |
-| [OSPF Lab](cyber-labs/ospf-lab/) | router-ID, area, and network validation | `mospf` |
-| [STP Lab](cyber-labs/stp-lab/) | bridge identity and priority consistency checks | `mstp` |
-| [NAT Policy Lab](cyber-labs/nat-lab/) | offline IPv4 NAT policy validation | `mnat` |
-| [SNMP Audit](cyber-labs/snmp-audit/) | configuration review for insecure SNMP settings | `msnmp` |
-| [Syslog Analyzer](cyber-labs/syslog-analyzer/) | network-device syslog aggregation | `msyslog` |
-| [ACL Policy Lab](cyber-labs/acl-policy-lab/) | offline access-control policy validation | `macl` |
-| [Routing Lab](cyber-labs/routing-lab/) | offline route validation and analysis | `mrt` |
-| [Network Operations Lab](cyber-labs/network-operations-lab/) | isolated Docker topology with services and health checks | — |
-| [Network Engineering Suite](cyber-labs/network-engineering-suite/) | IP validation, longest-prefix route lookup, and inventory tooling | `mroute` |
-| [Network Config Compliance](cyber-labs/config-compliance/) | deterministic Cisco-style configuration compliance checks | `mconf` |
-| [Network Incident Triage](cyber-labs/incident-network-triage/) | network event timeline and severity analysis | `mtriage` |
-| [File Integrity Monitor](cyber-labs/file-integrity-monitor/) | SHA-256 baseline and tamper detection (added/removed/modified/permissions, optional HMAC) | `mfim` |
-| [Detection Rules Engine](cyber-labs/detection-rules-engine/) | JSON detection rules over JSONL logs: conditions, thresholds, grouping, severity and ATT&CK tags | `mdet` |
-| [Log Normalizer](cyber-labs/log-normalizer/) | offline normalization of JSON/JSONL, syslog and authentication records with a detection-pipeline integration | `mnorm`, `mpipe` |
-| [Log Ingest](cyber-labs/log-ingest/) | SSH, web-access and syslog lines (with years/time zones handled) to structured JSONL, summaries and an HTML report; pipes into the rules engine | `mlog` |
-
-### Linux / Termux
-
-| Project | What it does | Command |
-|---|---|---|
-| [Mosta Terminal](cyber-labs/mosta-terminal/) | Linux/Termux launchers with `Mosta` terminal branding and short aliases | — |
-| [Linux Network Toolbox](cyber-labs/linux-network-toolbox/) | interfaces, routes, DNS, and TCP diagnostics | `mtool` |
-| [Security Tool Catalog](cyber-labs/tool-catalog/) | categorized Linux/Termux security-tool reference | — |
-| [Mosta Tool Index](cyber-labs/mosta-tool-index/) | upstream tool to Mosta alias map (`mnmap`, `mmasscan`, `mdnsrecon`, ...) | — |
-
-### Quick Start (Linux)
-
-```bash
-git clone https://github.com/mostafa-frg/mostafa-frg.git
-cd mostafa-frg/cyber-labs/mosta-terminal
-./install.sh && mosta-doctor
-mnet subnet 192.168.10.10/24     # every tool opens with the MOSTA banner
-```
-
-The graphic banner is drawn on stderr only in an interactive terminal, so pipes, JSON output and scripts stay clean. Set `MOSTA_BANNER=never` to hide it, `MOSTA_BANNER=always` to force it, or `NO_COLOR=1` to disable colors.
-
-### Termux Quick Start
-
-Install the public repository directly inside Termux. The command layer installs native aliases and the repository labs; it does not add third-party package repositories.
-
-```bash
-pkg update -y
-pkg install -y git
-git clone --depth 1 --branch feat/mosta-platform-redesign https://github.com/mostafa-frg/mostafa-frg.git
-cd mostafa-frg/cyber-labs/mosta-terminal
-bash install.sh
-source ~/.zshrc 2>/dev/null || source ~/.bashrc 2>/dev/null || true
-hash -r
-mosta-doctor
-mosta-tools
-```
-
-The installer checks the packages available in the enabled Termux repositories, installs the supported core set, and reports unavailable packages instead of claiming they were installed. Optional extras can be skipped with `MOSTA_INSTALL_EXTRAS=0 bash install.sh`.
-
-The toolkit includes the repository labs (`mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtriage`, `mfim`, `mdet`, and more) plus native aliases for Nmap, Netcat, DNS, packet capture, routing, process inspection, JSON, TLS, throughput testing, and terminal utilities.
-
-See the full [Termux installation and command guide](cyber-labs/mosta-terminal/TERMUX-GUIDE.md) for the complete package matrix, usage examples, update steps, troubleshooting, and Android/root limitations.
-
-### Enterprise Security
-
-- [Active Directory Security Lab](cyber-labs/active-directory-security-lab/) — offline account and privilege auditing
-- [Privilege Escalation Lab](cyber-labs/privilege-escalation-lab/) — Linux privilege-boundary checks
-
-### Web Security
-
-- [Web Security Lab](cyber-labs/web-security-lab/) — local web-security exercises
-- [API Security Lab](cyber-labs/api-security-lab/) — authentication and authorization testing
-- [CTF Web Security Lab](cyber-labs/ctf-web-lab/) — controlled vulnerable web challenges
-- [HTTP Security Auditor](cyber-labs/http-security-auditor/) — HTTP security-header assessment
-
-### Blue Team & Reporting
-
-- [SOC Log Analyzer](cyber-labs/soc-log-analyzer/) — SSH authentication-log analysis
-- [Security Assessment Report Template](cyber-labs/security-report-template/) — repeatable security-report generation
-
-## What is verified (and what is not)
-
-- **Verified:** 42 pytest tests (plus the Log Normalizer's 7 unittest tests) pass; every CLI runs on sample data; the three Flask labs serve requests; shell launchers install and run from a clean `HOME` and virtualenv on Linux (tested with Python 3.13).
-- **Static check only:** compatibility with Python 3.8-3.12 (no syntax newer than 3.8 is used, but older interpreters were not run).
-- **Not device-tested:** real Termux/Android devices and macOS. The Termux scripts and fixed command wrappers are checked by GitHub Actions, but Android-specific permissions, package mirrors, and hardware behavior still require device-level validation. The installer uses `readlink -f`, which stock macOS does not provide, so macOS is not claimed as supported.
-- **CI:** the workflow is defined in `.github/workflows/lab-checks.yml`; check the badge above for the live result.
+The [cyber-labs directory](cyber-labs/README.md) contains independent Python labs for subnetting, routing, VLANs, ACLs, configuration auditing, PCAP analysis, log normalization, detection rules, file integrity, and incident triage.
 
 ## Validation
 
-The GitHub Actions workflow is configured to check:
+GitHub Actions runs automated checks for the web workspace, backend security tests against isolated local test resources, and Python lab regression tests. The desktop toolkit has a separate Windows and Ubuntu test matrix.
 
-- Python compilation and CLI help paths
-- unit and integration tests (unittest and pytest)
-- offline lab fixtures and negative cases
-- PCAP analysis with generated test traffic
-- local HTTP and Flask lab behavior
-- shell syntax and terminal launchers
-- Docker Compose configuration
+A successful CI run is evidence for the tested code paths only; it is not a guarantee that every environment or live network will behave identically.
 
-The security labs are scoped to localhost, supplied evidence, offline analysis, or environments where testing is explicitly authorized.
+## Privacy and safe use
 
-## Tools
+- No personal profile data is required to run the tools.
+- No telemetry or silent data upload is built into DeskOps.
+- Never commit credentials, tokens, private logs, private keys, or real customer data.
+- Network diagnostics and security testing must be limited to systems you own or are explicitly authorized to assess.
 
-`Linux` `Python` `Bash` `Git` `TCP/IP` `IPv4` `DNS` `DHCP` `VLAN` `Routing` `ACL` `IPAM` `PCAP` `Network Automation` `Web Security` `SOC`
+## License and third-party tools
 
----
-
-<div align="center">
-
-**Build it. Test it. Understand it.**
-
-</div>
+Review the license and each tool's upstream license before redistribution. External utilities are not bundled or silently installed by this repository.

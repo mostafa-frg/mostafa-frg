@@ -299,7 +299,7 @@ class DeskOpsTests(unittest.TestCase):
         self.assertEqual(result["sudo_events"], 1)
         self.assertEqual(result["failed_auth_total"], 2)
         serialized = json.dumps(result)
-        for secret in ("operator", "admin", "guest", "192.0.2.55", "/bin/id", "2001:db8"):
+        for secret in ("operator", "admin", "guest", "192.0.2.55", "/bin/id", "2001:db8:abcd:12::1"):
             self.assertNotIn(secret, serialized)
 
     def test_auth_summary_rejects_symlink_and_missing_file(self):

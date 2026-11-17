@@ -125,8 +125,9 @@ This is a pre-extraction triage aid, not an antivirus engine. It does not decomp
 
 ## Exit codes
 
-- 0: command completed successfully (or endpoint is reachable).
-- 2: invalid input, I/O failure, endpoint unavailable, or integrity differences detected.
+- 0: command completed successfully with no blocking findings.
+- 1: review-only findings (currently ZIP entries with executable-looking extensions or encrypted entries).
+- 2: invalid input, I/O failure, endpoint unavailable, integrity differences, or high-severity ZIP metadata hazards.
 
 ## Validation
 

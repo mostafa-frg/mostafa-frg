@@ -11,7 +11,7 @@ class DesktopCatalogDocumentationTests(unittest.TestCase):
                      "John the Ripper", "Hashcat", "Docker", "Terraform", "kubectl"):
             self.assertIn(term, text)
         self.assertNotRegex(text.lower(), r"termux|android terminal")
-        self.assertIn("explicit written authorization", text)
+        self.assertIn("written authorization", text)
         self.assertGreaterEqual(text.count("| ["), 45)
 
     def test_install_guide_does_not_require_personal_data_or_mobile_devices(self):

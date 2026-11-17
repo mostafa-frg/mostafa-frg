@@ -94,6 +94,32 @@ class DeskOpsTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             deskops.http_audit("https://user:secret@example.test/")
 
+
+    @patch("deskops.ssl.create_default_context")
+    @patch("deskops.socket.create_connection")
+    def test_tls_check_reports_verified_certificate(self, connect, make_context):
+        raw = Mock()
+        connect.return_value = raw
+        tls = Mock()
+        tls.__enter__.return_value = tls
+        tls.getpeercert.side_effect = [
+            {"subject": ((("commonName", "example.test"),),),
+             "issuer": ((("commonName", "Example Test CA"),),),
+             "notAfter": "Jan  1 00:00:00 2030 GMT",
+             "subjectAltName": (("DNS", "example.test"),)},
+            b"test-certificate",
+        ]
+        tls.version.return_value = "TLSv1.3"
+        tls.cipher.return_value = ("TLS_AES_128_GCM_SHA256", "TLSv1.3", 128)
+        context = Mock()
+        context.wrap_socket.return_value = tls
+        make_context.return_value = context
+        result = deskops.tls_check("example.test")
+        self.assertEqual(result["tls_version"], "TLSv1.3")
+        self.assertEqual(result["verification"], "passed")
+        self.assertIn("example.test", result["subject_alt_names"])
+        raw.close.assert_called_once()
+
     def test_log_summary_does_not_disclose_client_addresses(self):
         log = self.root / "access.log"
         log.write_text(

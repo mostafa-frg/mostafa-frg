@@ -198,6 +198,82 @@ def log_summary(path: Path) -> dict:
 
 
 
+
+AUTH_SSH_RE = re.compile(
+    r"\b(?P<result>Failed password|Accepted password|Accepted publickey|Failed publickey) "
+    r"for (?:(?:invalid user) )?\S+ from (?P<ip>[0-9a-fA-F:.]+) port \d+\b"
+)
+AUTH_INVALID_RE = re.compile(r"\bInvalid user \S+ from (?P<ip>[0-9a-fA-F:.]+) port \d+\b")
+AUTH_PAM_RE = re.compile(r"\brhost=(?P<ip>[0-9a-fA-F:.]+)\b")
+
+def _masked_source(value: str) -> str | None:
+    try:
+        address = ipaddress.ip_address(value)
+    except ValueError:
+        return None
+    prefix = 24 if address.version == 4 else 48
+    return ipaddress.ip_network(f"{address}/{prefix}", strict=False).with_prefixlen
+
+def auth_summary(path: Path) -> dict:
+    """Aggregate common Linux SSH/PAM/sudo log events without exposing identities."""
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("Expected an existing regular authentication log file")
+    counts = Counter()
+    sources = Counter()
+    lines_scanned = events = 0
+    with path.open(encoding="utf-8", errors="replace") as stream:
+        for line in stream:
+            lines_scanned += 1
+            ssh = AUTH_SSH_RE.search(line)
+            invalid = AUTH_INVALID_RE.search(line)
+            if ssh:
+                result = ssh.group("result")
+                category = "ssh_accepted" if result.startswith("Accepted") else "ssh_failed"
+                counts[category] += 1
+                events += 1
+                masked = _masked_source(ssh.group("ip"))
+                if masked:
+                    sources[masked] += 1
+                if "invalid user" in line.lower():
+                    counts["invalid_user"] += 1
+            elif invalid:
+                counts["invalid_user"] += 1
+                events += 1
+                masked = _masked_source(invalid.group("ip"))
+                if masked:
+                    sources[masked] += 1
+            elif "authentication failure" in line.lower():
+                counts["pam_failures"] += 1
+                events += 1
+                source = AUTH_PAM_RE.search(line)
+                if source:
+                    masked = _masked_source(source.group("ip"))
+                    if masked:
+                        sources[masked] += 1
+            if re.search(r"\bsudo:\s+\S+\s*:", line):
+                counts["sudo_events"] += 1
+                events += 1
+    failed = counts["ssh_failed"] + counts["pam_failures"]
+    accepted = counts["ssh_accepted"]
+    return {
+        "lines_scanned": lines_scanned,
+        "events": events,
+        "ssh_failed": counts["ssh_failed"],
+        "ssh_accepted": accepted,
+        "pam_failures": counts["pam_failures"],
+        "invalid_user_events": counts["invalid_user"],
+        "sudo_events": counts["sudo_events"],
+        "failed_auth_total": failed,
+        "accepted_auth_total": accepted,
+        "unique_source_networks": len(sources),
+        "top_source_networks": [
+            {"network": network, "events": count}
+            for network, count in sources.most_common(10)
+        ],
+        "privacy": "Usernames, raw IP addresses, and sudo command contents are not included; source IPs are grouped into IPv4 /24 or IPv6 /48 networks.",
+        "limitations": "Parses common Linux OpenSSH, PAM, and sudo text-log patterns; journald binary exports, Windows event logs, and vendor-specific formats are not supported.",
+    }
+
 def subnet_info(value: str) -> dict:
     """Calculate IPv4 subnet boundaries locally; no network traffic is generated."""
     if not value or value.strip() != value or any(c.isspace() for c in value):
@@ -361,6 +437,7 @@ def main(argv=None) -> int:
     p.add_argument("--timeout", type=float, default=8.0); p.add_argument("--json", action="store_true")
     p = sub.add_parser("tls-check", help="Inspect a verified TLS certificate on one endpoint"); p.add_argument("host"); p.add_argument("--port", type=int, default=443); p.add_argument("--timeout", type=float, default=5.0); p.add_argument("--json", action="store_true")
     p = sub.add_parser("log-summary", help="Summarize a local Apache/Nginx access log"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
+    p = sub.add_parser("auth-summary", help="Summarize local Linux SSH, PAM and sudo authentication logs"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     p = sub.add_parser("subnet", help="Calculate IPv4 subnet boundaries and host capacity"); p.add_argument("network"); p.add_argument("--json", action="store_true")
     p = sub.add_parser("pcap-summary", help="Summarize an offline classic Ethernet PCAP without exposing payloads"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
@@ -373,6 +450,7 @@ def main(argv=None) -> int:
         elif args.command == "http-audit": result = http_audit(args.url, args.timeout)
         elif args.command == "tls-check": result = tls_check(args.host, args.port, args.timeout)
         elif args.command == "pcap-summary": result = pcap_summary(args.file)
+        elif args.command == "auth-summary": result = auth_summary(args.file)
         elif args.command == "subnet": result = subnet_info(args.network)
         else: result = log_summary(args.file)
         _emit(result, getattr(args, "json", False))

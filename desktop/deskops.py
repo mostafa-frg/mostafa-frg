@@ -408,6 +408,67 @@ def pcap_summary(path: Path) -> dict:
     }
 
 
+
+FILE_SIGNATURES = (
+    (b"\x7fELF", "ELF executable or shared object", "executable", {".elf", ".so", ".bin"}),
+    (b"MZ", "Windows PE/DOS executable signature", "executable", {".exe", ".dll", ".sys", ".scr", ".com", ".ocx"}),
+    (b"%PDF-", "PDF document", "document", {".pdf"}),
+    (b"\x89PNG\r\n\x1a\n", "PNG image", "image", {".png"}),
+    (b"\xff\xd8\xff", "JPEG image", "image", {".jpg", ".jpeg"}),
+    (b"GIF87a", "GIF image", "image", {".gif"}),
+    (b"GIF89a", "GIF image", "image", {".gif"}),
+    (b"PK\x03\x04", "ZIP archive", "archive", {".zip", ".docx", ".xlsx", ".pptx", ".odt", ".ods", ".jar", ".apk"}),
+    (b"PK\x05\x06", "ZIP archive (empty)", "archive", {".zip"}),
+    (b"PK\x07\x08", "ZIP archive (spanned)", "archive", {".zip"}),
+    (b"\x1f\x8b", "GZIP compressed data", "archive", {".gz", ".tgz"}),
+    (b"7z\xbc\xaf\x27\x1c", "7-Zip archive", "archive", {".7z"}),
+    (b"Rar!\x1a\x07", "RAR archive", "archive", {".rar"}),
+    (b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1", "OLE compound document", "document_or_container", {".doc", ".xls", ".ppt", ".msi"}),
+    (b"SQLite format 3\x00", "SQLite database", "database", {".db", ".sqlite", ".sqlite3"}),
+    (b"{\\rtf", "Rich Text Format document", "document", {".rtf"}),
+    (b"\xfe\xed\xfa\xce", "Mach-O executable", "executable", {".dylib", ".bin"}),
+    (b"\xfe\xed\xfa\xcf", "Mach-O 64-bit executable", "executable", {".dylib", ".bin"}),
+    (b"\xce\xfa\xed\xfe", "Mach-O executable (little-endian)", "executable", {".dylib", ".bin"}),
+    (b"\xcf\xfa\xed\xfe", "Mach-O 64-bit executable (little-endian)", "executable", {".dylib", ".bin"}),
+)
+
+def file_triage(path: Path) -> dict:
+    """Identify common file signatures and hash a local file without executing it."""
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("Expected an existing regular file")
+    size = path.stat().st_size
+    with path.open("rb") as stream:
+        header = stream.read(64)
+        digest = hashlib.sha256()
+        digest.update(header)
+        while chunk := stream.read(CHUNK):
+            digest.update(chunk)
+    detected = next((item for item in FILE_SIGNATURES if header.startswith(item[0])), None)
+    extension = path.suffix.lower()
+    findings = []
+    if detected is None:
+        file_type, category, expected = "Unknown or unrecognized signature", "unknown", set()
+    else:
+        _magic, file_type, category, expected = detected
+        if expected and extension not in expected:
+            findings.append({
+                "severity": "review", "code": "extension_mismatch",
+                "detail": f"Detected signature does not match the filename extension {extension or '(none)'}",
+            })
+        if category == "executable":
+            findings.append({
+                "severity": "review", "code": "executable_file",
+                "detail": "File has an executable-format signature; do not run it unless its source and integrity are trusted",
+            })
+    return {
+        "filename": path.name, "size": size, "sha256": digest.hexdigest(),
+        "extension": extension or None, "detected_type": file_type,
+        "category": category, "extension_matches": bool(detected and (not expected or extension in expected)),
+        "findings": findings,
+        "scope": "Reads file bytes and computes SHA-256 only; does not execute, load, extract, or upload the file.",
+        "limitations": "Signature identification is heuristic and checks only common magic bytes. It is not antivirus scanning or proof that the file is safe.",
+    }
+
 ARCHIVE_EXECUTABLE_SUFFIXES = {
     ".exe", ".dll", ".com", ".scr", ".msi", ".bat", ".cmd",
     ".ps1", ".psm1", ".vbs", ".vbe", ".js", ".jse", ".wsf",
@@ -525,6 +586,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("auth-summary", help="Summarize local Linux SSH, PAM and sudo authentication logs"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     p = sub.add_parser("subnet", help="Calculate IPv4 subnet boundaries and host capacity"); p.add_argument("network"); p.add_argument("--json", action="store_true")
     p = sub.add_parser("pcap-summary", help="Summarize an offline classic Ethernet PCAP without exposing payloads"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
+    p = sub.add_parser("file-triage", help="Identify common file signatures and compute SHA-256 locally"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     p = sub.add_parser("archive-audit", help="Inspect ZIP metadata for path traversal and extraction hazards"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     try:
@@ -537,6 +599,7 @@ def main(argv=None) -> int:
         elif args.command == "tls-check": result = tls_check(args.host, args.port, args.timeout)
         elif args.command == "pcap-summary": result = pcap_summary(args.file)
         elif args.command == "archive-audit": result = archive_audit(args.file)
+        elif args.command == "file-triage": result = file_triage(args.file)
         elif args.command == "auth-summary": result = auth_summary(args.file)
         elif args.command == "subnet": result = subnet_info(args.network)
         else: result = log_summary(args.file)

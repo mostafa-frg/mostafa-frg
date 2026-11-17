@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Cross-platform, local-first desktop diagnostics. Python standard library only."""
 from __future__ import annotations
-import argparse, hashlib, ipaddress, json, re, socket, ssl, struct, sys, time, urllib.error, urllib.parse, urllib.request
+import argparse, hashlib, ipaddress, json, re, socket, ssl, stat, struct, sys, time, urllib.error, urllib.parse, urllib.request, zipfile
 from collections import Counter
-from pathlib import Path, PurePosixPath
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 FORMAT = "deskops-manifest-v1"
 CHUNK = 1024 * 1024
@@ -407,6 +407,91 @@ def pcap_summary(path: Path) -> dict:
         "limitations": "Classic Ethernet PCAP only; PCAPNG, non-Ethernet link types, and IPv6 extension-header traversal are not supported.",
     }
 
+
+ARCHIVE_EXECUTABLE_SUFFIXES = {
+    ".exe", ".dll", ".com", ".scr", ".msi", ".bat", ".cmd",
+    ".ps1", ".psm1", ".vbs", ".vbe", ".js", ".jse", ".wsf",
+    ".hta", ".jar", ".sh", ".app", ".dmg", ".deb", ".rpm",
+}
+ARCHIVE_MAX_ENTRIES = 100_000
+ARCHIVE_MAX_ENTRY_SIZE = 512 * 1024 * 1024
+ARCHIVE_MAX_TOTAL_SIZE = 2 * 1024 * 1024 * 1024
+ARCHIVE_MAX_RATIO = 200.0
+
+def archive_audit(path: Path) -> dict:
+    """Inspect ZIP metadata for extraction hazards; never extracts or executes content."""
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("Expected an existing regular ZIP file")
+    findings = []
+    def add(severity, code, name, detail):
+        findings.append({"severity": severity, "code": code, "entry": name, "detail": detail})
+    try:
+        with zipfile.ZipFile(path, "r") as archive:
+            infos = archive.infolist()
+            if len(infos) > ARCHIVE_MAX_ENTRIES:
+                add("high", "too_many_entries", "", f"Archive contains {len(infos)} entries; review the {ARCHIVE_MAX_ENTRIES:,}-entry safety limit")
+            total_size = 0
+            seen = set()
+            encrypted = executable = symlinks = unsafe_paths = oversized = suspicious_ratios = 0
+            for info in infos[:ARCHIVE_MAX_ENTRIES]:
+                name = info.filename
+                normalized = name.replace("\\", "/")
+                posix = PurePosixPath(normalized)
+                windows = PureWindowsPath(name)
+                if posix.is_absolute() or windows.is_absolute() or bool(windows.drive) or normalized.startswith("//"):
+                    unsafe_paths += 1
+                    add("high", "absolute_path", name, "Entry uses an absolute, UNC, or drive-qualified path")
+                if ".." in posix.parts:
+                    unsafe_paths += 1
+                    add("high", "path_traversal", name, "Entry contains a parent-directory traversal component")
+                canonical = normalized.rstrip("/").casefold()
+                if canonical and canonical in seen:
+                    add("high", "duplicate_path", name, "Duplicate path after separator normalization and case folding")
+                if canonical:
+                    seen.add(canonical)
+                mode = (info.external_attr >> 16) & 0xffff
+                if stat.S_ISLNK(mode):
+                    symlinks += 1
+                    add("high", "symbolic_link", name, "Symbolic-link entry can redirect extraction outside the intended tree")
+                if info.flag_bits & 0x1:
+                    encrypted += 1
+                    add("review", "encrypted_entry", name, "Encrypted entry cannot be inspected by this metadata-only audit")
+                suffix = PurePosixPath(normalized).suffix.lower()
+                if suffix in ARCHIVE_EXECUTABLE_SUFFIXES and not info.is_dir():
+                    executable += 1
+                    add("review", "executable_extension", name, f"Entry has a potentially executable extension ({suffix})")
+                if not info.is_dir():
+                    total_size += info.file_size
+                    if info.file_size > ARCHIVE_MAX_ENTRY_SIZE:
+                        oversized += 1
+                        add("high", "oversized_entry", name, f"Declared uncompressed size exceeds {ARCHIVE_MAX_ENTRY_SIZE // (1024 * 1024)} MiB")
+                    if info.compress_size == 0 and info.file_size > 0:
+                        suspicious_ratios += 1
+                        add("high", "extreme_compression_ratio", name, "Non-empty entry has zero compressed size")
+                    elif info.compress_size > 0 and info.file_size / info.compress_size > ARCHIVE_MAX_RATIO:
+                        suspicious_ratios += 1
+                        add("high", "extreme_compression_ratio", name, f"Declared compression ratio exceeds {ARCHIVE_MAX_RATIO:g}:1")
+            if total_size > ARCHIVE_MAX_TOTAL_SIZE:
+                add("high", "oversized_archive_content", "", f"Declared total uncompressed size exceeds {ARCHIVE_MAX_TOTAL_SIZE // (1024 * 1024)} MiB")
+            high = sum(item["severity"] == "high" for item in findings)
+            review = sum(item["severity"] == "review" for item in findings)
+            return {
+                "archive": path.name, "format": "zip", "entries": len(infos),
+                "files": sum(not item.is_dir() for item in infos),
+                "directories": sum(item.is_dir() for item in infos),
+                "declared_uncompressed_bytes": total_size,
+                "unsafe_paths": unsafe_paths, "symbolic_links": symlinks,
+                "encrypted_entries": encrypted, "executable_extensions": executable,
+                "oversized_entries": oversized, "suspicious_compression_ratios": suspicious_ratios,
+                "high_findings": high, "review_findings": review,
+                "assessment": "block_extraction_pending_review" if high else ("review_before_extraction" if review else "no_metadata_hazards_detected"),
+                "findings": findings,
+                "scope": "Metadata-only ZIP inspection. No entry is extracted, executed, or decompressed for content scanning.",
+                "limitations": "Does not detect malware, inspect file contents, validate signatures, or guarantee safe extraction. A clean result is not a malware-free verdict.",
+            }
+    except zipfile.BadZipFile as exc:
+        raise ValueError(f"Invalid or unsupported ZIP archive: {exc}") from exc
+
 def _emit(data, as_json=False):
     if as_json:
         print(json.dumps(data, indent=2, sort_keys=True))
@@ -440,6 +525,7 @@ def main(argv=None) -> int:
     p = sub.add_parser("auth-summary", help="Summarize local Linux SSH, PAM and sudo authentication logs"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     p = sub.add_parser("subnet", help="Calculate IPv4 subnet boundaries and host capacity"); p.add_argument("network"); p.add_argument("--json", action="store_true")
     p = sub.add_parser("pcap-summary", help="Summarize an offline classic Ethernet PCAP without exposing payloads"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
+    p = sub.add_parser("archive-audit", help="Inspect ZIP metadata for path traversal and extraction hazards"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "hash": result = file_hash(args.file, args.algorithm)
@@ -450,6 +536,7 @@ def main(argv=None) -> int:
         elif args.command == "http-audit": result = http_audit(args.url, args.timeout)
         elif args.command == "tls-check": result = tls_check(args.host, args.port, args.timeout)
         elif args.command == "pcap-summary": result = pcap_summary(args.file)
+        elif args.command == "archive-audit": result = archive_audit(args.file)
         elif args.command == "auth-summary": result = auth_summary(args.file)
         elif args.command == "subnet": result = subnet_info(args.network)
         else: result = log_summary(args.file)
@@ -457,7 +544,7 @@ def main(argv=None) -> int:
         if args.command == "tcp" and not result["open"]: return 2
         if args.command == "manifest" and args.action == "verify" and not result["ok"]: return 2
         return 0
-    except (OSError, ValueError, json.JSONDecodeError) as exc:
+    except (OSError, ValueError, json.JSONDecodeError, zipfile.BadZipFile) as exc:
         print(f"deskops: {exc}", file=sys.stderr); return 2
 
 if __name__ == "__main__":

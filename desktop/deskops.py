@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Cross-platform, local-first desktop diagnostics. Python standard library only."""
 from __future__ import annotations
-import argparse, hashlib, json, re, socket, ssl, sys, time, urllib.error, urllib.parse, urllib.request
+import argparse, hashlib, json, re, socket, ssl, struct, sys, time, urllib.error, urllib.parse, urllib.request
 from collections import Counter
 from pathlib import Path, PurePosixPath
 
@@ -196,6 +196,118 @@ def log_summary(path: Path) -> dict:
             "top_paths": [{"path": k, "requests": v} for k, v in paths.most_common(10)],
             "privacy": "Client addresses are counted but never included in this report."}
 
+
+PCAP_MAGICS = {
+    b"\xd4\xc3\xb2\xa1": "<",
+    b"\xa1\xb2\xc3\xd4": ">",
+    b"\x4d\x3c\xb2\xa1": "<",
+    b"\xa1\xb2\x3c\x4d": ">",
+}
+PCAP_MAX_PACKET = 64 * 1024 * 1024
+
+def pcap_summary(path: Path) -> dict:
+    """Summarize classic Ethernet PCAP headers without exposing packet payloads or IPs."""
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("Expected an existing regular PCAP file")
+    protocols = Counter()
+    destination_ports = Counter()
+    packets = malformed = truncated = ipv4 = ipv6 = 0
+    with path.open("rb") as stream:
+        header = stream.read(24)
+        if len(header) != 24:
+            raise ValueError("File is too short to contain a classic PCAP header")
+        endian = PCAP_MAGICS.get(header[:4])
+        if endian is None:
+            raise ValueError("Unsupported capture format; classic PCAP is required (PCAPNG is not supported)")
+        major, minor, _zone, _sigfigs, snaplen, network = struct.unpack(endian + "HHIIII", header[4:])
+        if (major, minor) not in {(2, 4)}:
+            raise ValueError("Unsupported classic PCAP version")
+        if not 1 <= snaplen <= PCAP_MAX_PACKET:
+            raise ValueError("Invalid or excessive PCAP snapshot length")
+        if (network & 0xffff) != 1:
+            raise ValueError("Only Ethernet-linktype PCAP files are supported")
+        while True:
+            record = stream.read(16)
+            if not record:
+                break
+            if len(record) != 16:
+                raise ValueError("Truncated PCAP packet record header")
+            _seconds, _fraction, included, original = struct.unpack(endian + "IIII", record)
+            if included > snaplen or included > PCAP_MAX_PACKET or included > original:
+                raise ValueError("Invalid PCAP packet length")
+            frame = stream.read(included)
+            if len(frame) != included:
+                truncated += 1
+                break
+            packets += 1
+            if len(frame) < 14:
+                malformed += 1
+                continue
+            ethertype = struct.unpack("!H", frame[12:14])[0]
+            offset = 14
+            while ethertype in {0x8100, 0x88a8, 0x9100}:
+                if len(frame) < offset + 4:
+                    malformed += 1
+                    ethertype = None
+                    break
+                ethertype = struct.unpack("!H", frame[offset + 2:offset + 4])[0]
+                offset += 4
+            if ethertype is None:
+                continue
+            protocol = None
+            transport_offset = None
+            if ethertype == 0x0800:
+                if len(frame) < offset + 20 or frame[offset] >> 4 != 4:
+                    malformed += 1
+                    continue
+                ihl = (frame[offset] & 0x0f) * 4
+                total_length = struct.unpack("!H", frame[offset + 2:offset + 4])[0]
+                if ihl < 20 or total_length < ihl or len(frame) < offset + ihl:
+                    malformed += 1
+                    continue
+                ipv4 += 1
+                protocol = frame[offset + 9]
+                fragment = struct.unpack("!H", frame[offset + 6:offset + 8])[0] & 0x1fff
+                if fragment == 0:
+                    transport_offset = offset + ihl
+            elif ethertype == 0x86dd:
+                if len(frame) < offset + 40 or frame[offset] >> 4 != 6:
+                    malformed += 1
+                    continue
+                ipv6 += 1
+                protocol = frame[offset + 6]
+                transport_offset = offset + 40
+            else:
+                protocols["other"] += 1
+                continue
+            if protocol == 6:
+                protocols["tcp"] += 1
+            elif protocol == 17:
+                protocols["udp"] += 1
+            elif protocol in {1, 58}:
+                protocols["icmp"] += 1
+            else:
+                protocols["other"] += 1
+            if protocol in {6, 17} and transport_offset is not None:
+                if len(frame) >= transport_offset + 4:
+                    _source_port, destination_port = struct.unpack(
+                        "!HH", frame[transport_offset:transport_offset + 4])
+                    destination_ports[destination_port] += 1
+                else:
+                    malformed += 1
+    return {
+        "format": "classic-pcap", "link_type": "Ethernet",
+        "packets": packets, "ipv4_packets": ipv4, "ipv6_packets": ipv6,
+        "protocols": dict(sorted(protocols.items())),
+        "top_destination_ports": [
+            {"port": port, "packets": count}
+            for port, count in sorted(destination_ports.items(), key=lambda item: (-item[1], item[0]))[:10]
+        ],
+        "malformed_packets": malformed, "truncated_records": truncated,
+        "privacy": "Packet payloads and source/destination IP addresses are not stored in this report.",
+        "limitations": "Classic Ethernet PCAP only; PCAPNG, non-Ethernet link types, and IPv6 extension-header traversal are not supported.",
+    }
+
 def _emit(data, as_json=False):
     if as_json:
         print(json.dumps(data, indent=2, sort_keys=True))
@@ -226,6 +338,7 @@ def main(argv=None) -> int:
     p.add_argument("--timeout", type=float, default=8.0); p.add_argument("--json", action="store_true")
     p = sub.add_parser("tls-check", help="Inspect a verified TLS certificate on one endpoint"); p.add_argument("host"); p.add_argument("--port", type=int, default=443); p.add_argument("--timeout", type=float, default=5.0); p.add_argument("--json", action="store_true")
     p = sub.add_parser("log-summary", help="Summarize a local Apache/Nginx access log"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
+    p = sub.add_parser("pcap-summary", help="Summarize an offline classic Ethernet PCAP without exposing payloads"); p.add_argument("file", type=Path); p.add_argument("--json", action="store_true")
     args = parser.parse_args(argv)
     try:
         if args.command == "hash": result = file_hash(args.file, args.algorithm)
@@ -235,6 +348,7 @@ def main(argv=None) -> int:
         elif args.command == "tcp": result = tcp_check(args.host, args.port, args.timeout)
         elif args.command == "http-audit": result = http_audit(args.url, args.timeout)
         elif args.command == "tls-check": result = tls_check(args.host, args.port, args.timeout)
+        elif args.command == "pcap-summary": result = pcap_summary(args.file)
         else: result = log_summary(args.file)
         _emit(result, getattr(args, "json", False))
         if args.command == "tcp" and not result["open"]: return 2

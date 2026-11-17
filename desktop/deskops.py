@@ -199,8 +199,14 @@ def log_summary(path: Path) -> dict:
 def _emit(data, as_json=False):
     if as_json:
         print(json.dumps(data, indent=2, sort_keys=True))
-    else:
-        print(json.dumps(data, indent=2, sort_keys=True))
+        return
+    for key, value in data.items():
+        label = key.replace("_", " ").capitalize()
+        if isinstance(value, (dict, list)):
+            print(f"{label}:")
+            print(json.dumps(value, indent=2, sort_keys=True))
+        else:
+            print(f"{label}: {value}")
 
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog="deskops", description="Cross-platform desktop diagnostics and defensive utilities")

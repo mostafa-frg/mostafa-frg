@@ -20,6 +20,10 @@ ln -sfn "$BASE/banner.sh" "$BIN/mosta-banner"
 for f in "${commands[@]}"; do
   ln -sfn "$BASE/$f" "$BIN/${f%.sh}"
 done
+external_aliases=(mnmap mnc mdig mtcpdump mtshark mwireshark mscapy msocat mtracepath mtraceroute mmtr mwhois mcurl mwget mssh maircrack mkismet mnikto mffuf mjohn mhashcat mhydra mzeek msuricata mmetsploit msqlmap msearchsploit mburp mzap mmasscan mwhatweb mwifite mdnsrecon mdnsenum mnslookup mss mip mping mps mtop mjq mopenssl miperf3 mipcalc mnetstat mifconfig mhtop mtmux mrsync mlsof msha256sum mfile mstrace mripgrep mfd mfzf mtree mncdu mmicro mfiglet mtoilet)
+for name in "${external_aliases[@]}"; do
+  ln -sfn "$BASE/mosta-external" "$BIN/$name"
+done
 while IFS= read -r req; do
   [ -z "$req" ] && continue
   printf '%s\n' "Installing Python dependencies from $req"

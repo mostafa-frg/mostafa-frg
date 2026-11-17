@@ -34,4 +34,31 @@ wifite,mwifite,Linux,wireless,authorized Wi-Fi auditing automation
 dnsrecon,mdnsrecon,Linux+Termux,dns,DNS enumeration for authorized domains
 dnsenum,mdnsenum,Linux,dns,DNS enumeration for authorized domains
 nslookup,mnslookup,Linux+Termux,dns,DNS lookup
-ss (iproute2),mss,Linux,network,socket statistics
+ss (iproute2),mss,Linux+Termux,network,socket statistics
+iproute2,mip,Linux+Termux,network,interfaces routes and neighbour diagnostics
+iputils,mping,Linux+Termux,network,ICMP reachability checks
+procps,mps,Linux+Termux,system,process listing
+procps,mtop,Linux+Termux,system,interactive process monitoring
+jq,mjq,Linux+Termux,data,JSON filtering and extraction
+OpenSSL,mopenssl,Linux+Termux,crypto,TLS and cryptographic diagnostics
+iperf3,miperf3,Linux+Termux,network,throughput testing between authorized endpoints
+ipcalc,mipcalc,Linux+Termux,network,IPv4 subnet calculations
+htop,mhtop,Linux+Termux,system,interactive process monitoring
+tmux,mtmux,Linux+Termux,terminal,multiplexed terminal sessions
+rsync,mrsync,Linux+Termux,transfer,file synchronization
+lsof,mlsof,Linux+Termux,system,open files and sockets
+coreutils,msha256sum,Linux+Termux,integrity,SHA-256 file hashing
+file,mfile,Linux+Termux,system,file type identification
+net-tools,mnetstat,Linux+Termux,network,legacy network statistics
+net-tools,mifconfig,Linux+Termux,network,legacy interface inspection
+strace,mstrace,Linux+Termux,system,process syscall tracing
+ripgrep,mripgrep,Linux+Termux,developer,fast text search
+fd,mfd,Linux+Termux,developer,fast file discovery
+fzf,mfzf,Linux+Termux,developer,fuzzy selection
+tree,mtree,Linux+Termux,system,directory tree display
+ncdu,mncdu,Linux+Termux,system,disk usage inspection
+micro,mmicro,Linux+Termux,editor,terminal text editor
+figlet,mfiglet,Linux+Termux,terminal,ASCII text banners
+toilet,mtoilet,Linux+Termux,terminal,ASCII text banners
+Termux tools,mtermux-info,Linux+Termux,android,Termux environment diagnostics
+Termux tools,mtermux-storage,Linux+Termux,android,request shared storage access

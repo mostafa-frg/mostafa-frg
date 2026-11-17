@@ -4,11 +4,12 @@ BASE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 source "$BASE/banner.sh"
 mosta_banner "MOSTA EXTERNAL TOOLS"
 cat <<'EOF'
-Core network commands:
+Core portable network commands:
   mnmap        Nmap
   mnc          Netcat
   mdig         dig
-  mtcpdump     tcpdump
+  mnslookup    nslookup
+  mtcpdump     tcpdump (capture permissions may be restricted)
   msocat       socat
   mtracepath   tracepath
   mtraceroute  traceroute
@@ -17,15 +18,47 @@ Core network commands:
   mwget        wget
   mssh         OpenSSH
 
-Optional security / analysis commands:
+Termux/Linux system and network commands:
+  mip          iproute2 interfaces, routes and neighbours
+  mping        ping
+  mss          ss socket statistics
+  mps          ps process listing
+  mtop         top process monitor
+  mjq          jq JSON filtering
+  mopenssl     OpenSSL / TLS diagnostics
+  miperf3      iperf3 throughput tests
+  mipcalc      IP subnet calculator
+  mhtop        htop process monitor
+  mtmux        tmux terminal sessions
+  mrsync       rsync file synchronization
+  mlsof        lsof open files and sockets
+  msha256sum   SHA-256 file hashing
+  mfile        file type detection
+  mtermux-info Termux environment report
+  mtermux-storage request shared Android storage access
+
+Optional packages (installed only when present in enabled repositories):
+  mmtr        MTR
+  mnetstat    netstat
+  mifconfig   ifconfig
+  mstrace     strace
+  mripgrep    ripgrep
+  mfd         fd
+  mfzf        fzf
+  mtree       tree
+  mncdu       ncdu
+  mmicro      micro editor
+  mfiglet     figlet
+  mtoilet     toilet
+
+Linux desktop / root / additional-environment tools:
   mtshark      TShark
-  mwireshark   Wireshark
-  mscapy       Scapy
+  mwireshark   Wireshark GUI
+  mscapy       Scapy command (if installed)
   maircrack    Aircrack-ng
   mkismet      Kismet
   mnikto       Nikto
   mffuf        ffuf
-  mmtr         MTR
   mjohn        John the Ripper
   mhashcat     Hashcat
   mhydra       Hydra
@@ -36,7 +69,14 @@ Optional security / analysis commands:
   msearchsploit SearchSploit
   mburp        Burp Suite
   mzap         OWASP ZAP
+  mmasscan     Masscan
+  mwhatweb     WhatWeb
+  mwifite      Wifite
+  mdnsrecon    DNSRecon
+  mdnsenum     DNSenum
 
-All wrappers pass arguments to the real executable. Availability is checked at runtime.
-Use mosta-doctor for the installed core set.
+All wrappers pass arguments to the real upstream executable. They do not emulate, rename, or bypass the underlying tool.
+Run mosta-doctor to check what is actually installed.
+The Termux installer does not add third-party repositories and does not promise root-only or GUI features.
+Use scanning and auditing commands only on systems you own or are explicitly authorized to test.
 EOF

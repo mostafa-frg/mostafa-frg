@@ -3,9 +3,11 @@ set -euo pipefail
 BASE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 ROOT="$(cd "$BASE/.." && pwd)"
 BIN="$HOME/.local/bin"
-if [ -f "/data/data/com.termux/files/usr/bin/pkg" ]; then
+TERMUX=0
+if [ -x "/data/data/com.termux/files/usr/bin/pkg" ]; then
+  TERMUX=1
   printf '%s\n' "Termux detected."
-  pkg update -y
+  pkg update -y || printf '%s\n' "WARNING: package index update failed; continuing with the current cache."
   pkg install -y python git
 fi
 command -v python3 >/dev/null 2>&1 || { printf '%s\n' "ERROR: python3 is required." >&2; exit 1; }
@@ -28,11 +30,17 @@ if command -v python3 >/dev/null 2>&1; then
   while IFS= read -r req; do
     [ -z "$req" ] && continue
     printf '%s\n' "Installing Python dependencies from $req"
-    python3 -m pip install -r "$ROOT/$req"
+    if ! python3 -m pip install -r "$ROOT/$req"; then
+      if [ "$TERMUX" -eq 1 ]; then
+        printf '%s\n' "WARNING: optional lab dependencies failed for $req; the remaining installer steps will continue."
+      else
+        exit 1
+      fi
+    fi
   done < <(find "$ROOT" -mindepth 2 -maxdepth 2 -name requirements.txt -print | sed "s#^$ROOT/##" | sort)
 fi
-if [ -f "/data/data/com.termux/files/usr/bin/pkg" ]; then
-  "$BASE/mosta-external-install.sh"
+if [ "$TERMUX" -eq 1 ]; then
+  MOSTA_SKIP_PKG_UPDATE=1 "$BASE/mosta-external-install.sh"
 fi
 for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
   [ -f "$rc" ] || continue

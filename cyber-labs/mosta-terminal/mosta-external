@@ -3,7 +3,7 @@ set -euo pipefail
 NAME="$(basename "$0")"
 case "$NAME" in
   mnmap) tool="nmap"; label="NMAP" ;;
-  mnc) tool="netcat-openbsd"; label="NETCAT" ;;
+  mnc) tool="nc"; label="NETCAT" ;;
   mdig) tool="dig"; label="DIG" ;;
   mtcpdump) tool="tcpdump"; label="TCPDUMP" ;;
   mtshark) tool="tshark"; label="TSHARK" ;;
@@ -38,6 +38,34 @@ case "$NAME" in
   mdnsenum) tool="dnsenum"; label="DNSENUM" ;;
   mnslookup) tool="nslookup"; label="NSLOOKUP" ;;
   mss) tool="ss"; label="SS" ;;
+  mip) tool="ip"; label="IPROUTE2" ;;
+  mping) tool="ping"; label="PING" ;;
+  mps) tool="ps"; label="PROCESS LIST" ;;
+  mtop) tool="top"; label="PROCESS MONITOR" ;;
+  mjq) tool="jq"; label="JSON QUERY" ;;
+  mopenssl) tool="openssl"; label="OPENSSL" ;;
+  miperf3) tool="iperf3"; label="IPERF3" ;;
+  mipcalc) tool="ipcalc"; label="IPCALC" ;;
+  mnetstat) tool="netstat"; label="NETSTAT" ;;
+  mifconfig) tool="ifconfig"; label="IFCONFIG" ;;
+  mhtop) tool="htop"; label="HTOP" ;;
+  mtmux) tool="tmux"; label="TMUX" ;;
+  mrsync) tool="rsync"; label="RSYNC" ;;
+  mlsof) tool="lsof"; label="LSOF" ;;
+  msha256sum) tool="sha256sum"; label="SHA256SUM" ;;
+  mfile) tool="file"; label="FILE" ;;
+  mmtr) tool="mtr"; label="MTR" ;;
+  mstrace) tool="strace"; label="STRACE" ;;
+  mripgrep) tool="rg"; label="RIPGREP" ;;
+  mfd) tool="fd"; label="FD" ;;
+  mfzf) tool="fzf"; label="FZF" ;;
+  mtree) tool="tree"; label="TREE" ;;
+  mncdu) tool="ncdu"; label="NCDU" ;;
+  mmicro) tool="micro"; label="MICRO" ;;
+  mfiglet) tool="figlet"; label="FIGLET" ;;
+  mtoilet) tool="toilet"; label="TOILET" ;;
+  mtermux-info) tool="termux-info"; label="TERMUX INFO" ;;
+  mtermux-storage) tool="termux-setup-storage"; label="TERMUX STORAGE" ;;
   *) echo "Unknown Mosta external command: $NAME" >&2; exit 2 ;;
 esac
 command -v "$tool" >/dev/null 2>&1 || {

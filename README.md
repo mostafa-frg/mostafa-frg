@@ -16,8 +16,8 @@ Practical network engineering, security testing, Linux administration, and defen
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B%20(static%20check)-3776AB?logo=python&logoColor=white)
 ![Platform](https://img.shields.io/badge/Linux-tested-2ea44f)
-![Termux](https://img.shields.io/badge/Termux-supported%20(not%20yet%20tested)-yellow)
-![Tools](https://img.shields.io/badge/33%20CLI%20tools%20%2B%203%20web%20labs-0ea5e9)
+![Termux](https://img.shields.io/badge/Termux-guide%20available%20%E2%80%A2%20device%20QA%20pending-yellow)
+![Tools](https://img.shields.io/badge/CLI%20toolkit%20%2B%20web%20labs-0ea5e9)
 ![Tests](https://img.shields.io/badge/tests-pytest%20%2B%20unittest-8b5cf6)
 ![License](https://img.shields.io/badge/use-authorized%20only-orange)
 
@@ -121,16 +121,25 @@ The graphic banner is drawn on stderr only in an interactive terminal, so pipes,
 
 ### Termux Quick Start
 
-The repository can be installed as a native Mosta command layer on Termux:
+Install the public repository directly inside Termux. The command layer installs native aliases and the repository labs; it does not add third-party package repositories.
 
 ```bash
-cd cyber-labs/mosta-terminal
-chmod +x install.sh
-./install.sh
+pkg update -y
+pkg install -y git
+git clone --depth 1 https://github.com/mostafa-frg/mostafa-frg.git
+cd mostafa-frg/cyber-labs/mosta-terminal
+bash install.sh
+source ~/.zshrc 2>/dev/null || source ~/.bashrc 2>/dev/null || true
+hash -r
 mosta-doctor
+mosta-tools
 ```
 
-Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtriage`, and `mtool`. Every lab also has a short command: `mvlan`, `mfw`, `mospf`, `mstp`, `mnat`, `macl`, `msnmp`, `msyslog`, `mflow`, `mipam`, `msubnet`, `mtopo`, `mad`, `mpriv`, `mreport`, `mcfg`, `mdns`, `mmon`, `mscan`, and `mauto`. Native networking tools are exposed through `mnmap`, `mnc`, `mdig`, `mtcpdump`, and related Mosta aliases.
+The installer checks the packages available in the enabled Termux repositories, installs the supported core set, and reports unavailable packages instead of claiming they were installed. Optional extras can be skipped with `MOSTA_INSTALL_EXTRAS=0 bash install.sh`.
+
+The toolkit includes the repository labs (`mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtriage`, `mfim`, `mdet`, and more) plus native aliases for Nmap, Netcat, DNS, packet capture, routing, process inspection, JSON, TLS, throughput testing, and terminal utilities.
+
+See the full [Termux installation and command guide](cyber-labs/mosta-terminal/TERMUX-GUIDE.md) for the complete package matrix, usage examples, update steps, troubleshooting, and Android/root limitations.
 
 ### Enterprise Security
 
@@ -153,7 +162,7 @@ Core commands include `mnet`, `mhttp`, `mpcap`, `msoc`, `mconf`, `mroute`, `mtri
 
 - **Verified:** 42 pytest tests (plus the Log Normalizer's 7 unittest tests) pass; every CLI runs on sample data; the three Flask labs serve requests; shell launchers install and run from a clean `HOME` and virtualenv on Linux (tested with Python 3.13).
 - **Static check only:** compatibility with Python 3.8-3.12 (no syntax newer than 3.8 is used, but older interpreters were not run).
-- **Not tested:** real Termux/Android devices and macOS. The installer uses `readlink -f`, which stock macOS does not provide, so macOS is not claimed as supported.
+- **Not device-tested:** real Termux/Android devices and macOS. The Termux scripts and fixed command wrappers are checked by GitHub Actions, but Android-specific permissions, package mirrors, and hardware behavior still require device-level validation. The installer uses `readlink -f`, which stock macOS does not provide, so macOS is not claimed as supported.
 - **CI:** the workflow is defined in `.github/workflows/lab-checks.yml`; check the badge above for the live result.
 
 ## Validation

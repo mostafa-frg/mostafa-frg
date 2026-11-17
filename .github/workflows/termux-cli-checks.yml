@@ -1,0 +1,54 @@
+name: Termux CLI Checks
+
+on:
+  push:
+    paths:
+      - "cyber-labs/mosta-terminal/**"
+      - "cyber-labs/mosta-tool-index/**"
+      - ".github/workflows/termux-cli-checks.yml"
+      - "README.md"
+  pull_request:
+    paths:
+      - "cyber-labs/mosta-terminal/**"
+      - "cyber-labs/mosta-tool-index/**"
+      - ".github/workflows/termux-cli-checks.yml"
+      - "README.md"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Validate Bash syntax and documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          for script in cyber-labs/mosta-terminal/*.sh; do
+            bash -n "$script"
+          done
+          bash -n cyber-labs/mosta-terminal/mosta-external
+          test -s cyber-labs/mosta-terminal/TERMUX-GUIDE.md
+          grep -q "TERMUX-GUIDE.md" README.md
+      - name: Test fixed upstream command mappings
+        shell: bash
+        run: |
+          set -euo pipefail
+          temp_dir="$(mktemp -d)"
+          trap 'rm -rf "$temp_dir"' EXIT
+          wrapper="${GITHUB_WORKSPACE}/cyber-labs/mosta-terminal/mosta-external"
+          for mapping in \
+            nmap:mnmap nc:mnc ip:mip jq:mjq iperf3:miperf3 \
+            openssl:mopenssl sha256sum:msha256sum netstat:mnetstat \
+            termux-info:mtermux-info termux-setup-storage:mtermux-storage; do
+            tool="${mapping%%:*}"
+            alias="${mapping#*:}"
+            printf '#!/usr/bin/env bash\nprintf "stub:%s\\n"\n' "$tool" > "$temp_dir/$tool"
+            chmod +x "$temp_dir/$tool"
+            ln -s "$wrapper" "$temp_dir/$alias"
+            actual="$(MOSTA_BANNER=never PATH="$temp_dir:$PATH" "$temp_dir/$alias" --version)"
+            test "$actual" = "stub:$tool"
+          done

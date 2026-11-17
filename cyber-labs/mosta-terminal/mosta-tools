@@ -2,9 +2,9 @@
 set -euo pipefail
 BASE="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 source "$BASE/banner.sh"
-mosta_banner "MOSTA EXTERNAL TOOLS"
+mosta_banner "LINUX DESKTOP TOOL INDEX"
 cat <<'EOF'
-Core portable network commands:
+Core network commands:
   mnmap        Nmap
   mnc          Netcat
   mdig         dig
@@ -18,7 +18,7 @@ Core portable network commands:
   mwget        wget
   mssh         OpenSSH
 
-Termux/Linux system and network commands:
+Linux system and network commands:
   mip          iproute2 interfaces, routes and neighbours
   mping        ping
   mss          ss socket statistics
@@ -34,49 +34,18 @@ Termux/Linux system and network commands:
   mlsof        lsof open files and sockets
   msha256sum   SHA-256 file hashing
   mfile        file type detection
-  mtermux-info Termux environment report
-  mtermux-storage request shared Android storage access
 
-Optional packages (installed only when present in enabled repositories):
-  mmtr        MTR
-  mnetstat    netstat
-  mifconfig   ifconfig
-  mstrace     strace
-  mripgrep    ripgrep
-  mfd         fd
-  mfzf        fzf
-  mtree       tree
-  mncdu       ncdu
-  mmicro      micro editor
-  mfiglet     figlet
-  mtoilet     toilet
+Optional packages:
+  mmtr, mnetstat, mifconfig, mstrace, mripgrep, mfd, mfzf,
+  mtree, mncdu, mmicro, mfiglet, mtoilet
 
-Linux desktop / root / additional-environment tools:
-  mtshark      TShark
-  mwireshark   Wireshark GUI
-  mscapy       Scapy command (if installed)
-  maircrack    Aircrack-ng
-  mkismet      Kismet
-  mnikto       Nikto
-  mffuf        ffuf
-  mjohn        John the Ripper
-  mhashcat     Hashcat
-  mhydra       Hydra
-  mzeek        Zeek
-  msuricata    Suricata
-  mmetsploit   Metasploit
-  msqlmap      SQLMap
-  msearchsploit SearchSploit
-  mburp        Burp Suite
-  mzap         OWASP ZAP
-  mmasscan     Masscan
-  mwhatweb     WhatWeb
-  mwifite      Wifite
-  mdnsrecon    DNSRecon
-  mdnsenum     DNSenum
+Additional security and analysis tools:
+  mtshark, mwireshark, mscapy, maircrack, mkismet, mnikto,
+  mffuf, mjohn, mhashcat, mhydra, mzeek, msuricata,
+  mmetsploit, msqlmap, msearchsploit, mburp, mzap,
+  mmasscan, mwhatweb, mwifite, mdnsrecon, mdnsenum
 
-All wrappers pass arguments to the real upstream executable. They do not emulate, rename, or bypass the underlying tool.
-Run mosta-doctor to check what is actually installed.
-The Termux installer does not add third-party repositories and does not promise root-only or GUI features.
-Use scanning and auditing commands only on systems you own or are explicitly authorized to test.
+All wrappers call the real upstream executable and pass its arguments through.
+Run mosta-doctor to check actual availability.
+Use security tools only on systems you own or are authorized to assess.
 EOF

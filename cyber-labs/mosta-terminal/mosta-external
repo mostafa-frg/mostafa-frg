@@ -54,7 +54,6 @@ case "$NAME" in
   mlsof) tool="lsof"; label="LSOF" ;;
   msha256sum) tool="sha256sum"; label="SHA256SUM" ;;
   mfile) tool="file"; label="FILE" ;;
-  mmtr) tool="mtr"; label="MTR" ;;
   mstrace) tool="strace"; label="STRACE" ;;
   mripgrep) tool="rg"; label="RIPGREP" ;;
   mfd) tool="fd"; label="FD" ;;

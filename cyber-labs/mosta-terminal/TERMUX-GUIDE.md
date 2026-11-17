@@ -1,6 +1,6 @@
 # MOSTA Terminal — Termux Installation and Field Guide
 
-This guide installs the repository's command-line labs and a branded command layer inside the official Termux app on Android. It is written for a fresh Termux profile and does not require a GitHub token because this repository is public.
+This guide installs the repository's command-line labs and a branded command layer inside the official Termux app on Android. It is written for a fresh Termux profile and does not require a GitHub token because this repository is public. Until PR #5 is merged, the commands below explicitly clone the feat/mosta-platform-redesign branch so they receive this guide and installer.
 
 > Compatibility is reported honestly: a package is shown as installed only when its executable is present. Android permissions, device kernels, Wi-Fi drivers, CPU architecture, and repository mirrors can change what works on a particular phone. This is not a promise that every Linux desktop tool works on stock Android.
 
@@ -20,7 +20,7 @@ Run the commands one at a time in Termux:
 
     pkg update -y
     pkg install -y git
-    git clone --depth 1 https://github.com/mostafa-frg/mostafa-frg.git
+    git clone --depth 1 --branch feat/mosta-platform-redesign https://github.com/mostafa-frg/mostafa-frg.git
     cd mostafa-frg/cyber-labs/mosta-terminal
     bash install.sh
 
@@ -52,7 +52,7 @@ The installer adds that directory to existing Bash and Zsh startup files. If a c
 
 For a fresh Termux session, this is the same sequence in one command:
 
-    pkg update -y && pkg install -y git && git clone --depth 1 https://github.com/mostafa-frg/mostafa-frg.git && cd mostafa-frg/cyber-labs/mosta-terminal && bash install.sh
+    pkg update -y && pkg install -y git && git clone --depth 1 --branch feat/mosta-platform-redesign https://github.com/mostafa-frg/mostafa-frg.git && cd mostafa-frg/cyber-labs/mosta-terminal && bash install.sh
 
 Then run:
 
@@ -69,7 +69,7 @@ The installer:
 - Detects Termux and installs Python and Git when needed.
 - Creates the Mosta command links under the user's home directory.
 - Attempts the repository's Python requirements one project at a time.
-- Continues past a failed optional Python dependency on Termux and prints a warning, rather than leaving the user with no command links.
+- Continues past a failed lab-specific Python dependency on Termux and prints a warning, rather than leaving the user with no command links.
 - Checks the active Termux package index before requesting each native package group.
 - Skips package names that are not listed in the currently enabled repositories.
 - Retries packages individually if a grouped package installation fails.

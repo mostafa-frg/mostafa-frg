@@ -126,7 +126,7 @@ Install the public repository directly inside Termux. The command layer installs
 ```bash
 pkg update -y
 pkg install -y git
-git clone --depth 1 https://github.com/mostafa-frg/mostafa-frg.git
+git clone --depth 1 --branch feat/mosta-platform-redesign https://github.com/mostafa-frg/mostafa-frg.git
 cd mostafa-frg/cyber-labs/mosta-terminal
 bash install.sh
 source ~/.zshrc 2>/dev/null || source ~/.bashrc 2>/dev/null || true

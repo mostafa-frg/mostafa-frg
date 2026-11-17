@@ -316,5 +316,67 @@ class DeskOpsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "regular"):
             deskops.auth_summary(link)
 
+
+    def test_archive_audit_flags_traversal_absolute_paths_and_executables(self):
+        import zipfile
+        archive = self.root / "unsafe.zip"
+        with zipfile.ZipFile(archive, "w") as bundle:
+            bundle.writestr("../outside.txt", "outside")
+            bundle.writestr("C:\\Windows\\startup.bat", "echo unsafe")
+            bundle.writestr("payload/tool.exe", "not executed")
+        result = deskops.archive_audit(archive)
+        codes = {item["code"] for item in result["findings"]}
+        self.assertIn("path_traversal", codes)
+        self.assertIn("absolute_path", codes)
+        self.assertIn("executable_extension", codes)
+        self.assertEqual(result["assessment"], "block_extraction_pending_review")
+
+    def test_archive_audit_flags_symlinks_duplicate_names_and_compression_ratio(self):
+        import stat
+        import zipfile
+        archive = self.root / "metadata-hazards.zip"
+        with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as bundle:
+            bundle.writestr("same.txt", "one")
+            bundle.writestr("SAME.txt", "two")
+            bundle.writestr("compressed.txt", "A" * 100_000)
+            link = zipfile.ZipInfo("link-out")
+            link.create_system = 3
+            link.external_attr = (stat.S_IFLNK | 0o777) << 16
+            bundle.writestr(link, "../outside")
+        result = deskops.archive_audit(archive)
+        codes = {item["code"] for item in result["findings"]}
+        self.assertIn("duplicate_path", codes)
+        self.assertIn("symbolic_link", codes)
+        self.assertIn("extreme_compression_ratio", codes)
+
+    def test_archive_audit_clean_archive_and_cli_json(self):
+        import zipfile
+        archive = self.root / "normal.zip"
+        with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as bundle:
+            bundle.writestr("docs/readme.txt", "safe metadata")
+        result = deskops.archive_audit(archive)
+        self.assertEqual(result["assessment"], "no_metadata_hazards_detected")
+        self.assertEqual(result["files"], 1)
+        output = StringIO()
+        with redirect_stdout(output):
+            code = deskops.main(["archive-audit", str(archive), "--json"])
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(output.getvalue())["format"], "zip")
+
+    def test_archive_audit_rejects_invalid_zip_and_symlink_input(self):
+        invalid = self.root / "broken.zip"
+        invalid.write_bytes(b"not a zip")
+        with self.assertRaisesRegex(ValueError, "Invalid or unsupported ZIP"):
+            deskops.archive_audit(invalid)
+        target = self.root / "valid.zip"
+        target.write_bytes(b"not read because symlink rejected")
+        link = self.root / "alias.zip"
+        try:
+            link.symlink_to(target)
+        except (OSError, NotImplementedError):
+            self.skipTest("Symlinks are unavailable on this platform")
+        with self.assertRaisesRegex(ValueError, "regular ZIP"):
+            deskops.archive_audit(link)
+
 if __name__ == "__main__":
     unittest.main()

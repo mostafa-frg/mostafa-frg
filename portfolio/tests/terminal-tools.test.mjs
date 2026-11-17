@@ -8,32 +8,43 @@ const source = await readFile(new URL('../assets/terminal-tools.js', import.meta
 const styles = await readFile(new URL('../assets/terminal-tools.css', import.meta.url), 'utf8');
 
 test('catalog has unique, complete upstream-linked tool records', () => {
-  assert.equal(data.tools.length, 24);
+  assert.equal(data.tools.length, 50);
+  assert.equal(data.termuxPackagesChecked.length, 50);
   const ids = data.tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
   for (const tool of data.tools) {
-    for (const key of ['name', 'category', 'summary', 'tags', 'termuxPackage', 'debianPackage', 'verifyTermux', 'verifyDebian', 'note', 'trouble', 'sourceUrl', 'docsUrl']) {
+    for (const key of ['name', 'category', 'summary', 'tags', 'termuxPackage', 'verifyTermux', 'note', 'trouble', 'sourceUrl', 'docsUrl']) {
       assert.ok(tool[key], tool.id + ' is missing ' + key);
     }
     assert.ok(data.categories.some(category => category.id === tool.category), tool.id + ' has an unknown category');
     assert.match(tool.sourceUrl, /^https:\/\//, tool.id + ' source must use HTTPS');
     assert.match(tool.docsUrl, /^https:\/\//, tool.id + ' docs must use HTTPS');
     assert.match(tool.termuxPackage, /^[a-z0-9+.-]+$/, tool.id + ' has an unsafe Termux package identifier');
-    assert.match(tool.debianPackage, /^[a-z0-9+.-]+$/, tool.id + ' has an unsafe APT package identifier');
+    assert.ok(data.termuxPackagesChecked.includes(tool.termuxPackage), tool.id + ' package metadata was not checked');
+    if (tool.debianPackage) {
+      assert.ok(tool.verifyDebian, tool.id + ' is missing its APT verification command');
+      assert.match(tool.debianPackage, /^[a-z0-9+.-]+$/, tool.id + ' has an unsafe APT package identifier');
+    } else {
+      assert.equal(tool.termuxOnly, true, tool.id + ' must declare why it is Termux-only');
+      assert.equal(tool.verifyDebian, null);
+    }
   }
 });
 
 test('Termux and APT commands are generated from package identifiers, not arbitrary scripts', () => {
   for (const tool of data.tools) {
     assert.doesNotMatch(tool.termuxPackage, /[;&|\x60$<>]/);
-    assert.doesNotMatch(tool.debianPackage, /[;&|\x60$<>]/);
     assert.ok(tool.verifyTermux.length < 120);
-    assert.ok(tool.verifyDebian.length < 120);
+    if (tool.debianPackage) {
+      assert.doesNotMatch(tool.debianPackage, /[;&|\x60$<>]/);
+      assert.ok(tool.verifyDebian.length < 120);
+    }
   }
   assert.match(source, /'pkg install ' \+ pkg/);
   assert.match(source, /'sudo apt install ' \+ pkg/);
   assert.match(source, /'pkg uninstall ' \+ pkg/);
   assert.match(source, /'sudo apt remove ' \+ pkg/);
+  assert.match(source, /Boolean\(tool\.debianPackage\)/);
   assert.doesNotMatch(source, /curl[^\n]*\|\s*(ba)?sh/i);
   assert.doesNotMatch(source, /innerHTML|eval\s*\(/);
 });
@@ -62,6 +73,7 @@ test('future firmware and flashing entries are clearly separated from installabl
   assert.ok(data.roadmap.some(item => item.id === 'esp-idf'));
   assert.ok(data.roadmap.some(item => item.id === 'arduino-cli'));
   assert.ok(data.roadmap.some(item => item.id === 'openocd-esp32'));
+  assert.ok(data.tools.filter(item => item.termuxOnly).length === 3);
 });
 
 test('page exposes accessible search, environment selection, category filters and safety notes', () => {

@@ -67,21 +67,25 @@
     details.append(summary);
     const body = node('div', 'terminal-tool-detail-body');
     const pkg = environment.value === 'debian' ? tool.debianPackage : tool.termuxPackage;
-    const install = environment.value === 'debian'
-      ? 'sudo apt install ' + pkg
-      : 'pkg install ' + pkg;
-    const remove = environment.value === 'debian'
-      ? 'sudo apt remove ' + pkg
-      : 'pkg uninstall ' + pkg;
-    const verify = environment.value === 'debian' ? tool.verifyDebian : tool.verifyTermux;
     const environmentLabel = environment.value === 'debian' ? 'DEBIAN / UBUNTU (APT)' : 'TERMUX (PKG)';
 
     body.append(node('p', 'terminal-environment-label', 'INSTALL TARGET: ' + environmentLabel));
-    const commands = node('div', 'terminal-command-grid');
-    addCommand(commands, 'INSTALL', install);
-    addCommand(commands, 'VERIFY', verify);
-    addCommand(commands, 'UNINSTALL', remove);
-    body.append(commands);
+    if (!pkg) {
+      body.append(node('p', 'terminal-tool-note', 'This entry is not packaged for the selected environment in this catalog.'));
+    } else {
+      const install = environment.value === 'debian'
+        ? 'sudo apt install ' + pkg
+        : 'pkg install ' + pkg;
+      const remove = environment.value === 'debian'
+        ? 'sudo apt remove ' + pkg
+        : 'pkg uninstall ' + pkg;
+      const verify = environment.value === 'debian' ? tool.verifyDebian : tool.verifyTermux;
+      const commands = node('div', 'terminal-command-grid');
+      addCommand(commands, 'INSTALL', install);
+      addCommand(commands, 'VERIFY', verify);
+      addCommand(commands, 'UNINSTALL', remove);
+      body.append(commands);
+    }
     body.append(node('p', 'terminal-tool-note', 'Important: ' + tool.note));
     body.append(node('p', 'terminal-tool-trouble', 'If something fails: ' + tool.trouble));
     body.append(node('p', 'terminal-license-note', 'License: review the license in the original project before copying, modifying or redistributing it. This catalog links to upstream sources and does not bundle the tool.'));
@@ -116,8 +120,9 @@
     const query = (search.value || '').trim().toLowerCase();
     const matches = catalog.tools.filter(tool => {
       const categoryMatch = activeCategory === 'all' || tool.category === activeCategory;
+      const environmentMatch = environment.value === 'termux' || Boolean(tool.debianPackage);
       const text = [tool.name, tool.summary, tool.category, ...tool.tags].join(' ').toLowerCase();
-      return categoryMatch && (!query || text.includes(query));
+      return categoryMatch && environmentMatch && (!query || text.includes(query));
     });
     grid.replaceChildren();
     matches.forEach(tool => grid.append(renderTool(tool)));

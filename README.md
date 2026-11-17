@@ -26,7 +26,7 @@ Browser-local tools process supplied data in the browser. External lookups ident
 
 ## Terminal and CLI library
 
-The public terminal catalog contains 24 upstream-linked command-line tools for Termux and Debian/Ubuntu. Each entry provides environment-specific installation, verification and removal commands, operational caveats, troubleshooting guidance, and links to the original source and documentation. The site generates commands only; it does not execute them or bundle third-party binaries.
+The public terminal catalog contains 50 upstream-linked command-line tools for Termux and Debian/Ubuntu. Each entry provides environment-specific installation, verification and removal commands, operational caveats, troubleshooting guidance, and links to the original source and documentation. The site generates commands only; it does not execute them or bundle third-party binaries.
 
 The future roadmap reserves eight entries for ESP32 and firmware workflows, including esptool, ESP-IDF, Arduino CLI, PlatformIO, OpenOCD, firmware inspection, serial consoles, and USB-UART drivers. These are marked as planned and are not presented as install-ready instructions.
 

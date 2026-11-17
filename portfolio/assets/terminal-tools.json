@@ -39,6 +39,16 @@
       "id": "system",
       "label": "System administration",
       "description": "Process, resource and file synchronization tools."
+    },
+    {
+      "id": "developer",
+      "label": "Developer runtimes & build tools",
+      "description": "Programming languages, compilers, build systems and developer CLIs."
+    },
+    {
+      "id": "termux",
+      "label": "Termux-specific workflows",
+      "description": "Android integration, service supervision and Linux userlands through PRoot."
     }
   ],
   "tools": [
@@ -524,6 +534,532 @@
       "trouble": "For permission errors, inspect ownership and destination write access. For remote transfers, verify SSH connectivity and the remote rsync installation.",
       "sourceUrl": "https://rsync.samba.org/",
       "docsUrl": "https://rsync.samba.org/documentation.html"
+    },
+    {
+      "id": "bat",
+      "name": "bat",
+      "category": "terminal",
+      "symbol": "BAT",
+      "summary": "Syntax-highlighted file viewer with Git-aware line information.",
+      "tags": [
+        "cat alternative",
+        "syntax highlighting",
+        "files"
+      ],
+      "termuxPackage": "bat",
+      "debianPackage": "bat",
+      "verifyTermux": "bat --version",
+      "verifyDebian": "batcat --version",
+      "note": "On Debian/Ubuntu the executable is commonly batcat; on Termux it is bat. Do not assume the command name is identical across distributions.",
+      "trouble": "If bat is not found on Debian/Ubuntu, try batcat. Check the package's installed executable name before adding an alias.",
+      "sourceUrl": "https://github.com/sharkdp/bat",
+      "docsUrl": "https://github.com/sharkdp/bat#readme"
+    },
+    {
+      "id": "micro",
+      "name": "Micro Editor",
+      "category": "terminal",
+      "symbol": "MICRO",
+      "summary": "Modern terminal text editor with simple defaults and mouse support.",
+      "tags": [
+        "editor",
+        "terminal",
+        "text"
+      ],
+      "termuxPackage": "micro",
+      "debianPackage": "micro",
+      "verifyTermux": "micro --version",
+      "verifyDebian": "micro --version",
+      "note": "Use a text editor only on files you intend to change. Keep backups of configuration files before editing them.",
+      "trouble": "If terminal colors or key bindings behave incorrectly, check TERM and terminal emulator compatibility. Start with a copy of important configuration files.",
+      "sourceUrl": "https://github.com/zyedidia/micro",
+      "docsUrl": "https://github.com/zyedidia/micro#readme"
+    },
+    {
+      "id": "aria2",
+      "name": "aria2",
+      "category": "terminal",
+      "symbol": "DL",
+      "summary": "Multi-protocol download utility with segmented transfer support.",
+      "tags": [
+        "download",
+        "http",
+        "ftp",
+        "torrent"
+      ],
+      "termuxPackage": "aria2",
+      "debianPackage": "aria2",
+      "verifyTermux": "aria2c --version",
+      "verifyDebian": "aria2c --version",
+      "note": "Use trusted URLs and verify checksums or signatures for downloaded software. Avoid downloading executable content from untrusted sources.",
+      "trouble": "For interrupted downloads, inspect the server response and local storage space. For certificate errors, repair the CA store rather than disabling TLS checks.",
+      "sourceUrl": "https://github.com/aria2/aria2",
+      "docsUrl": "https://aria2.github.io/manual/en/html/"
+    },
+    {
+      "id": "unzip",
+      "name": "UnZip",
+      "category": "system",
+      "symbol": "ZIP",
+      "summary": "List and extract ZIP archives from the command line.",
+      "tags": [
+        "archive",
+        "zip",
+        "compression"
+      ],
+      "termuxPackage": "unzip",
+      "debianPackage": "unzip",
+      "verifyTermux": "unzip -v",
+      "verifyDebian": "unzip -v",
+      "note": "List archive contents before extraction when files come from an untrusted source. Avoid extracting into privileged system directories.",
+      "trouble": "If extraction fails, check archive integrity and available storage. Use the list option to inspect filenames and paths before extracting.",
+      "sourceUrl": "https://infozip.sourceforge.net/",
+      "docsUrl": "https://manpages.debian.org/stable/unzip/unzip.1.en.html"
+    },
+    {
+      "id": "make",
+      "name": "GNU Make",
+      "category": "automation",
+      "symbol": "MAKE",
+      "summary": "Run repeatable build and automation tasks described in Makefiles.",
+      "tags": [
+        "build",
+        "automation",
+        "makefile"
+      ],
+      "termuxPackage": "make",
+      "debianPackage": "make",
+      "verifyTermux": "make --version",
+      "verifyDebian": "make --version",
+      "note": "A Makefile can run arbitrary shell commands. Inspect its targets and recipes before running make in an unfamiliar repository.",
+      "trouble": "For missing compiler or linker errors, install the documented build dependencies. Use make -n to preview recipes before executing them.",
+      "sourceUrl": "https://git.savannah.gnu.org/cgit/make.git",
+      "docsUrl": "https://www.gnu.org/software/make/manual/"
+    },
+    {
+      "id": "cmake",
+      "name": "CMake",
+      "category": "automation",
+      "symbol": "CMAKE",
+      "summary": "Cross-platform build configuration and project generation tool.",
+      "tags": [
+        "build system",
+        "C",
+        "C++",
+        "configure"
+      ],
+      "termuxPackage": "cmake",
+      "debianPackage": "cmake",
+      "verifyTermux": "cmake --version",
+      "verifyDebian": "cmake --version",
+      "note": "CMake configuration can invoke project scripts. Review CMakeLists.txt and presets before configuring an unfamiliar codebase.",
+      "trouble": "If compiler detection fails, install the compiler toolchain and make package. Clear or recreate the build directory after changing toolchain settings.",
+      "sourceUrl": "https://github.com/Kitware/CMake",
+      "docsUrl": "https://cmake.org/documentation/"
+    },
+    {
+      "id": "nodejs",
+      "name": "Node.js",
+      "category": "developer",
+      "symbol": "NODE",
+      "summary": "JavaScript runtime for CLI applications, tooling and local development.",
+      "tags": [
+        "javascript",
+        "runtime",
+        "npm"
+      ],
+      "termuxPackage": "nodejs",
+      "debianPackage": "nodejs",
+      "verifyTermux": "node --version",
+      "verifyDebian": "node --version",
+      "note": "Use a project lockfile and review package scripts before running npm install or npm run. Dependency lifecycle scripts can execute code.",
+      "trouble": "If npm is missing, verify the distribution's Node.js package selection. If versions conflict, use a version manager from its official documentation.",
+      "sourceUrl": "https://github.com/nodejs/node",
+      "docsUrl": "https://nodejs.org/docs/latest/api/"
+    },
+    {
+      "id": "ruby",
+      "name": "Ruby",
+      "category": "developer",
+      "symbol": "RB",
+      "summary": "Ruby runtime for scripts, automation and development tools.",
+      "tags": [
+        "ruby",
+        "runtime",
+        "gems"
+      ],
+      "termuxPackage": "ruby",
+      "debianPackage": "ruby",
+      "verifyTermux": "ruby --version",
+      "verifyDebian": "ruby --version",
+      "note": "Prefer project-specific dependency management and review gem sources before installing packages.",
+      "trouble": "If gem installation fails, check RubyGems configuration and write permissions. Avoid running gem install with elevated privileges unless the official instructions require it.",
+      "sourceUrl": "https://github.com/ruby/ruby",
+      "docsUrl": "https://docs.ruby-lang.org/en/"
+    },
+    {
+      "id": "perl",
+      "name": "Perl",
+      "category": "developer",
+      "symbol": "PL",
+      "summary": "Perl interpreter for text processing, scripting and legacy automation.",
+      "tags": [
+        "perl",
+        "scripting",
+        "text processing"
+      ],
+      "termuxPackage": "perl",
+      "debianPackage": "perl",
+      "verifyTermux": "perl --version",
+      "verifyDebian": "perl --version",
+      "note": "Review scripts before execution, especially when they process files or network input.",
+      "trouble": "If a module is missing, identify its package or distribution source first. Prefer system packages when available and avoid mixing incompatible library paths.",
+      "sourceUrl": "https://github.com/Perl/perl5",
+      "docsUrl": "https://perldoc.perl.org/"
+    },
+    {
+      "id": "php",
+      "name": "PHP CLI",
+      "category": "developer",
+      "symbol": "PHP",
+      "summary": "PHP command-line interpreter for scripts and local development tasks.",
+      "tags": [
+        "php",
+        "runtime",
+        "cli"
+      ],
+      "termuxPackage": "php",
+      "debianPackage": "php-cli",
+      "verifyTermux": "php --version",
+      "verifyDebian": "php --version",
+      "note": "The CLI package is for command-line use; it does not automatically configure a public web server. Keep test services bound to localhost unless intentionally exposed.",
+      "trouble": "If extensions are missing, install the matching extension package for the PHP version. Check php --ini to locate active configuration files.",
+      "sourceUrl": "https://github.com/php/php-src",
+      "docsUrl": "https://www.php.net/manual/en/"
+    },
+    {
+      "id": "golang",
+      "name": "Go",
+      "category": "developer",
+      "symbol": "GO",
+      "summary": "Go compiler and toolchain for building portable command-line programs.",
+      "tags": [
+        "golang",
+        "compiler",
+        "build"
+      ],
+      "termuxPackage": "golang",
+      "debianPackage": "golang-go",
+      "verifyTermux": "go version",
+      "verifyDebian": "go version",
+      "note": "Use module mode and review go.mod and go.sum before building unfamiliar projects.",
+      "trouble": "If a module cannot be downloaded, check GOPROXY and network access. Ensure the Go binary directory is on PATH when installing tools with go install.",
+      "sourceUrl": "https://github.com/golang/go",
+      "docsUrl": "https://go.dev/doc/"
+    },
+    {
+      "id": "rust",
+      "name": "Rust Toolchain",
+      "category": "developer",
+      "symbol": "RS",
+      "summary": "Rust compiler for systems programming and native CLI tools.",
+      "tags": [
+        "rust",
+        "compiler",
+        "cargo"
+      ],
+      "termuxPackage": "rust",
+      "debianPackage": "rustc",
+      "verifyTermux": "rustc --version",
+      "verifyDebian": "rustc --version",
+      "note": "This entry installs the compiler package; Cargo availability can depend on the distribution package split. Check cargo --version before building Rust projects.",
+      "trouble": "If cargo is missing on Debian/Ubuntu, install the separate cargo package. For build errors, check the required Rust toolchain version in rust-toolchain.toml.",
+      "sourceUrl": "https://github.com/rust-lang/rust",
+      "docsUrl": "https://doc.rust-lang.org/"
+    },
+    {
+      "id": "zsh",
+      "name": "Zsh",
+      "category": "terminal",
+      "symbol": "ZSH",
+      "summary": "Interactive shell with advanced completion, globbing and customization.",
+      "tags": [
+        "shell",
+        "terminal",
+        "completion"
+      ],
+      "termuxPackage": "zsh",
+      "debianPackage": "zsh",
+      "verifyTermux": "zsh --version",
+      "verifyDebian": "zsh --version",
+      "note": "Changing the login shell affects startup behavior. Keep a working Bash session and back up shell configuration before switching.",
+      "trouble": "If startup becomes slow or broken, launch zsh with -f to skip user configuration and inspect .zshrc. Verify the shell path before changing the login shell.",
+      "sourceUrl": "https://github.com/zsh-users/zsh",
+      "docsUrl": "https://zsh.sourceforge.io/Doc/"
+    },
+    {
+      "id": "ffmpeg",
+      "name": "FFmpeg",
+      "category": "system",
+      "symbol": "MEDIA",
+      "summary": "Command-line multimedia inspection, conversion and stream processing.",
+      "tags": [
+        "audio",
+        "video",
+        "media"
+      ],
+      "termuxPackage": "ffmpeg",
+      "debianPackage": "ffmpeg",
+      "verifyTermux": "ffmpeg -version",
+      "verifyDebian": "ffmpeg -version",
+      "note": "Conversion and transcoding can consume significant CPU, storage and battery. Preserve originals before overwriting media files.",
+      "trouble": "For unsupported codecs, inspect the build configuration with ffmpeg -buildconf. For permission errors, check input and output file access.",
+      "sourceUrl": "https://github.com/FFmpeg/FFmpeg",
+      "docsUrl": "https://ffmpeg.org/documentation.html"
+    },
+    {
+      "id": "gh",
+      "name": "GitHub CLI",
+      "category": "developer",
+      "symbol": "GH",
+      "summary": "Manage GitHub repositories, issues, pull requests and releases from the terminal.",
+      "tags": [
+        "github",
+        "git",
+        "pull requests"
+      ],
+      "termuxPackage": "gh",
+      "debianPackage": "gh",
+      "verifyTermux": "gh --version",
+      "verifyDebian": "gh --version",
+      "note": "Authentication grants the CLI access to your GitHub account. Use least-privilege scopes and never expose tokens in logs or shell history.",
+      "trouble": "If authentication fails, run gh auth status and follow the official login flow. Check the active host and account before changing repository settings.",
+      "sourceUrl": "https://github.com/cli/cli",
+      "docsUrl": "https://cli.github.com/manual/"
+    },
+    {
+      "id": "git-lfs",
+      "name": "Git LFS",
+      "category": "developer",
+      "symbol": "LFS",
+      "summary": "Track large binary assets through Git Large File Storage.",
+      "tags": [
+        "git",
+        "large files",
+        "version control"
+      ],
+      "termuxPackage": "git-lfs",
+      "debianPackage": "git-lfs",
+      "verifyTermux": "git lfs version",
+      "verifyDebian": "git lfs version",
+      "note": "Git LFS transfers file contents to configured storage endpoints. Review repository attributes and storage policy before tracking large or sensitive files.",
+      "trouble": "If checkout shows pointer files, verify Git LFS is installed and run git lfs install for the current user. Check remote LFS quotas and authentication.",
+      "sourceUrl": "https://github.com/git-lfs/git-lfs",
+      "docsUrl": "https://git-lfs.com/"
+    },
+    {
+      "id": "busybox",
+      "name": "BusyBox",
+      "category": "system",
+      "symbol": "BB",
+      "summary": "Compact collection of common Unix command-line utilities in one binary.",
+      "tags": [
+        "unix tools",
+        "shell",
+        "embedded"
+      ],
+      "termuxPackage": "busybox",
+      "debianPackage": "busybox",
+      "verifyTermux": "busybox --help",
+      "verifyDebian": "busybox --help",
+      "note": "BusyBox applets can differ from GNU utilities in options and behavior. Do not assume scripts are fully portable between implementations.",
+      "trouble": "If an option is unsupported, check the BusyBox applet help and use the system's GNU utility where compatibility matters.",
+      "sourceUrl": "https://git.busybox.net/busybox/",
+      "docsUrl": "https://busybox.net/downloads/BusyBox.html"
+    },
+    {
+      "id": "coreutils",
+      "name": "GNU Coreutils",
+      "category": "system",
+      "symbol": "CORE",
+      "summary": "Essential file, text and system utilities such as ls, cp, mv, sort and wc.",
+      "tags": [
+        "unix utilities",
+        "files",
+        "text"
+      ],
+      "termuxPackage": "coreutils",
+      "debianPackage": "coreutils",
+      "verifyTermux": "ls --version",
+      "verifyDebian": "ls --version",
+      "note": "Coreutils commands can overwrite or delete files. Check source and destination paths before using cp, mv, rm or install.",
+      "trouble": "If an option differs, check the local command's --help because BusyBox and GNU implementations may not match. Confirm which binary is first on PATH.",
+      "sourceUrl": "https://www.gnu.org/software/coreutils/",
+      "docsUrl": "https://www.gnu.org/software/coreutils/manual/"
+    },
+    {
+      "id": "findutils",
+      "name": "GNU Findutils",
+      "category": "terminal",
+      "symbol": "FIND",
+      "summary": "Find files and process directory trees with find, xargs and locate utilities.",
+      "tags": [
+        "find",
+        "xargs",
+        "filesystem"
+      ],
+      "termuxPackage": "findutils",
+      "debianPackage": "findutils",
+      "verifyTermux": "find --version",
+      "verifyDebian": "find --version",
+      "note": "Review find expressions before adding -delete or piping results into commands that modify files.",
+      "trouble": "If results differ from expectations, quote patterns and test the expression without -delete or other actions first.",
+      "sourceUrl": "https://git.savannah.gnu.org/cgit/findutils.git",
+      "docsUrl": "https://www.gnu.org/software/findutils/manual/"
+    },
+    {
+      "id": "gawk",
+      "name": "GNU awk",
+      "category": "automation",
+      "symbol": "AWK",
+      "summary": "Pattern scanning and data extraction for structured and line-oriented text.",
+      "tags": [
+        "awk",
+        "text processing",
+        "automation"
+      ],
+      "termuxPackage": "gawk",
+      "debianPackage": "gawk",
+      "verifyTermux": "gawk --version",
+      "verifyDebian": "gawk --version",
+      "note": "Awk programs process every matching input line. Test filters against sample data before applying them to production logs.",
+      "trouble": "If fields are misaligned, check the input delimiter and locale. Use a small sample to confirm field numbering before processing large files.",
+      "sourceUrl": "https://git.savannah.gnu.org/cgit/gawk.git",
+      "docsUrl": "https://www.gnu.org/software/gawk/manual/"
+    },
+    {
+      "id": "less",
+      "name": "less",
+      "category": "terminal",
+      "symbol": "LESS",
+      "summary": "Page through large text files and command output without loading everything into an editor.",
+      "tags": [
+        "pager",
+        "logs",
+        "text"
+      ],
+      "termuxPackage": "less",
+      "debianPackage": "less",
+      "verifyTermux": "less --version",
+      "verifyDebian": "less --version",
+      "note": "Use less -F or q to exit. When inspecting sensitive logs, remember terminal scrollback and copied output may retain data.",
+      "trouble": "If colors or control characters appear, try a plain-text view and check the program's color settings. Use / to search within the pager.",
+      "sourceUrl": "https://github.com/gwsw/less",
+      "docsUrl": "https://www.greenwoodsoftware.com/less/"
+    },
+    {
+      "id": "neovim",
+      "name": "Neovim",
+      "category": "terminal",
+      "symbol": "NVIM",
+      "summary": "Extensible terminal text editor with Lua configuration and plugin support.",
+      "tags": [
+        "editor",
+        "lua",
+        "terminal"
+      ],
+      "termuxPackage": "neovim",
+      "debianPackage": "neovim",
+      "verifyTermux": "nvim --version",
+      "verifyDebian": "nvim --version",
+      "note": "Plugin managers and editor plugins execute code. Review plugin sources and back up configuration before adding extensions.",
+      "trouble": "If startup fails, run nvim --clean to bypass user configuration. Check the runtime path and plugin compatibility before reinstalling.",
+      "sourceUrl": "https://github.com/neovim/neovim",
+      "docsUrl": "https://neovim.io/doc/"
+    },
+    {
+      "id": "gdb",
+      "name": "GNU Debugger (GDB)",
+      "category": "developer",
+      "symbol": "GDB",
+      "summary": "Inspect and debug native programs with breakpoints, stack traces and variable inspection.",
+      "tags": [
+        "debugger",
+        "native code",
+        "C",
+        "C++"
+      ],
+      "termuxPackage": "gdb",
+      "debianPackage": "gdb",
+      "verifyTermux": "gdb --version",
+      "verifyDebian": "gdb --version",
+      "note": "Debug only binaries and processes you own or are authorized to inspect. Android ptrace and SELinux policies may limit process attachment.",
+      "trouble": "If attach is denied, check ptrace permissions and platform policy. For missing symbols, rebuild with debug information and preserve the matching binary.",
+      "sourceUrl": "https://sourceware.org/git/binutils-gdb.git",
+      "docsUrl": "https://sourceware.org/gdb/documentation/"
+    },
+    {
+      "id": "proot-distro",
+      "name": "proot-distro",
+      "category": "termux",
+      "symbol": "PROOT",
+      "summary": "Install and manage Linux root filesystems inside Termux using PRoot.",
+      "tags": [
+        "termux",
+        "linux userland",
+        "proot"
+      ],
+      "termuxPackage": "proot-distro",
+      "debianPackage": null,
+      "verifyTermux": "proot-distro --help",
+      "verifyDebian": null,
+      "termuxOnly": true,
+      "note": "This creates a user-space Linux environment, not a virtual machine or a separate Linux kernel. It does not automatically provide root privileges, monitor mode or direct hardware access.",
+      "trouble": "If a distribution fails to install, check free storage, Termux repository health and the selected distro support. Back up important files before removing a rootfs.",
+      "sourceUrl": "https://github.com/termux/proot-distro",
+      "docsUrl": "https://github.com/termux/proot-distro#readme"
+    },
+    {
+      "id": "termux-api",
+      "name": "Termux:API",
+      "category": "termux",
+      "symbol": "API",
+      "summary": "Expose selected Android device functions to Termux command-line scripts through the companion app.",
+      "tags": [
+        "termux",
+        "android api",
+        "device integration"
+      ],
+      "termuxPackage": "termux-api",
+      "debianPackage": null,
+      "verifyTermux": "command -v termux-battery-status",
+      "verifyDebian": null,
+      "termuxOnly": true,
+      "note": "The Termux:API Android companion app must be installed from the same signing source as the Termux app. Android permissions and API availability vary by device.",
+      "trouble": "If a command exists but returns no data, confirm the companion app is installed, signatures match and required Android permissions are granted.",
+      "sourceUrl": "https://github.com/termux/termux-api",
+      "docsUrl": "https://github.com/termux/termux-api#readme"
+    },
+    {
+      "id": "termux-services",
+      "name": "Termux Services",
+      "category": "termux",
+      "symbol": "SV",
+      "summary": "Service supervision helpers for managing supported background services in Termux.",
+      "tags": [
+        "termux",
+        "services",
+        "runit"
+      ],
+      "termuxPackage": "termux-services",
+      "debianPackage": null,
+      "verifyTermux": "command -v sv",
+      "verifyDebian": null,
+      "termuxOnly": true,
+      "note": "Service management can start processes in the background. Enable only services you understand and monitor their resource usage.",
+      "trouble": "If service commands are unavailable, restart the Termux session after installation and check the package's official usage guide.",
+      "sourceUrl": "https://github.com/termux/termux-services",
+      "docsUrl": "https://github.com/termux/termux-services#readme"
     }
   ],
   "roadmap": [
@@ -629,5 +1165,57 @@
       ],
       "safety": "Drivers will be linked only from chip vendors. We will identify the adapter chipset before recommending a driver."
     }
+  ],
+  "termuxPackagesChecked": [
+    "aria2",
+    "bat",
+    "busybox",
+    "cmake",
+    "coreutils",
+    "dnsutils",
+    "fd",
+    "ffmpeg",
+    "findutils",
+    "fzf",
+    "gawk",
+    "gdb",
+    "gh",
+    "git",
+    "git-lfs",
+    "golang",
+    "htop",
+    "iperf3",
+    "iproute2",
+    "jq",
+    "less",
+    "lsof",
+    "make",
+    "micro",
+    "neovim",
+    "nmap",
+    "nodejs",
+    "openssh",
+    "openssl",
+    "perl",
+    "php",
+    "proot-distro",
+    "python",
+    "ripgrep",
+    "rsync",
+    "ruby",
+    "rust",
+    "shellcheck",
+    "shfmt",
+    "socat",
+    "strace",
+    "termux-api",
+    "termux-services",
+    "tmux",
+    "traceroute",
+    "tree",
+    "unzip",
+    "wget",
+    "whois",
+    "zsh"
   ]
 }

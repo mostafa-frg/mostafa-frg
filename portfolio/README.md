@@ -5,7 +5,7 @@ A product-oriented engineering platform for developers, infrastructure engineers
 ## Product scope
 
 - Searchable engineering tool library across networking, cybersecurity, SOC operations, Linux, and developer workflows.
-- Public terminal catalog with 24 upstream-linked packages for Termux and Debian/Ubuntu, including install, verify, uninstall and troubleshooting instructions.
+- Public terminal catalog with 50 upstream-linked packages for Termux and Debian/Ubuntu, including install, verify, uninstall and troubleshooting instructions.
 - Planned ESP32 firmware and flashing workspace; roadmap items remain clearly marked as not yet installable.
 - Browser-local utilities that keep supplied content in the browser whenever feasible.
 - Clearly identified external lookups with provider disclosure and bounded requests.

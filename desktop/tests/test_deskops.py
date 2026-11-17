@@ -378,5 +378,19 @@ class DeskOpsTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "regular ZIP"):
             deskops.archive_audit(link)
 
+
+    def test_archive_audit_cli_exit_codes_distinguish_high_and_review_findings(self):
+        import zipfile
+        high_archive = self.root / "high-risk.zip"
+        with zipfile.ZipFile(high_archive, "w") as bundle:
+            bundle.writestr("../escape.txt", "x")
+        with redirect_stdout(StringIO()):
+            self.assertEqual(deskops.main(["archive-audit", str(high_archive), "--json"]), 2)
+        review_archive = self.root / "review.zip"
+        with zipfile.ZipFile(review_archive, "w") as bundle:
+            bundle.writestr("installer.exe", "binary")
+        with redirect_stdout(StringIO()):
+            self.assertEqual(deskops.main(["archive-audit", str(review_archive), "--json"]), 1)
+
 if __name__ == "__main__":
     unittest.main()

@@ -80,6 +80,14 @@ Uses the operating system's trusted certificate store and hostname verification.
 
 Parses common Apache/Nginx combined access-log lines. The report contains aggregate counts, not client IP values or query strings.
 
+
+### 8. Offline PCAP summary
+
+    python -m deskops pcap-summary ./capture.pcap
+    python -m deskops pcap-summary ./capture.pcap --json
+
+Reads classic Ethernet PCAP files locally and reports packet totals, IPv4/IPv6 counts, TCP/UDP/ICMP/other protocol counts, and the most common destination ports. It does not transmit packets, perform a live capture, export packet payloads, or include source/destination IP addresses in the report. VLAN-tagged Ethernet and IPv4 fragmentation are handled conservatively; IPv6 extension-header traversal is not implemented. PCAPNG and non-Ethernet capture formats are rejected explicitly. Use captures you own or are authorized to analyze.
+
 ## Exit codes
 
 - 0: command completed successfully (or endpoint is reachable).

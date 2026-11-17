@@ -9,7 +9,7 @@ A cross-platform command-line toolkit for Windows 10/11, Linux desktops and macO
 - File manifests store relative paths, sizes, and cryptographic digests — never absolute paths.
 - Access-log reports count client addresses but do not print or export the addresses.
 - DNS queries use the operating system's configured resolver. TCP checks connect only to the single host and port explicitly supplied.
-- HTTP header audit sends a small HTTP request to the URL you explicitly provide. The destination receives the request and your network address as it normally would.
+- HTTP header audit sends a small HTTP request to the URL you explicitly provide; TLS inspection opens a verified connection to the host you specify. Those destinations receive normal network requests from your machine.
 - No passwords, tokens, browser profiles, environment variables, or personal files are collected.
 
 ## Requirements
@@ -91,3 +91,8 @@ GitHub Actions runs the suite on Windows and Ubuntu. Network-dependent commands 
 ## Safe-use boundaries
 
 Only test systems and networks you own or have explicit permission to assess. The toolkit intentionally does not provide arbitrary shell execution, credential collection, stealth, persistence, exploitation, or uncontrolled network scanning.
+
+
+## Licensing status
+
+The repository does not yet contain an explicit open-source license. GitHub visibility allows downloading the source, but does not by itself grant broad rights to redistribute or publish modified copies. A license choice is still required before presenting this as a permissively licensed public project.

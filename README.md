@@ -16,7 +16,7 @@ Start here: [Desktop Toolkit documentation](desktop/README.md).
 
 ## Engineering workspace
 
-The browser-based workspace contains practical tools for networking, cybersecurity, SOC analysis, Linux administration, Bash, and developer workflows.
+The browser-based workspace currently registers 104 utilities for networking, cybersecurity, SOC analysis, Linux administration, Bash, and developer workflows. CI exercises every registered tool workflow.
 
 - Open the application source in [portfolio](portfolio/).
 - Browse the [tool library](portfolio/tools.html).

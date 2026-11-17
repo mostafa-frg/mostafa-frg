@@ -1,6 +1,6 @@
 # DeskOps — Desktop Engineering & Security Toolkit
 
-A cross-platform command-line toolkit for Windows 10/11, Linux desktops and macOS (the CI matrix exercises Windows, Ubuntu and macOS). It uses only the Python standard library; no Android, Termux, root access, external Python packages, telemetry, account, or cloud service is required.
+A cross-platform command-line toolkit for Windows 10/11, Linux desktops and macOS. It uses only the Python standard library; no root access, external Python packages, telemetry, account, or cloud service is required.
 
 ## Privacy model
 
@@ -24,7 +24,7 @@ A cross-platform command-line toolkit for Windows 10/11, Linux desktops and macO
     cd mostafa-frg/desktop
     python -m deskops --help
 
-On Windows, use py -3 -m deskops --help if python is not on PATH.
+On Windows, use py -3 -m deskops --help if python is not on PATH. You can also use GitHub's Code → Download ZIP option, extract the archive, and open a terminal in the desktop folder.
 
 ## Commands
 
@@ -64,6 +64,8 @@ Reviews HSTS, CSP, clickjacking controls, MIME-sniffing protection, Referrer-Pol
 ### 6. TLS certificate inspection
 
     python -m deskops tls-check example.com --port 443
+
+On Windows, replace python with py -3 in the examples if needed.
 
 Uses the operating system's trusted certificate store and hostname verification. Reports TLS version, negotiated cipher, subject/issuer, SANs, expiry and SHA-256 certificate fingerprint. It does not disable certificate verification.
 

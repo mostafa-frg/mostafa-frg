@@ -1,54 +1,58 @@
 # Engineering & Security Toolkit
 
-A public collection of desktop utilities, engineering references, and controlled cybersecurity labs. The repository is organized for repeatable use, transparent behavior, and verification through automated tests.
+A desktop-first collection of practical engineering utilities, command-line references, and controlled cybersecurity labs for Windows, Linux, and macOS.
 
-## Desktop toolkit
+## Start here
 
-The DeskOps package provides cross-platform utilities for Windows 10/11, Linux desktops, and macOS. It requires Python 3.10+ and uses only the standard library.
+- [Desktop toolkit](desktop/README.md) — local command-line utilities with no third-party Python dependencies.
+- [Desktop download and installation guide](desktop/INSTALL.md) — GitHub ZIP download or Git clone, with Windows, Linux, and macOS instructions.
+- [Desktop CLI & Security Tool Catalog](desktop/CLI-CATALOG.md) — a categorized upstream directory of networking, web security, defensive monitoring, forensics, cryptography, and developer tools.
+- [Browser-based engineering workspace](portfolio/index.html) — practical networking, cybersecurity, SOC, Linux administration, Bash, and developer utilities.
+- [Security and privacy notes](portfolio/security.html).
 
-- File hashing and integrity baselines
-- DNS resolution and single-endpoint TCP checks
-- HTTP security-header review
-- Local Apache/Nginx access-log summaries
-- No telemetry, automatic uploads, credential collection, or background service
+## DeskOps desktop commands
 
-Start here: [Desktop Toolkit documentation](desktop/README.md).
+The DeskOps package uses Python 3.10+ and the Python standard library:
 
-## Engineering workspace
+- File hashing and integrity manifests.
+- DNS resolution and single-endpoint TCP diagnostics.
+- HTTP security-header review and TLS certificate inspection.
+- Local Apache/Nginx access-log summaries.
+- Offline tests and a cross-platform GitHub Actions matrix.
 
-The browser-based workspace currently registers 104 utilities for networking, cybersecurity, SOC analysis, Linux administration, Bash, and developer workflows. CI exercises every registered tool workflow.
+Quick start:
 
-- Open the application source in [portfolio](portfolio/).
-- Browse the [tool library](portfolio/tools.html).
-- Read the [security and privacy notes](portfolio/security.html).
+```bash
+git clone https://github.com/mostafa-frg/mostafa-frg.git
+cd mostafa-frg/desktop
+python -m deskops --help
+python -m unittest discover -s tests -v
+```
 
-Browser-local tools process supplied data in the browser. External lookups identify their provider and send only the query required for that lookup.
+On Windows, use `py -3` if `python` is not on PATH. GitHub's **Code → Download ZIP** option is also supported; Git is not required for a ZIP download.
 
-## Terminal and CLI library
+## Desktop CLI catalog
 
-The public terminal catalog contains 50 upstream-linked command-line tools for Termux and Debian/Ubuntu. Each entry provides environment-specific installation, verification and removal commands, operational caveats, troubleshooting guidance, and links to the original source and documentation. The site generates commands only; it does not execute them or bundle third-party binaries.
+The CLI catalog is designed for desktop/laptop operating systems only. It covers Windows 10/11, Linux distributions, and macOS. It links to upstream projects and explains platform-specific installation routes, verification, and limitations. It does not bundle third-party executables or run installation commands.
 
-The future roadmap reserves eight entries for ESP32 and firmware workflows, including esptool, ESP-IDF, Arduino CLI, PlatformIO, OpenOCD, firmware inspection, serial consoles, and USB-UART drivers. These are marked as planned and are not presented as install-ready instructions.
+**Mobile operating systems and Android terminal environments are out of scope.**
 
-Browse the [Terminal & CLI Library](portfolio/terminal-tools.html).
+## Engineering workspace and labs
 
-## Network and security labs
-
-The [cyber-labs directory](cyber-labs/README.md) contains independent Python labs for subnetting, routing, VLANs, ACLs, configuration auditing, PCAP analysis, log normalization, detection rules, file integrity, and incident triage.
-
-## Validation
-
-GitHub Actions runs automated checks for the web workspace, backend security tests against isolated local test resources, and Python lab regression tests. The desktop toolkit has a separate Windows and Ubuntu test matrix.
-
-A successful CI run is evidence for the tested code paths only; it is not a guarantee that every environment or live network will behave identically.
+The browser workspace contains utilities for networking, cybersecurity, SOC analysis, Linux administration, Bash, and developer workflows. The [cyber-labs directory](cyber-labs/README.md) contains focused Python labs for subnetting, routing, VLANs, ACLs, configuration auditing, PCAP analysis, log normalization, detection rules, file integrity, and incident triage.
 
 ## Privacy and safe use
 
-- No personal profile data is required to run the tools.
-- No telemetry or silent data upload is built into DeskOps.
+- No personal profile information is required to download or run the tools.
+- DeskOps does not collect device identifiers, credentials, browser data, or personal files.
+- No telemetry, silent data upload, account, or background service is built into DeskOps.
 - Never commit credentials, tokens, private logs, private keys, or real customer data.
 - Network diagnostics and security testing must be limited to systems you own or are explicitly authorized to assess.
 
-## License and third-party tools
+## Validation and limitations
 
-No repository-wide open-source license has been selected yet; public visibility does not itself grant redistribution rights. External utilities are not bundled or silently installed, and each upstream tool has its own license.
+GitHub Actions runs automated checks for the browser workspace, backend security tests against isolated local test resources, Python lab regression tests, and the desktop toolkit on supported CI operating systems. Passing CI validates only the code paths exercised by those tests; it does not guarantee compatibility with every hardware device, network, distribution, or third-party package.
+
+## Licensing
+
+No repository-wide open-source license has been selected yet. Public visibility on GitHub does not automatically grant permission to redistribute this repository or third-party software. The CLI catalog links to upstream projects; review each project's license and official installation instructions.

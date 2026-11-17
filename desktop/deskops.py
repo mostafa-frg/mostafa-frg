@@ -250,7 +250,7 @@ def auth_summary(path: Path) -> dict:
                     masked = _masked_source(source.group("ip"))
                     if masked:
                         sources[masked] += 1
-            if re.search(r"\bsudo:\s+\S+\s*:", line):
+            if re.search(r"\bsudo(?:\[\d+\])?:\s+\S+\s*:", line):
                 counts["sudo_events"] += 1
                 events += 1
     failed = counts["ssh_failed"] + counts["pam_failures"]

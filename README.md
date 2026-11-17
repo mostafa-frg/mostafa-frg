@@ -18,6 +18,8 @@ The DeskOps package uses Python 3.10+ and the Python standard library:
 - DNS resolution and single-endpoint TCP diagnostics.
 - HTTP security-header review and TLS certificate inspection.
 - Local Apache/Nginx access-log summaries.
+- IPv4 subnet planning, including `/31` point-to-point and `/32` single-host cases.
+- Offline classic Ethernet PCAP summaries with protocol and destination-port counts; packet payloads and IP addresses are not included in reports.
 - Offline tests and a cross-platform GitHub Actions matrix.
 
 Quick start:

@@ -12,6 +12,11 @@ A cross-platform command-line toolkit for Windows 10/11, Linux desktops and macO
 - HTTP header audit sends a small HTTP request to the URL you explicitly provide; TLS inspection opens a verified connection to the host you specify. Those destinations receive normal network requests from your machine.
 - No passwords, tokens, browser profiles, environment variables, or personal files are collected.
 
+## Additional desktop tools
+
+- [Desktop CLI & Security Tool Catalog](CLI-CATALOG.md) — networking, web assessment, defensive monitoring, forensics, cryptography, and developer tools for Windows, Linux, and macOS.
+- [Download and installation guide](INSTALL.md) — GitHub ZIP and Git clone workflows for desktop systems.
+
 ## Requirements
 
 - Python 3.10 or newer

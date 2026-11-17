@@ -136,7 +136,7 @@ Signature matching is heuristic and does not scan file contents. A recognized ty
 ## Exit codes
 
 - 0: command completed successfully with no blocking findings.
-- 1: review-only findings (currently ZIP entries with executable-looking extensions or encrypted entries).
+- 1: review-only findings (currently ZIP entries with executable-looking extensions or encrypted entries, and file-triage executable signatures or extension mismatches).
 - 2: invalid input, I/O failure, endpoint unavailable, integrity differences, or high-severity ZIP metadata hazards.
 
 ## Validation

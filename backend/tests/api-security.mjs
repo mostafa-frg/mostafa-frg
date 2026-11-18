@@ -22,6 +22,11 @@ t('concurrent bootstrap creates exactly one admin',rr.filter(x=>x.s===201).lengt
 const winner=['adminone','admintwo','adminthree'][rr.findIndex(x=>x.s===201)];
 let a=await call('/api/auth/login',{method:'POST',ip:'8.8.8.8',body:{username:winner,password:PW}});const adminCookie=ck(a);
 t('admin login ok + cookie flags',a.s===200&&/HttpOnly/.test(a.sc)&&/Secure/.test(a.sc)&&/SameSite=Strict/.test(a.sc)&&adminCookie.startsWith('__Host-'));
+const adminCatalog=await call('/api/tools',{cookie:adminCookie});
+t('admin tool catalog includes Cloud and database additions',
+  ['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].every(id=>adminCatalog.j.tools.some(tool=>tool.id===id)),
+  JSON.stringify(adminCatalog.j.tools.filter(tool=>['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].includes(tool.id))));
+
 // S-01 lockout DoS
 const att=[];for(let i=0;i<12;i++)att.push((await call('/api/auth/login',{method:'POST',ip:'9.9.9.9',body:{username:winner,password:'guess'+i}})).s);
 t('attacker IP locked after 5 failures',att.slice(0,5).every(c=>c===401)&&att.slice(5).every(c=>c===429),att.join(','));

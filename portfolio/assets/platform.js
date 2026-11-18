@@ -254,7 +254,12 @@ const params=new URLSearchParams(location.search);
 if(params.get('category')&&Object.hasOwn(categories,params.get('category')))category=params.get('category');
 if(search&&params.get('q'))search.value=params.get('q');
 async function initializeAuthorizedTools(){try{const response=await fetch('/api/tools',{credentials:'same-origin',headers:{accept:'application/json'}});if(!response.ok){location.replace('/auth.html');return;}const data=await response.json();const allowed=new Set((data.tools||[]).map(x=>x.id));tools=tools.filter(tool=>allowed.has(tool.id));renderCategories();renderTools();if(params.get('tool'))openTool(params.get('tool'));}catch{location.replace('/auth.html');}}
-initializeAuthorizedTools();
+if(grid) initializeAuthorizedTools();
+else {
+ const counts={all:tools.length,...Object.fromEntries(Object.keys(categories).map(key=>[key,tools.filter(tool=>tool.cat===key).length]))};
+ const home=$('#homeToolTotal');if(home)home.textContent=String(tools.length);
+ $('[data-home-count]').forEach(node=>{node.textContent=(counts[node.dataset.homeCount]??0)+' tools';});
+}
 const homeSearch=$('#homeToolSearch');
 homeSearch?.addEventListener('keydown',e=>{if(e.key==='Enter'){location.href='tools.html?q='+encodeURIComponent(homeSearch.value.trim());}});
 homeSearch?.addEventListener('input',()=>{const q=homeSearch.value.trim().toLowerCase();if(q.length>1){const t=tools.find(x=>(x.name+' '+x.tags+' '+x.desc).toLowerCase().includes(q));homeSearch.setAttribute('aria-description',t?'Suggested: '+t.name:'Search all tools');}});

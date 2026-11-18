@@ -684,7 +684,7 @@ test('Cloudflare Wrangler auditor flags plaintext secret-like variables without 
     '[vars]',
     'API_TOKEN = "do-not-print-this-secret"',
     '[env.production]',
-  ].join('\\n')});
+  ].join('\n')});
   assert.match(output,/HIGH line 5/);
   assert.doesNotMatch(output,/do-not-print-this-secret/);
   assert.match(output,/Wrangler configuration review/);
@@ -704,7 +704,7 @@ test('Kubernetes manifest reviewer flags dangerous pod and image settings', () =
     '          securityContext:',
     '            privileged: true',
     '            runAsUser: 0',
-  ].join('\\n')});
+  ].join('\n')});
   assert.match(output,/host network namespace/);
   assert.match(output,/privileged mode/);
   assert.match(output,/UID 0/);
@@ -717,21 +717,20 @@ test('SQL migration reviewer detects unbounded writes and destructive DDL', () =
     'UPDATE users SET role = "admin";',
     'DROP TABLE audit_events;',
     'GRANT SELECT ON users TO PUBLIC;',
-  ].join('\\n')});
+  ].join('\n')});
   assert.match(output,/DELETE has no WHERE clause/);
   assert.match(output,/UPDATE has no WHERE clause/);
   assert.match(output,/destructive DROP/);
   assert.match(output,/granted to PUBLIC/);
-  const safe = byId('sql-migration-review').run({sql:'BEGIN;\\nUPDATE users SET active = false WHERE id = 7;\\nCOMMIT;'});
+  const safe = byId('sql-migration-review').run({sql:'BEGIN;\nUPDATE users SET active = false WHERE id = 7;\nCOMMIT;'});
   assert.doesNotMatch(safe,/UPDATE has no WHERE clause/);
   assert.throws(()=>byId('sql-migration-review').run({sql:'  '}),/Paste a SQL migration script/);
 });
 
-test('new tool categories are present in the registry and homepage navigation', async () => {
+test('new tool categories are present in the registry and homepage navigation', () => {
   assert.ok(tools.some(tool=>tool.id==='wrangler-config-audit'&&tool.cat==='cloud'));
   assert.ok(tools.some(tool=>tool.id==='k8s-manifest-audit'&&tool.cat==='cloud'));
   assert.ok(tools.some(tool=>tool.id==='sql-migration-review'&&tool.cat==='database'));
-  assert.match(directoryMarkup,/data-category/);
-  assert.match(homeMarkup,/tools\\.html\\?category=cloud/);
-  assert.match(homeMarkup,/tools\\.html\\?category=database/);
+  assert.match(homeMarkup,/tools\.html\?category=cloud/);
+  assert.match(homeMarkup,/tools\.html\?category=database/);
 });

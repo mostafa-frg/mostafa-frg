@@ -51,15 +51,15 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 74);
+  assert.equal(tools.length, 80);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 23);
-  assert.equal(tools.filter(tool => tool.cat === 'security').length, 21);
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 24);
+  assert.equal(tools.filter(tool => tool.cat === 'security').length, 24);
   assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
-  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 10);
+  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 12);
   assert.equal(tools.filter(tool => tool.cat === 'developer').length, 15);
 });
 
@@ -156,7 +156,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 74);
+  assert.equal(tools.length, 80);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -361,4 +361,22 @@ test('Nmap, Wireshark, Termux, Kali and OSINT helper tools validate input and bu
   const eh = await r('email-header', { h: byId('email-header').fields[0][2] });
   assert.match(eh, /Reply-To domain differs/);
   assert.match(eh, /dkim=fail/);
+});
+
+test('security-output analyzers and Termux guides parse samples correctly', async () => {
+  const d = id => byId(id).fields[0][2];
+  const r = (id, v) => byId(id).run(v);
+  const tc = await r('tcpdump-analyzer', { out: d('tcpdump-analyzer') });
+  assert.match(tc, /Packets parsed: 3/); assert.match(tc, /192\.168\.1\.5  \(2\)/); assert.match(tc, /\b443  \(1\)/);
+  assert.throws(() => byId('tcpdump-analyzer').run({ out: 'nothing' }), /No/);
+  const ss = await r('socket-analyzer', { out: d('socket-analyzer') });
+  assert.match(ss, /MySQL exposed/); assert.match(ss, /sensitive exposed: 1/); assert.doesNotMatch(ss, /631.*exposed/);
+  const ly = await r('lynis-parser', { out: d('lynis-parser') });
+  assert.match(ly, /Hardening index: 62/); assert.match(ly, /Warnings: 1/); assert.match(ly, /Suggestions: 2/);
+  assert.match(await r('tls-output-analyzer', { out: d('tls-output-analyzer') }), /Findings: none/);
+  const bad = await r('tls-output-analyzer', { out: 'Protocol version: TLSv1\nCiphersuite: RC4-MD5\nVerification error: certificate has expired\nnotAfter=Jan  1 00:00:00 2020 GMT' });
+  assert.match(bad, /Deprecated protocol/); assert.match(bad, /Weak cipher/); assert.match(bad, /expired/);
+  assert.match(await r('termux-guide', { topic: 'SSH server' }), /sshd/);
+  assert.match(await r('termux-api', { action: 'Battery status' }), /termux-battery-status/);
+  assert.throws(() => byId('termux-api').run({ action: 'x' }), /Choose/);
 });

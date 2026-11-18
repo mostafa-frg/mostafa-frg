@@ -51,15 +51,15 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 87);
+  assert.equal(tools.length, 95);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 27);
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 33);
   assert.equal(tools.filter(tool => tool.cat === 'security').length, 26);
-  assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
-  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 14);
+  assert.equal(tools.filter(tool => tool.cat === 'soc').length, 6);
+  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 15);
   assert.equal(tools.filter(tool => tool.cat === 'developer').length, 15);
 });
 
@@ -156,7 +156,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 87);
+  assert.equal(tools.length, 95);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -404,4 +404,25 @@ test('professional calculators: VLSM, IPv6, CVSS 3.1, SPF/DMARC, ufw, ssh-keygen
   assert.match(await r('ssh-keygen', { type: 'ed25519', comment: 'a@b', file: 'k' }), /ssh-keygen -t ed25519 -a 100 -C "a@b" -f ~\/\.ssh\/k/);
   assert.throws(() => byId('ssh-keygen').run({ type: 'ed25519', comment: 'x"; id', file: 'k' }), /Comment/);
   assert.match(await r('port-reference', { q: '3389' }), /RDP/);
+});
+
+test('route summary, throughput, converters, command builders, TTL and ATT&CK lookup', async () => {
+  const r = (id, v) => byId(id).run(v);
+  const rs = await r('route-summary', { nets: '192.168.0.0/24\n192.168.1.0/24\n192.168.2.0/24\n192.168.3.0/24' });
+  assert.match(rs, /Summary route: 192\.168\.0\.0\/22/); assert.match(rs, /Exact summary: yes/);
+  const rs2 = await r('route-summary', { nets: '10.0.0.0/24, 10.0.2.0/24' });
+  assert.match(rs2, /10\.0\.0\.0\/22/); assert.match(rs2, /Extra addresses: 512/);
+  assert.match(await r('tcp-throughput', { mss: '1460', rtt: '50', loss: '0.1' }), /9\.01 Mbit\/s/);
+  assert.throws(() => byId('tcp-throughput').run({ mss: '1460', rtt: '50', loss: '0' }), /loss/);
+  assert.match(await r('bandwidth-convert', { value: '100', unit: 'Mbit/s' }), /MB\/s: 12\.5/);
+  assert.match(await r('tcpdump-builder', { iface: 'eth0', filter: 'port 53', count: '10', mode: 'write pcap file', file: 'a.pcap' }), /^sudo tcpdump -i eth0 -nn -c 10 -w a\.pcap 'port 53'/);
+  assert.throws(() => byId('tcpdump-builder').run({ iface: 'eth0', filter: "x'; id", count: '1', mode: 'print to screen', file: 'a.pcap' }), /Filter/);
+  assert.equal(await r('dig-builder', { name: 'example.com', type: 'MX', server: '1.1.1.1', mode: 'short answer' }), 'dig @1.1.1.1 example.com MX +short');
+  assert.throws(() => byId('dig-builder').run({ name: 'a.com; id', type: 'A', server: 'system default', mode: 'short answer' }), /domain/);
+  const tt = await r('ttl-guess', { ttl: '117' });
+  assert.match(tt, /Likely initial TTL: 128/); assert.match(tt, /Estimated hops: 11/);
+  assert.match(await r('attack-reference', { q: 'T1110' }), /Brute Force/);
+  assert.match(await r('attack-reference', { q: 'lateral' }), /T1021/);
+  assert.match(await r('journalctl-builder', { unit: 'ssh.service', since: '1 hour ago', prio: 'err' }), /journalctl -u ssh\.service --since "1 hour ago" -p err --no-pager/);
+  assert.throws(() => byId('journalctl-builder').run({ unit: 'a; rm', since: 'today', prio: 'all' }), /Unit/);
 });

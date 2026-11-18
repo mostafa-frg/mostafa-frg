@@ -4,7 +4,7 @@ A product-oriented engineering platform for developers, infrastructure engineers
 
 ## Product scope
 
-- Searchable engineering tool library across networking, cybersecurity, SOC operations, Linux, and developer workflows.
+- Searchable engineering tool library across networking, cybersecurity, SOC operations, Linux, developer workflows, Cloud & DevOps, and database engineering.\n- Local-first Cloudflare Wrangler configuration review, Kubernetes manifest security heuristics, and SQL migration safety checks; these tools inspect pasted text and never deploy or connect to databases.
 - Public terminal catalog with 50 upstream-linked packages for Termux and Debian/Ubuntu, including install, verify, uninstall and troubleshooting instructions.
 - Planned ESP32 firmware and flashing workspace; roadmap items remain clearly marked as not yet installable.
 - Browser-local utilities that keep supplied content in the browser whenever feasible.

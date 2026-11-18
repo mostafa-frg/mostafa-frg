@@ -258,7 +258,7 @@ if(grid) initializeAuthorizedTools();
 else {
  const counts={all:tools.length,...Object.fromEntries(Object.keys(categories).map(key=>[key,tools.filter(tool=>tool.cat===key).length]))};
  const home=$('#homeToolTotal');if(home)home.textContent=String(tools.length);
- $('[data-home-count]').forEach(node=>{node.textContent=(counts[node.dataset.homeCount]??0)+' tools';});
+ $$('[data-home-count]').forEach(node=>{node.textContent=(counts[node.dataset.homeCount]??0)+' tools';});
 }
 const homeSearch=$('#homeToolSearch');
 homeSearch?.addEventListener('keydown',e=>{if(e.key==='Enter'){location.href='tools.html?q='+encodeURIComponent(homeSearch.value.trim());}});

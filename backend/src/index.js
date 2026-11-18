@@ -728,6 +728,27 @@ const TOOLS=[
     "group": "Ubuntu",
     "mode": "command",
     "description": "Generate commands to inspect snap refresh schedules, pending updates and installed revisions."
+  },
+  {
+    "id": "wrangler-config-audit",
+    "name": "Cloudflare Wrangler Configuration Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Review Wrangler configuration text for missing deployment metadata, risky development exposure and secret-like plaintext variables."
+  },
+  {
+    "id": "k8s-manifest-audit",
+    "name": "Kubernetes Manifest Security Review",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect Kubernetes YAML for privileged containers, host namespace access, risky mounts, root users and unpinned images."
+  },
+  {
+    "id": "sql-migration-review",
+    "name": "SQL Migration Safety Reviewer",
+    "group": "Database Engineering",
+    "mode": "browser",
+    "description": "Review SQL migration text for unbounded writes, destructive DDL and transaction-boundary issues without database access."
   }
 ];
 

@@ -674,3 +674,64 @@ test('Shared input validation bounds text and rejects embedded NUL characters', 
    assert.throws(()=>byId('case').run({text:'x'.repeat(200001),mode:'upper'}),/Text input is too long \(maximum 200000 characters\)/);
 });
 
+
+
+test('Cloudflare Wrangler auditor flags plaintext secret-like variables without echoing values', () => {
+  const output = byId('wrangler-config-audit').run({config:[
+    'name = "worker"',
+    'main = "src/index.js"',
+    'compatibility_date = "2026-11-18"',
+    '[vars]',
+    'API_TOKEN = "do-not-print-this-secret"',
+    '[env.production]',
+  ].join('\\n')});
+  assert.match(output,/HIGH line 5/);
+  assert.doesNotMatch(output,/do-not-print-this-secret/);
+  assert.match(output,/Wrangler configuration review/);
+  assert.match(byId('wrangler-config-audit').run({config:'name = "worker"'}),/compatibility_date/);
+});
+
+test('Kubernetes manifest reviewer flags dangerous pod and image settings', () => {
+  const output = byId('k8s-manifest-audit').run({manifest:[
+    'kind: Deployment',
+    'spec:',
+    '  template:',
+    '    spec:',
+    '      hostNetwork: true',
+    '      containers:',
+    '        - name: web',
+    '          image: nginx:latest',
+    '          securityContext:',
+    '            privileged: true',
+    '            runAsUser: 0',
+  ].join('\\n')});
+  assert.match(output,/host network namespace/);
+  assert.match(output,/privileged mode/);
+  assert.match(output,/UID 0/);
+  assert.match(output,/not pinned/);
+});
+
+test('SQL migration reviewer detects unbounded writes and destructive DDL', () => {
+  const output = byId('sql-migration-review').run({sql:[
+    'DELETE FROM sessions;',
+    'UPDATE users SET role = "admin";',
+    'DROP TABLE audit_events;',
+    'GRANT SELECT ON users TO PUBLIC;',
+  ].join('\\n')});
+  assert.match(output,/DELETE has no WHERE clause/);
+  assert.match(output,/UPDATE has no WHERE clause/);
+  assert.match(output,/destructive DROP/);
+  assert.match(output,/granted to PUBLIC/);
+  const safe = byId('sql-migration-review').run({sql:'BEGIN;\\nUPDATE users SET active = false WHERE id = 7;\\nCOMMIT;'});
+  assert.doesNotMatch(safe,/UPDATE has no WHERE clause/);
+  assert.throws(()=>byId('sql-migration-review').run({sql:'  '}),/Paste a SQL migration script/);
+});
+
+test('new tool categories are present in the registry and homepage navigation', async () => {
+  assert.ok(tools.some(tool=>tool.id==='wrangler-config-audit'&&tool.cat==='cloud'));
+  assert.ok(tools.some(tool=>tool.id==='k8s-manifest-audit'&&tool.cat==='cloud'));
+  assert.ok(tools.some(tool=>tool.id==='sql-migration-review'&&tool.cat==='database'));
+  assert.match(directoryMarkup,/data-category/);
+  assert.match(homeMarkup,/tools\\.html\\?category=cloud/);
+  assert.match(homeMarkup,/tools\\.html\\?category=database/);
+});

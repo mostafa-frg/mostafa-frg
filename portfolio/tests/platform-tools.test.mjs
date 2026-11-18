@@ -202,15 +202,15 @@ test('homepage search and quick-access deep links resolve to real tool workspace
   for(const id of deepLinks)assert.ok(tools.some(tool=>tool.id===id),'Homepage deep link resolves: '+id);
 });
 
-test('tool registry has unique IDs and eight declared workspaces', () => {
+test('tool registry has unique IDs and ten declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 104);
+  assert.equal(tools.length, 107);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
-    ['bash','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
+    ['bash','cloud','database','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
   );
-  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,bash:13,developer:11};
+  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,bash:13,developer:11,cloud:2,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -381,12 +381,12 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 104);
+  assert.equal(tools.length, 107);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
     assert.ok(tool.desc && tool.desc.length >= 35, tool.id + ' has a task description');
-    assert.ok(['networking','security','soc','linux','ubuntu','kali','bash','developer'].includes(tool.cat));
+    assert.ok(['networking','security','soc','linux','ubuntu','kali','bash','developer','cloud','database'].includes(tool.cat));
     assert.equal(typeof tool.run, 'function', tool.id + ' has a run handler');
     const fieldNames = (tool.fields || []).map(field => field[0]);
     assert.equal(new Set(fieldNames).size, fieldNames.length, tool.id + ' has unique input names');

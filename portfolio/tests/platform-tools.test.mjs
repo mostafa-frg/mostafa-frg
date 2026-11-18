@@ -734,3 +734,10 @@ test('new tool categories are present in the registry and homepage navigation', 
   assert.match(homeMarkup,/tools\.html\?category=cloud/);
   assert.match(homeMarkup,/tools\.html\?category=database/);
 });
+
+test('public homepage does not run the authenticated tool bootstrap', () => {
+  assert.match(homeMarkup, /id="homeToolTotal"/);
+  assert.match(source, /if\s*\(grid\)\s*initializeAuthorizedTools\(\)/);
+  assert.match(source, /else\s*\{\s*const counts=\{all:tools\.length/);
+  assert.match(source, /data-home-count/);
+});

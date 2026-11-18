@@ -1,0 +1,184 @@
+// Closure tests: every tool needs known-answer, edge-case and error-path checks.
+// Network-dependent tools run against a mocked fetch (no real provider is contacted).
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import vm from 'node:vm';
+import { webcrypto } from 'node:crypto';
+import { TextDecoder } from 'node:util';
+
+const source = await readFile(new URL('../assets/platform.js', import.meta.url), 'utf8');
+const a = source.indexOf('const tools=') + 'const tools='.length;
+const b = source.indexOf('\n];\nfunction rows', a);
+const hs = source.indexOf('function rows('), he = source.indexOf('const grid=', hs);
+let fetchImpl = async () => { throw new Error('unexpected network call'); };
+const ctx = {
+  crypto: webcrypto, TextEncoder, TextDecoder, Uint8Array, atob, btoa, URL, Date, Math, JSON, BigInt, Number, String,
+  Array, Object, RegExp, Error, Set, Map, Intl, encodeURIComponent, decodeURIComponent, parseInt, parseFloat, isNaN,
+  performance, Promise, fetch: (...x) => fetchImpl(...x),
+};
+const tools = vm.runInNewContext(`(()=>{${source.slice(hs, he)}\nreturn ${source.slice(a, b + 2)};})()`, ctx);
+const run = (id, v = {}) => tools.find(t => t.id === id).run(v);
+const throwsMsg = async (id, v, re) => assert.rejects(async () => run(id, v), re);
+
+test('IPv4 calculators: subnet, cidr, range, ipv4, wildcard, range-cidr, subnet-split', async () => {
+  assert.match(await run('subnet', { ip: '192.168.1.10', prefix: '30' }), /Network: 192\.168\.1\.8\/30[\s\S]*Broadcast: 192\.168\.1\.11[\s\S]*First host: 192\.168\.1\.9[\s\S]*Last host: 192\.168\.1\.10[\s\S]*Usable hosts: 2/);
+  assert.match(await run('subnet', { ip: '10.0.0.1', prefix: '31' }), /Usable hosts: 2/);
+  assert.match(await run('subnet', { ip: '10.0.0.1', prefix: '32' }), /Usable hosts: 1/);
+  assert.match(await run('subnet', { ip: '10.9.9.9', prefix: '8' }), /Broadcast: 10\.255\.255\.255[\s\S]*Usable hosts: 16777214/);
+  await throwsMsg('subnet', { ip: '300.1.1.1', prefix: '24' }, /valid IPv4/);
+  await throwsMsg('subnet', { ip: '01.2.3.4', prefix: '24' }, /valid IPv4/);
+  await throwsMsg('subnet', { ip: '1.2.3.4', prefix: '33' }, /0 to 32/);
+  assert.match(await run('cidr', { prefix: '0' }), /Subnet mask: 0\.0\.0\.0[\s\S]*Wildcard: 255\.255\.255\.255/);
+  assert.match(await run('cidr', { prefix: '32' }), /Addresses: 1$/);
+  assert.match(await run('range', { start: '192.168.1.1', end: '192.168.1.254' }), /Total addresses: 254/);
+  await throwsMsg('range', { start: '10.0.0.5', end: '10.0.0.1' }, /greater than or equal/);
+  assert.match(await run('ipv4', { ip: '255.255.255.255' }), /4294967295[\s\S]*0xFFFFFFFF/);
+  assert.match(await run('ipv4', { ip: '192.168.1.1' }), /11000000\.10101000\.00000001\.00000001/);
+  assert.match(await run('wildcard', { prefix: '30' }), /Wildcard mask: 0\.0\.0\.3/);
+  const rc = await run('range-cidr', { start: '10.0.0.1', end: '10.0.0.6' });
+  assert.match(rc, /10\.0\.0\.1\/32\n10\.0\.0\.2\/31\n10\.0\.0\.4\/31\n10\.0\.0\.6\/32/); assert.match(rc, /CIDR blocks: 4/);
+  assert.match(await run('range-cidr', { start: '192.168.1.0', end: '192.168.1.255' }), /^192\.168\.1\.0\/24/);
+  const sp = await run('subnet-split', { network: '10.0.0.0/24', count: '4' });
+  assert.match(sp, /New prefix: \/26/); assert.match(sp, /10\.0\.0\.192\/26  10\.0\.0\.192 – 10\.0\.0\.255/);
+  await throwsMsg('subnet-split', { network: '10.0.0.0/30', count: '8' }, /cannot fit/);
+});
+
+test('IPv6 validator, hash tools and HMAC use correct known vectors', async () => {
+  const v6 = await run('ipv6', { address: '2001:0db8:0000:0000:0000:ff00:0042:8329' });
+  assert.match(v6, /Compressed: 2001:db8::ff00:42:8329/);
+  assert.match(await run('ipv6', { address: '::1' }), /Compressed: ::1/);
+  await throwsMsg('ipv6', { address: 'gggg::1' }, /Invalid IPv6 group/);
+  await throwsMsg('ipv6', { address: '1::2::3' }, /standard hexadecimal/);
+  assert.match(await run('hash-text', { text: 'abc' }), /ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad/);
+  assert.match(await run('hash-text', { text: '' }), /e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855/);
+  const file = { name: 'a.txt', size: 3, async arrayBuffer() { return new TextEncoder().encode('abc').buffer; } };
+  assert.match(await run('hash-file', { file }), /ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad/);
+  assert.match(await run('hmac', { key: 'key', message: 'The quick brown fox jumps over the lazy dog' }), /f7bc83f430538424b13298e6aa6fb143ef4d59a14946175997479dbc2d1a3cd8/);
+  await throwsMsg('hmac', { key: '', message: 'x' }, /secret key/);
+});
+
+test('web security tools: headers, csp, csp-audit, cookies, jwt, strength', async () => {
+  const h = await run('headers', { headers: 'Strict-Transport-Security: max-age=31536000\nX-Content-Type-Options: nosniff' });
+  assert.match(h, /\[PRESENT\] HSTS/); assert.match(h, /\[MISSING\] Content Security Policy/); assert.match(h, /Found 2 of 6/);
+  assert.match(await run('headers', { headers: '' }), /Found 0 of 6/);
+  assert.match(await run('csp', { origins: 'https://api.example.com' }), /connect-src 'self' https:\/\/api\.example\.com;/);
+  await throwsMsg('csp', { origins: 'javascript:alert(1)' }, /HTTPS origins only/);
+  await throwsMsg('csp', { origins: 'https://a.com; script-src *' }, /Invalid origin/);
+  const ca = await run('csp-audit', { policy: "script-src 'unsafe-inline' *" });
+  assert.match(ca, /\[MISSING\] default-src/); assert.match(ca, /\[RISK\] unsafe-inline in script-src/); assert.match(ca, /wildcard source in script-src/);
+  assert.match(await run('cookies', { cookies: 'a=1' }), /Secure: MISSING \| HttpOnly: MISSING \| SameSite: MISSING/);
+  assert.match(await run('cookies', { cookies: 'sid=1; Secure; HttpOnly; SameSite=Lax' }), /Secure: present \| HttpOnly: present \| SameSite: present/);
+  const jwt = await run('jwt', { token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c' });
+  assert.match(jwt, /"alg": "HS256"/); assert.match(jwt, /"name": "John Doe"/); assert.match(jwt, /NOT verified/);
+  await throwsMsg('jwt', { token: 'a.b' }, /three dot-separated/);
+  await throwsMsg('jwt', { token: 'a.b.c' }, /Base64URL-encoded JSON/);
+  assert.match(await run('strength', { password: 'password' }), /Very weak \(appears in common-password lists\)/);
+  assert.match(await run('strength', { password: 'aaa' }), /Very weak/);
+  assert.match(await run('strength', { password: 'xK9#mQ2$vL7!pR4&' }), /Very strong/);
+  await throwsMsg('strength', { password: '' }, /Enter a password/);
+});
+
+test('config, systemd and fstab reviewers flag what they should', async () => {
+  const c = await run('config', { config: 'enable password cisco\nip http server\nsnmp-server community public RW\nline vty 0 4\n transport input ssh\n exec-timeout 10 0\nlogging host 10.1.1.1' });
+  assert.match(c, /\[REVIEW\] Privileged EXEC secret configured/); assert.match(c, /\[FOUND\] VTY restricted to SSH/);
+  assert.match(c, /\[FOUND\] Remote logging configured/); assert.match(c, /\[FOUND\] SNMP community string detected/);
+  assert.match(c, /\[REVIEW\] HTTP server disabled/);
+  assert.match(await run('config', { config: 'enable secret 9 xyz\nno ip http server' }), /\[FOUND\] Privileged EXEC secret configured/);
+  const sd = await run('systemd', { unit: '[Service]\nExecStart=/bin/x' });
+  assert.match(sd, /\[FOUND\] ExecStart configured/); assert.match(sd, /\[REVIEW\] NoNewPrivileges enabled/);
+  assert.match(await run('systemd', { unit: '[Unit]\n[Service]\nUser=app\nExecStart=/bin/x\nNoNewPrivileges=true\nPrivateTmp=true\nRestart=on-failure\nProtectSystem=strict' }), /\[FOUND\] NoNewPrivileges enabled[\s\S]*\[FOUND\] PrivateTmp enabled/);
+  assert.match(await run('fstab', { entries: 'bad line' }), /\[INVALID\] expected 6 fields, found 2/);
+  assert.match(await run('fstab', { entries: 'UUID=1 /mnt/x nfs defaults 0 0' }), /\[OK STRUCTURE\][\s\S]*consider nofail/);
+  assert.match(await run('fstab', { entries: 'UUID=1 /data ext4 defaults,nofail 0 2' }), /\[OK STRUCTURE\] \/data \(ext4\)/);
+});
+
+test('linux and developer converters: timestamp, cron, filesize, signals, json, url, html, case, diff, uuid', async () => {
+  const ts = await run('timestamp', { timestamp: '1767225600' });
+  assert.match(ts, /Detected unit: Seconds/); assert.match(ts, /UTC: 2026-01-01T00:00:00\.000Z/);
+  assert.match(await run('timestamp', { timestamp: '1767225600000' }), /Detected unit: Milliseconds[\s\S]*Unix seconds: 1767225600/);
+  await throwsMsg('timestamp', { timestamp: 'abc' }, /valid numeric/);
+  assert.match(await run('cron', { expression: '*/15 * * * *' }), /Minute: \*\/15[\s\S]*Syntax and field ranges passed/);
+  assert.match(await run('cron', { expression: '0 0 1 1 *' }), /Day of month: 1/);
+  await throwsMsg('cron', { expression: '61 * * * *' }, /out-of-range/);
+  await throwsMsg('cron', { expression: '* * * *' }, /exactly five fields/);
+  const fs = await run('filesize', { bytes: '1048576' });
+  assert.match(fs, /Bytes: 1,048,576/); assert.match(fs, /MiB \(1024²\): 1\.000/); assert.match(fs, /KiB \(1024\): 1024\.000/);
+  await throwsMsg('filesize', { bytes: '-1' }, /non-negative/);
+  await throwsMsg('filesize', { bytes: 'abc' }, /non-negative/);
+  assert.match(await run('signals', { query: 'SIGTERM' }), /Number: 15/);
+  assert.match(await run('signals', { query: 'kill' }), /Signal: SIGKILL[\s\S]*Number: 9/);
+  assert.match(await run('signals', { query: '9' }), /Signal: SIGKILL[\s\S]*Number: 9/);
+  assert.match(await run('signals', { query: '15' }), /Signal: SIGTERM/);
+  assert.match(await run('signals', { query: 'nope' }), /No match/);
+  assert.equal(await run('json', { json: '{"a":[1,2]}', mode: 'minify' }), '{"a":[1,2]}');
+  assert.match(await run('json', { json: '{"a":1}', mode: 'pretty' }), /\{\n  "a": 1\n\}/);
+  await assert.rejects(async () => run('json', { json: '{bad', mode: 'pretty' }));
+  assert.equal(await run('url', { text: 'a b&c=d/é', mode: 'encode' }), 'a%20b%26c%3Dd%2F%C3%A9');
+  assert.equal(await run('url', { text: 'a%20b%26c', mode: 'decode' }), 'a b&c');
+  await assert.rejects(async () => run('url', { text: '%E0%A4%A', mode: 'decode' }));
+  assert.equal(await run('html', { text: '<a href="x">&</a>', mode: 'encode' }), '&lt;a href=&quot;x&quot;&gt;&amp;&lt;/a&gt;');
+  assert.equal(await run('case', { text: 'Hello World foo', mode: 'kebab' }), 'hello-world-foo');
+  assert.equal(await run('case', { text: 'Hello World foo', mode: 'snake' }), 'hello_world_foo');
+  assert.equal(await run('case', { text: 'hello world', mode: 'title' }), 'Hello World');
+  assert.equal(await run('diff', { left: 'a\nb\nc', right: 'a\nx\nc' }), '  a\n- b\n+ x\n  c');
+  assert.match(await run('uuid', {}), /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  assert.notEqual(await run('uuid', {}), await run('uuid', {}));
+});
+
+test('tools that need a browser DOM are verified in the real-browser UI run: xml, html decode', () => {
+  assert.ok(tools.some(t => t.id === 'xml') && tools.some(t => t.id === 'html'));
+});
+
+test('external-service tools handle success, provider errors and bad input (mocked fetch)', async () => {
+  const resp = (body, ok = true, status = 200) => ({ ok, status, json: async () => body, text: async () => String(body), arrayBuffer: async () => new ArrayBuffer(0) });
+  fetchImpl = async () => resp({ ip: '203.0.113.7' });
+  assert.match(await run('public-ip'), /Public IPv4: 203\.0\.113\.7/);
+  fetchImpl = async () => resp({ ip: '<script>' });
+  await throwsMsg('public-ip', {}, /invalid IPv4/);
+  fetchImpl = async () => resp({}, false, 503);
+  await throwsMsg('public-ip', {}, /unavailable/);
+  let url = '';
+  fetchImpl = async u => { url = u; return resp('Cisco Systems, Inc'); };
+  assert.match(await run('mac', { mac: '00-1a-2b-3c-4d-5e' }), /OUI: 001A2B[\s\S]*Vendor: Cisco Systems, Inc/);
+  assert.equal(url, 'https://api.macvendors.com/001A2B');
+  await throwsMsg('mac', { mac: 'not-a-mac' }, /12-hex-digit/);
+  fetchImpl = async () => resp('Not Found', false, 404);
+  await throwsMsg('mac', { mac: '00:1A:2B:3C:4D:5E' }, /Vendor not found/);
+  fetchImpl = async u => { url = u; return resp([{ id: 1, common_name: 'a.example.com', not_before: 'x', not_after: 'y' }, { id: 1, common_name: 'a.example.com', not_before: 'x', not_after: 'y' }]); };
+  const crt = await run('crt', { domain: 'example.com' });
+  assert.equal(crt.split('\n').length, 1); assert.match(url, /^https:\/\/crt\.sh\/\?q=%25\.example\.com&output=json$/);
+  fetchImpl = async () => resp([]);
+  assert.match(await run('crt', { domain: 'example.com' }), /No public certificate records/);
+  fetchImpl = async () => resp({}, false, 502);
+  await throwsMsg('crt', { domain: 'example.com' }, /HTTP 502/);
+  await throwsMsg('crt', { domain: 'bad domain' }, /valid public domain/);
+  fetchImpl = async u => { url = u; return resp({ Status: 0, Answer: [{ name: 'example.com', TTL: 60, data: '93.184.216.34' }] }); };
+  const dns = await run('dns', { domain: 'example.com', type: 'A' });
+  assert.match(dns, /Status: NOERROR[\s\S]*93\.184\.216\.34/); assert.match(url, /name=example\.com&type=A$/);
+  fetchImpl = async () => resp({ Status: 3 });
+  assert.match(await run('dns', { domain: 'nx.example.com', type: 'A' }), /Status: 3[\s\S]*No answer records/);
+  await throwsMsg('dns', { domain: 'x;y', type: 'A' }, /valid public domain/);
+  fetchImpl = async () => resp({}, false, 500);
+  await throwsMsg('latency', {}, /All HTTPS probes failed/);
+  fetchImpl = async () => resp(null);
+  assert.match(await run('latency'), /Successful probes: 5\/5[\s\S]*not ICMP/);
+  fetchImpl = async () => resp({}, false, 500);
+  await throwsMsg('speed', {}, /Download test failed/);
+  fetchImpl = async () => { throw new Error('unexpected network call'); };
+});
+
+test('port reference covers common services and unknown queries', async () => {
+  assert.match(await run('ports', { port: '443' }), /443\/tcp-or-udp\s+—\s+HTTPS \(TCP\)/);
+  assert.match(await run('ports', { port: 'ssh' }), /22/);
+  assert.match(await run('ports', { port: '65000' }), /No|not/i);
+});
+
+test('every registered tool has a dedicated closure test (guards future additions)', async () => {
+  const files = ['platform-tools.test.mjs', 'tool-closure.test.mjs'];
+  let text = '';
+  for (const f of files) text += await readFile(new URL('./' + f, import.meta.url), 'utf8');
+  text = text.replace(/const overrides = \{[\s\S]*?\n  \};/, '');
+  const missing = tools.map(t => t.id).filter(id => !new RegExp(`['"]${id}['"]`).test(text));
+  assert.equal(missing.length, 0, 'tools without a dedicated test: ' + missing.join(', '));
+});

@@ -51,12 +51,12 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 95);
+  assert.equal(tools.length, 94);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 33);
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 32);
   assert.equal(tools.filter(tool => tool.cat === 'security').length, 26);
   assert.equal(tools.filter(tool => tool.cat === 'soc').length, 6);
   assert.equal(tools.filter(tool => tool.cat === 'linux').length, 15);
@@ -156,7 +156,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 95);
+  assert.equal(tools.length, 94);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -403,7 +403,6 @@ test('professional calculators: VLSM, IPv6, CVSS 3.1, SPF/DMARC, ufw, ssh-keygen
   assert.throws(() => byId('ufw-builder').run({ action: 'allow', port: '22', proto: 'tcp', src: '1.2.3.4; rm' }), /IPv4/);
   assert.match(await r('ssh-keygen', { type: 'ed25519', comment: 'a@b', file: 'k' }), /ssh-keygen -t ed25519 -a 100 -C "a@b" -f ~\/\.ssh\/k/);
   assert.throws(() => byId('ssh-keygen').run({ type: 'ed25519', comment: 'x"; id', file: 'k' }), /Comment/);
-  assert.match(await r('port-reference', { q: '3389' }), /RDP/);
 });
 
 test('route summary, throughput, converters, command builders, TTL and ATT&CK lookup', async () => {

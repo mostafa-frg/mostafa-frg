@@ -1,6 +1,6 @@
 const B=process.env.BASE_URL||'http://localhost:8787', TOKEN=process.env.TEST_BOOTSTRAP_TOKEN||'test-bootstrap-token-0123456789abcdef';
 let pass=0,fail=0;const t=(name,ok,note='')=>{ok?pass++:fail++;console.log((ok?'PASS ':'FAIL ')+name+(note?'  ['+note+']':''))};
-const call=async(path,{method='GET',body,cookie,origin=B,raw,ip,stream}={})=>{const h={};if(origin)h.origin=origin;if(cookie)h.cookie=cookie;if(ip)h['cf-connecting-ip']=ip;if(body!==undefined||raw!==undefined||stream)h['content-type']='application/json';const init={method,headers:h,body:stream|| (raw!==undefined?raw:(body!==undefined?JSON.stringify(body):undefined)),redirect:'manual'};if(stream)init.duplex='half';const r=await fetch(B+path,init);let j=null;try{j=await r.clone().json()}catch{};return{r,j,s:r.status,sc:r.headers.get('set-cookie')}};
+const call=async(path,{method='GET',body,cookie,origin=B,raw,ip,stream,hdr}={})=>{const h={...(hdr||{})};if(origin)h.origin=origin;if(cookie)h.cookie=cookie;if(ip)h['cf-connecting-ip']=ip;if(body!==undefined||raw!==undefined||stream)h['content-type']='application/json';const init={method,headers:h,body:stream|| (raw!==undefined?raw:(body!==undefined?JSON.stringify(body):undefined)),redirect:'manual'};if(stream)init.duplex='half';const r=await fetch(B+path,init);let j=null;try{j=await r.clone().json()}catch{};return{r,j,s:r.status,sc:r.headers.get('set-cookie')}};
 const ck=r=>(r.sc||'').split(';')[0];
 const login=async(u,pw,ip)=>call('/api/auth/login',{method:'POST',ip,body:{username:u,password:pw}});
 const PW='correct-horse-battery-1';
@@ -123,5 +123,12 @@ t('audit trail has the new events',['auth.password_changed','auth.password_chang
 const cookies=[];for(let i=0;i<12;i++){const r=await login('carol','amber-falcon-river-42','31.0.'+i+'.1');cookies.push(ck(r));}
 const alive=[];for(const c of cookies)alive.push((await call('/api/auth/me',{cookie:c})).s===200);
 t('session cap: only the newest 10 sessions survive',alive.filter(Boolean).length===10&&!alive[0]&&!alive[1]&&alive[11],alive.map(x=>x?1:0).join(''));
+// hardening: Retry-After on throttling and Sec-Fetch-Site defence in depth
+const thr=await call('/api/auth/login',{method:'POST',ip:'9.9.9.9',body:{username:winner,password:'x'}});
+t('429 responses carry Retry-After',thr.s===429&&thr.r.headers.get('retry-after')==='900',thr.s+' '+thr.r.headers.get('retry-after'));
+const sf=await call('/api/auth/login',{method:'POST',ip:'41.0.0.1',hdr:{'sec-fetch-site':'cross-site'},body:{username:'x',password:'y'}});
+t('same Origin but Sec-Fetch-Site: cross-site is rejected',sf.s===403,String(sf.s));
+const sfs=await call('/api/auth/login',{method:'POST',ip:'41.0.0.2',hdr:{'sec-fetch-site':'same-origin'},body:{username:'x',password:'y'}});
+t('Sec-Fetch-Site: same-origin is accepted',sfs.s===401,String(sfs.s));
 
 console.log(`\n${pass} passed, ${fail} failed`);process.exit(fail?1:0);

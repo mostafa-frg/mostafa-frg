@@ -51,15 +51,15 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 80);
+  assert.equal(tools.length, 87);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 24);
-  assert.equal(tools.filter(tool => tool.cat === 'security').length, 24);
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 27);
+  assert.equal(tools.filter(tool => tool.cat === 'security').length, 26);
   assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
-  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 12);
+  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 14);
   assert.equal(tools.filter(tool => tool.cat === 'developer').length, 15);
 });
 
@@ -156,7 +156,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 80);
+  assert.equal(tools.length, 87);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -379,4 +379,29 @@ test('security-output analyzers and Termux guides parse samples correctly', asyn
   assert.match(await r('termux-guide', { topic: 'SSH server' }), /sshd/);
   assert.match(await r('termux-api', { action: 'Battery status' }), /termux-battery-status/);
   assert.throws(() => byId('termux-api').run({ action: 'x' }), /Choose/);
+});
+
+test('professional calculators: VLSM, IPv6, CVSS 3.1, SPF/DMARC, ufw, ssh-keygen', async () => {
+  const r = (id, v) => byId(id).run(v);
+  const vl = await r('vlsm', { base: '192.168.10.0/24', hosts: '2,100,20,50' });
+  assert.match(vl, /100 hosts -> 192\.168\.10\.0\/25/); assert.match(vl, /50 hosts -> 192\.168\.10\.128\/26/);
+  assert.match(vl, /20 hosts -> 192\.168\.10\.192\/27/); assert.match(vl, /2 hosts -> 192\.168\.10\.224\/30/);
+  assert.throws(() => byId('vlsm').run({ base: '192.168.10.0/24', hosts: '200,100' }), /too small/);
+  const v6 = await r('ipv6-subnet', { addr: '2001:db8::1', prefix: '32' });
+  assert.match(v6, /Network: 2001:db8::\/32/); assert.match(v6, /4294967296/);
+  assert.throws(() => byId('ipv6-subnet').run({ addr: '2001:::1', prefix: '32' }), /valid IPv6/);
+  const cv = (vec) => r('cvss', { vec });
+  assert.match(await cv('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H'), /Base score: 9\.8/);
+  assert.match(await cv('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'), /Base score: 10\.0/);
+  assert.match(await cv('CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H'), /Base score: 7\.8/);
+  assert.match(await cv('CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N'), /Base score: 6\.1/);
+  assert.match(await cv('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N'), /Severity: None/);
+  assert.throws(() => byId('cvss').run({ vec: 'CVSS:3.1/AV:N' }), /Missing/);
+  assert.match(await r('spf-dmarc', { type: 'SPF', rec: 'v=spf1 +all' }), /dangerous/);
+  assert.match(await r('spf-dmarc', { type: 'DMARC', rec: 'v=DMARC1; p=none' }), /monitor-only/);
+  assert.match(await r('ufw-builder', { action: 'allow', port: '22', proto: 'tcp', src: '192.168.1.0/24' }), /ufw allow from 192\.168\.1\.0\/24 to any port 22 proto tcp/);
+  assert.throws(() => byId('ufw-builder').run({ action: 'allow', port: '22', proto: 'tcp', src: '1.2.3.4; rm' }), /IPv4/);
+  assert.match(await r('ssh-keygen', { type: 'ed25519', comment: 'a@b', file: 'k' }), /ssh-keygen -t ed25519 -a 100 -C "a@b" -f ~\/\.ssh\/k/);
+  assert.throws(() => byId('ssh-keygen').run({ type: 'ed25519', comment: 'x"; id', file: 'k' }), /Comment/);
+  assert.match(await r('port-reference', { q: '3389' }), /RDP/);
 });

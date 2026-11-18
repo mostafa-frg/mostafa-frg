@@ -739,5 +739,5 @@ test('public homepage does not run the authenticated tool bootstrap', () => {
   assert.match(homeMarkup, /id="homeToolTotal"/);
   assert.match(source, /if\s*\(grid\)\s*initializeAuthorizedTools\(\)/);
   assert.match(source, /else\s*\{\s*const counts=\{all:tools\.length/);
-  assert.match(source, /data-home-count/);
+  assert.match(source, /\$\$\('\[data-home-count\]'\)\.forEach/);
 });

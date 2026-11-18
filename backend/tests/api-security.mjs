@@ -72,7 +72,7 @@ await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:admin
 t('revoked account-scoped grant blocks tool immediately',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}})).s===403);
 t('ungranted account tool catalog remains empty',(await call('/api/tools',{cookie:charlie})).j.tools.length===0);
 t('unauthenticated API blocked',(await call('/api/tools')).s===401);
-a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 104-tool registry',a.s===200&&a.j.tools.length===104&&new Set(a.j.tools.map(x=>x.id)).size===104&&!a.j.tools.some(x=>/termux/i.test(x.group+' '+x.id))&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
+a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 107-tool registry',a.s===200&&a.j.tools.length===107&&new Set(a.j.tools.map(x=>x.id)).size===107&&!a.j.tools.some(x=>/termux/i.test(x.group+' '+x.id))&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
 await call('/api/admin/users/'+bobId+'/disable',{method:'POST',cookie:adminCookie,body:{}});
 t('disable revokes live session',(await call('/api/auth/me',{cookie:bob})).s===401);
 t('disabled user cannot log in',(await call('/api/auth/login',{method:'POST',ip:'12.0.0.2',body:{username:'bob',password:'amber-lantern-quartz-2026'}})).s===401);

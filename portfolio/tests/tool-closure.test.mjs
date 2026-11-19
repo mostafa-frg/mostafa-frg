@@ -4,7 +4,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import vm from 'node:vm';
-import { webcrypto } from 'node:crypto';
+import { webcrypto, createHash, createHmac } from 'node:crypto';
+import { crc32 as nodeCrc32 } from 'node:zlib';
 import { TextDecoder } from 'node:util';
 
 const source = await readFile(new URL('../assets/platform.js', import.meta.url), 'utf8');
@@ -198,6 +199,94 @@ test('performance and correctness at scale: diff (Myers) and IOC extraction stay
   const small = await run('ioc-extractor', { data: 'see hxxps://evil[.]example/login and evil[.]example plus other[.]test from 203.0.113.9' });
   assert.match(small, /URLs \(1\)\nhttps:\/\/evil\.example\/login/);
   assert.match(small, /Domains \(1\)\nother\.test/); assert.match(small, /IPv4 addresses \(1\)\n203\.0\.113\.9/);
+});
+
+const field = (id, i = 0) => tools.find(t => t.id === id).fields[i][2];
+const rows2 = out => Object.fromEntries(out.split('\n').filter(l => l.includes(': ')).map(l => [l.slice(0, l.indexOf(': ')), l.slice(l.indexOf(': ') + 2)]));
+const nodeB32 = buf => { const A = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'; let bits = '', o = ''; for (const b of buf) bits += b.toString(2).padStart(8, '0'); for (let i = 0; i < bits.length; i += 5) o += A[parseInt(bits.slice(i, i + 5).padEnd(5, '0'), 2)]; while (o.length % 8) o += '='; return o; };
+
+test('CRC-32, MD5/SHA and Base32 match independent references (zlib, node:crypto, RFC 4648)', async () => {
+  assert.equal(rows2(await run('crc32', { data: '123456789', mode: 'text (UTF-8)' }))['CRC-32 (hex)'], 'CBF43926');
+  assert.equal(rows2(await run('crc32', { data: '', mode: 'text (UTF-8)' }))['CRC-32 (hex)'], '00000000');
+  assert.equal(rows2(await run('crc32', { data: '31 32 33 34 35 36 37 38 39', mode: 'hex bytes' }))['CRC-32 (hex)'], 'CBF43926');
+  await throwsMsg('crc32', { data: 'abc', mode: 'hex bytes' }, /even number/);
+  const samples = ['', 'a', 'abc', 'é', 'مرحبا بالعالم', '😀', 'The quick brown fox jumps over the lazy dog'];
+  for (const n of [1, 54, 55, 56, 57, 63, 64, 65, 119, 120, 127, 128, 129, 1000, 4096]) samples.push('x'.repeat(n), String.fromCharCode(...Array.from({ length: n }, (_, i) => 32 + (i * 7) % 90)));
+  for (const s of samples) {
+    assert.equal(rows2(await run('crc32', { data: s, mode: 'text (UTF-8)' }))['CRC-32 (decimal)'], String(nodeCrc32(Buffer.from(s, 'utf8'))), 'crc32 ' + JSON.stringify(s.slice(0, 20)));
+    const r = rows2(await run('multi-hash', { text: s }));
+    for (const [label, alg] of [['MD5', 'md5'], ['SHA-1', 'sha1'], ['SHA-256', 'sha256'], ['SHA-384', 'sha384'], ['SHA-512', 'sha512']])
+      assert.equal(r[label], createHash(alg).update(s, 'utf8').digest('hex'), label + ' ' + JSON.stringify(s.slice(0, 20)));
+  }
+  assert.equal(rows2(await run('multi-hash', { text: '' })).MD5, 'd41d8cd98f00b204e9800998ecf8427e');
+  assert.equal(rows2(await run('multi-hash', { text: 'abc' })).MD5, '900150983cd24fb0d6963f7d28e17f72');
+  const rfc = { '': '', f: 'MY======', fo: 'MZXQ====', foo: 'MZXW6===', foob: 'MZXW6YQ=', fooba: 'MZXW6YTB', foobar: 'MZXW6YTBOI======' };
+  for (const [plain, enc] of Object.entries(rfc)) {
+    if (plain) assert.equal(await run('base32', { text: plain, mode: 'encode' }), enc);
+    if (enc) assert.equal(await run('base32', { text: enc, mode: 'decode' }), plain);
+  }
+  for (let n = 0; n < 40; n++) { const buf = Buffer.from(Array.from({ length: n }, (_, i) => (i * 37 + n) & 255)); assert.equal(b32decHex(await run('base32', { text: nodeB32(buf), mode: 'decode' })), buf.toString('hex')); }
+  assert.equal(await run('base32', { text: 'mzxw6ytboi', mode: 'decode' }), 'foobar');
+  await throwsMsg('base32', { text: 'MZXW1', mode: 'decode' }, /only contain/);
+  await throwsMsg('base32', { text: 'MZX', mode: 'decode' }, /length/);
+});
+function b32decHex(s) { return s.startsWith('Binary data (hex): ') ? s.slice(19) : Buffer.from(s, 'utf8').toString('hex'); }
+
+test('TOTP/HOTP match RFC 4226 and RFC 6238 test vectors and an independent HMAC implementation', async () => {
+  const sec1 = nodeB32(Buffer.from('12345678901234567890')).replace(/=/g, '');
+  const hotp = ['755224', '287082', '359152', '969429', '338314', '254676', '287922', '162583', '399871', '520489'];
+  for (let i = 0; i < hotp.length; i++) assert.equal(rows2(await run('otp', { secret: sec1, kind: 'HOTP', value: String(i), digits: '6', algo: 'SHA-1' })).Code, hotp[i]);
+  const t6238 = { 59: '94287082', 1111111109: '07081804', 1111111111: '14050471', 1234567890: '89005924', 2000000000: '69279037', 20000000000: '65353130' };
+  for (const [t, code] of Object.entries(t6238)) assert.equal(rows2(await run('otp', { secret: sec1, kind: 'TOTP', value: t, digits: '8', algo: 'SHA-1' })).Code, code);
+  const ref = (key, alg, t, digits) => { const c = Buffer.alloc(8); c.writeBigUInt64BE(BigInt(Math.floor(t / 30))); const h = createHmac(alg, key).update(c).digest(); const o = h[h.length - 1] & 15; const bin = ((h[o] & 127) << 24 | h[o + 1] << 16 | h[o + 2] << 8 | h[o + 3]) >>> 0; return String(bin % 10 ** digits).padStart(digits, '0'); };
+  const keys = { 'SHA-1': ['sha1', '12345678901234567890'], 'SHA-256': ['sha256', '12345678901234567890123456789012'], 'SHA-512': ['sha512', '1234567890123456789012345678901234567890123456789012345678901234'] };
+  for (const [alg, [nodeAlg, key]] of Object.entries(keys)) for (const t of [59, 1111111109, 1111111111, 1234567890, 2000000000, 20000000000]) for (const d of [6, 8]) {
+    const got = rows2(await run('otp', { secret: nodeB32(Buffer.from(key)).replace(/=/g, ''), kind: 'TOTP', value: String(t), digits: String(d), algo: alg })).Code;
+    assert.equal(got, ref(Buffer.from(key), nodeAlg, t, d), alg + ' t=' + t + ' d=' + d);
+  }
+  assert.equal(rows2(await run('otp', { secret: nodeB32(Buffer.from(keys['SHA-256'][1])).replace(/=/g, ''), kind: 'TOTP', value: '59', digits: '8', algo: 'SHA-256' })).Code, '46119246');
+  assert.equal(rows2(await run('otp', { secret: nodeB32(Buffer.from(keys['SHA-512'][1])).replace(/=/g, ''), kind: 'TOTP', value: '59', digits: '8', algo: 'SHA-512' })).Code, '90693936');
+  assert.equal(rows2(await run('otp', { secret: sec1, kind: 'TOTP', value: '59', digits: '6', algo: 'SHA-1' }))['Valid for (s)'], '1');
+  assert.match(rows2(await run('otp', { secret: sec1, kind: 'TOTP', value: '', digits: '6', algo: 'SHA-1' })).Code, /^\d{6}$/);
+  await throwsMsg('otp', { secret: 'ABCDEFGH', kind: 'TOTP', value: '', digits: '6', algo: 'SHA-1' }, /too short/);
+  await throwsMsg('otp', { secret: sec1, kind: 'TOTP', value: '-5', digits: '6', algo: 'SHA-1' }, /whole number/);
+  await throwsMsg('otp', { secret: 'not base32!!!!!!!!', kind: 'TOTP', value: '', digits: '6', algo: 'SHA-1' }, /Base32/);
+});
+
+test('EUI-64, Internet checksum, Wake-on-LAN and MAC formatter produce exact results', async () => {
+  const e = rows2(await run('eui64', { mac: '00:25:96:12:34:56', prefix: '2001:db8:1:2::/64' }));
+  assert.equal(e['Interface ID'], '::225:96ff:fe12:3456'); assert.equal(e['Global address'], '2001:db8:1:2:225:96ff:fe12:3456'); assert.equal(e['Link-local'], 'fe80::225:96ff:fe12:3456');
+  assert.equal(rows2(await run('eui64', { mac: '02:00:00:00:00:01', prefix: '2001:db8::' }))['Interface ID'], '::ff:fe00:1');
+  await throwsMsg('eui64', { mac: '00:25:96:12:34:56', prefix: '2001:db8::/48' }, /\/64/);
+  await throwsMsg('eui64', { mac: 'zz', prefix: '2001:db8::/64' }, /12-hex-digit/);
+  assert.equal(rows2(await run('inet-checksum', { hex: '4500 0073 0000 4000 4011 0000 c0a8 0001 c0a8 00c7' })).Checksum, 'b861');
+  assert.equal(rows2(await run('inet-checksum', { hex: '4500 0073 0000 4000 4011 b861 c0a8 0001 c0a8 00c7' })).Checksum, '0000');
+  assert.equal(rows2(await run('inet-checksum', { hex: '01' })).Checksum, 'feff');
+  await throwsMsg('inet-checksum', { hex: '123' }, /even number/);
+  const w = rows2(await run('wol-packet', { mac: '00-1A-2B-3C-4D-5E' }))['Packet (102 bytes, hex)'];
+  assert.equal(w.length, 204); assert.equal(w, 'ffffffffffff' + '001a2b3c4d5e'.repeat(16));
+  const m = rows2(await run('mac-format', { mac: '00:1A:2B:3C:4D:5E' }));
+  assert.equal(m['Cisco dotted'], '001a.2b3c.4d5e'); assert.equal(m.Hyphen, '00-1a-2b-3c-4d-5e'); assert.equal(m.Plain, '001a2b3c4d5e'); assert.equal(m.OUI, '00:1a:2b');
+  assert.equal(m.Type, 'Unicast'); assert.match(m.Administration, /^Universally/);
+  assert.equal(rows2(await run('mac-format', { mac: 'ffff.ffff.ffff' })).Type, 'Multicast / broadcast');
+  assert.match(rows2(await run('mac-format', { mac: '02-00-00-00-00-01' })).Administration, /^Locally/);
+  await throwsMsg('mac-format', { mac: '00:1A:2B:3C:4D' }, /12-hex-digit/);
+  for (const id of ['crc32', 'multi-hash', 'base32', 'otp', 'eui64', 'inet-checksum', 'wol-packet', 'mac-format']) assert.ok(await run(id, Object.fromEntries(tools.find(t => t.id === id).fields.map(f => [f[0], f[2]]))), id + ' default input runs');
+});
+
+test('optional fields work when left blank, and are not marked required in the form', async () => {
+  const blank = { 'nmap-builder': { ports: '' }, 'wireshark-filter': { host: '', port: '' }, 'tshark-builder': { filter: '' }, 'tcpdump-builder': { filter: '' }, 'ufw-builder': { src: '' }, 'journalctl-builder': { unit: '' }, otp: { value: '' }, 'windows-event-reference': { eventId: '' } };
+  for (const [id, over] of Object.entries(blank)) {
+    const defaults = Object.fromEntries(tools.find(t => t.id === id).fields.map(f => [f[0], f[2]]));
+    const out = await run(id, { ...defaults, ...over });
+    assert.ok(String(out).length > 0, id + ' returns output with blank optional fields');
+  }
+  assert.match(await run('nmap-builder', { target: '10.0.0.1', scan: 'TCP connect scan', ports: '', timing: 'T3', save: 'no' }), /^nmap -sT -T3 10\.0\.0\.1/);
+  assert.match(await run('journalctl-builder', { unit: '', since: 'today', prio: 'all' }), /^journalctl --since today --no-pager/);
+  assert.match(await run('ufw-builder', { action: 'allow', port: '443', proto: 'tcp', src: '' }), /^sudo ufw allow port 443 proto tcp/);
+  assert.match(await run('wireshark-filter', { proto: 'dns', host: '', port: '' }), /Display filter:\ndns\n/);
+  assert.match(source, /el\.step='any'/, 'number inputs must accept decimals (tcp-throughput loss 0.1, transfer-time 2.5 GB)');
+  assert.match(source, /el\.required=\(type==='file'\|\|\(type!=='textarea'&&type!=='number'\)\)&&!\/optional\|blank\/i\.test\(label\)/);
 });
 
 test('port reference covers common services and unknown queries', async () => {

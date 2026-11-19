@@ -51,16 +51,16 @@ const byId = id => {
 test('tool registry has unique IDs and five declared domains', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 94);
+  assert.equal(tools.length, 102);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 32);
-  assert.equal(tools.filter(tool => tool.cat === 'security').length, 26);
+  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 36);
+  assert.equal(tools.filter(tool => tool.cat === 'security').length, 28);
   assert.equal(tools.filter(tool => tool.cat === 'soc').length, 6);
   assert.equal(tools.filter(tool => tool.cat === 'linux').length, 15);
-  assert.equal(tools.filter(tool => tool.cat === 'developer').length, 15);
+  assert.equal(tools.filter(tool => tool.cat === 'developer').length, 17);
 });
 
 test('IOC extractor normalizes defanged indicators and classifies hashes', () => {
@@ -156,7 +156,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 94);
+  assert.equal(tools.length, 102);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');

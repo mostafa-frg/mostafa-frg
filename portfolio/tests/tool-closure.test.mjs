@@ -168,6 +168,38 @@ test('external-service tools handle success, provider errors and bad input (mock
   fetchImpl = async () => { throw new Error('unexpected network call'); };
 });
 
+test('performance and correctness at scale: diff (Myers) and IOC extraction stay fast and exact', async () => {
+  const apply = (out, side) => out.split('\n').filter(l => (side === 'L' ? /^( {2}|- )/ : /^( {2}|\+ )/).test(l)).map(l => l.slice(2)).join('\n');
+  // an inserted line must not shift every following line (positional diff bug)
+  assert.equal(await run('diff', { left: 'a\nb\nc\nd', right: 'a\nx\nb\nc\nd' }), '  a\n+ x\n  b\n  c\n  d');
+  assert.equal(await run('diff', { left: 'a\nb\nc', right: 'a\nc' }), '  a\n- b\n  c');
+  assert.equal(await run('diff', { left: 'a\r\nb', right: 'a\nb' }), '  a\n  b');
+  assert.equal(await run('diff', { left: '', right: 'x' }), '- \n+ x');
+  // deterministic pseudo-random edits: both sides must be reconstructible from the diff
+  let seed = 12345; const rnd = n => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) % n;
+  for (let i = 0; i < 400; i++) {
+    const L = Array.from({ length: rnd(15) }, () => 'l' + rnd(5)), R = L.slice();
+    for (let e = rnd(6); e > 0; e--) { const op = rnd(3), p = rnd(R.length + 1); if (op === 0) R.splice(p, 0, 'n' + rnd(5)); else if (op === 1 && R.length) R.splice(rnd(R.length), 1); else if (R.length) R[rnd(R.length)] = 'm' + rnd(5); }
+    const out = await run('diff', { left: L.join('\n'), right: R.join('\n') });
+    assert.equal(apply(out, 'L'), L.join('\n')); assert.equal(apply(out, 'R'), R.join('\n'));
+  }
+  const big = n => Array.from({ length: n }, (_, i) => 'line ' + i + ' value ' + (i * 7 % 13)).join('\n');
+  let t0 = performance.now();
+  const bd = await run('diff', { left: big(10000), right: big(10000).replace(/value 3/g, 'value 4') });
+  assert.ok(performance.now() - t0 < 2000, 'diff of 10k lines with scattered edits must finish in 2 s');
+  assert.ok(bd.split('\n').filter(l => /^[-+] /.test(l)).length > 1000);
+  await assert.rejects(async () => run('diff', { left: big(20000), right: Array.from({ length: 20000 }, (_, i) => 'z' + i).join('\n') }), /Too many differences/);
+  // IOC extraction was quadratic (118 s for 50k lines)
+  const log = Array.from({ length: 50000 }, (_, i) => 'host' + i + '.example.com 10.0.' + (i % 250) + '.' + (i % 200) + ' http://a' + i + '.test/p').join('\n');
+  t0 = performance.now();
+  const ioc = await run('ioc-extractor', { data: log });
+  assert.ok(performance.now() - t0 < 3000, 'IOC extraction of 50k lines must finish in 3 s');
+  assert.match(ioc, /URLs \(50000\)/); assert.match(ioc, /Domains \(50000\)/);
+  const small = await run('ioc-extractor', { data: 'see hxxps://evil[.]example/login and evil[.]example plus other[.]test from 203.0.113.9' });
+  assert.match(small, /URLs \(1\)\nhttps:\/\/evil\.example\/login/);
+  assert.match(small, /Domains \(1\)\nother\.test/); assert.match(small, /IPv4 addresses \(1\)\n203\.0\.113\.9/);
+});
+
 test('port reference covers common services and unknown queries', async () => {
   assert.match(await run('ports', { port: '443' }), /443\/tcp-or-udp\s+—\s+HTTPS \(TCP\)/);
   assert.match(await run('ports', { port: 'ssh' }), /22/);

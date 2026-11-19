@@ -1,4 +1,4 @@
-const COOKIE="__Host-mosta_session",SESSION=604800,ITER=100000,LOGIN_PAIR_LIMIT=5,LOGIN_IP_LIMIT=20,BOOT_LIMIT=5,WINDOW=900,MAX_BODY=16384,MAX_SESSIONS=10;
+const COOKIE="__Host-mosta_session",SESSION=604800,ITER=600000,LOGIN_PAIR_LIMIT=5,LOGIN_IP_LIMIT=20,BOOT_LIMIT=5,WINDOW=900,MAX_BODY=16384,MAX_SESSIONS=10;
 class HttpError extends Error{constructor(status,message){super(message);this.status=status;}}
 const TOOLS=[
   {
@@ -801,7 +801,8 @@ if(p==="/api/auth/login"&&m==="POST"){if(!sameOrigin(req))return fail("Cross-ori
 await env.DB.prepare("DELETE FROM auth_attempts WHERE attempted_at<?").bind(now-86400).run();
 const reserve=await reserveLoginAttempt(env,name,ipHash,now);if(!reserve)return fail("Too many sign-in attempts. Try again in 15 minutes.",429);
 const user=await env.DB.prepare("SELECT * FROM users WHERE username=?").bind(name).first(),usable=!!(user&&user.active),cred=usable?{salt:user.password_salt,hash:user.password_hash,iter:user.password_iter||100000}:await dummy(),good=await passOK(pw,cred.salt,cred.hash,cred.iter),ok=usable&&good;
-if(!ok){await audit(env,user?user.id:null,"auth.login_failed",name+" ip:"+ipHash.slice(0,8));return fail("Invalid username or password.",401);}
+if(!ok){if(user&&cred.iter<ITER)await passHash(pw,rand(16),ITER-cred.iter);await audit(env,user?user.id:null,"auth.login_failed",name+" ip:"+ipHash.slice(0,8));return fail("Invalid username or password.",401);}
+if(user.password_iter<ITER){const upgraded=await passHash(pw);await env.DB.prepare("UPDATE users SET password_salt=?,password_hash=?,password_iter=? WHERE id=?").bind(upgraded.salt,upgraded.hash,ITER,user.id).run();}
 await env.DB.prepare("DELETE FROM auth_attempts WHERE id=?").bind(reserve.id).run();await env.DB.prepare("DELETE FROM sessions WHERE expires_at<?").bind(now).run();
 const raw=await newSession(env,user.id,now);await audit(env,user.id,"auth.login");return json({ok:true,user:{id:user.id,username:user.username,role:user.role}},200,{"set-cookie":setCookie(raw)});}
 if(p==="/api/auth/logout"&&m==="POST"){if(!sameOrigin(req))return fail("Cross-origin request rejected.",403);const raw=cookie(req),user=await current(req,env);if(raw)await env.DB.prepare("DELETE FROM sessions WHERE token_hash=?").bind(await hash(raw)).run();if(user)await audit(env,user.id,"auth.logout");return json({ok:true},200,{"set-cookie":clearCookie()});}

@@ -1449,7 +1449,7 @@ const TOOLS=[
     "group": "SOC & Incident Response",
     "mode": "browser",
     "description": "Summarize Zeek weird.log events by anomaly name and source endpoint for network investigation."
-  }
+  },
   {
     "id": "github-actions-workflow-audit",
     "name": "GitHub Actions Workflow Security Auditor",

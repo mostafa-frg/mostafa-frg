@@ -1190,6 +1190,146 @@ const TOOLS=[
     "group": "SOC & Incident Response",
     "mode": "browser",
     "description": "Check YARA rule text for rule blocks, condition clauses and basic rule hygiene."
+  },
+  {
+    "id": "linux-nftables-audit",
+    "name": "nftables Firewall Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review nft list ruleset text for permissive input policies and broad accept rules."
+  },
+  {
+    "id": "linux-pam-policy-audit",
+    "name": "Linux PAM Authentication Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review PAM configuration for account lockout, password quality and null-password settings."
+  },
+  {
+    "id": "linux-login-defs-audit",
+    "name": "Linux login.defs Password Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review password aging and password hash algorithm settings."
+  },
+  {
+    "id": "linux-mount-options-audit",
+    "name": "Linux Sensitive Mount Options Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review mount output for /tmp, /var/tmp and /dev/shm noexec, nodev and nosuid protections."
+  },
+  {
+    "id": "linux-hosts-file-audit",
+    "name": "Linux Hosts File Override Auditor",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Review /etc/hosts mappings for unexpected public-domain overrides and duplicate hostnames."
+  },
+  {
+    "id": "linux-resolver-audit",
+    "name": "Linux DNS Resolver Configuration Auditor",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Review resolv.conf nameservers, search domains and resolver entries."
+  },
+  {
+    "id": "linux-known-hosts-audit",
+    "name": "SSH known_hosts Integrity Reviewer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review known_hosts text for duplicate entries, hashed host records and obsolete key algorithms."
+  },
+  {
+    "id": "linux-ldd-audit",
+    "name": "Linux Shared Library Dependency Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review ldd output for unresolved shared libraries and unexpected dependency paths."
+  },
+  {
+    "id": "termux-getprop-audit",
+    "name": "Android Build Security Properties Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review selected Android getprop values for debuggable builds and weak ADB security settings."
+  },
+  {
+    "id": "termux-ssh-client-audit",
+    "name": "Termux SSH Client Configuration Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review SSH client config for disabled host-key checking, agent forwarding and insecure local commands."
+  },
+  {
+    "id": "kali-monitor-capability-review",
+    "name": "Kali Wireless Monitor Capability Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Inspect iw list output to determine whether a wireless driver advertises monitor mode support."
+  },
+  {
+    "id": "kali-wireless-interface-review",
+    "name": "Kali Wireless Interface State Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Review iw dev output for interface type and identify whether a device is already in monitor mode."
+  },
+  {
+    "id": "soc-zeek-http-summary",
+    "name": "Zeek HTTP Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek http.log methods, status codes, hosts and request paths."
+  },
+  {
+    "id": "soc-zeek-ssl-summary",
+    "name": "Zeek TLS Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek ssl.log TLS versions, validation results and server names."
+  },
+  {
+    "id": "soc-powershell-4104-triage",
+    "name": "PowerShell Script Block 4104 Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review Windows PowerShell 4104 script-block text for encoded commands and suspicious execution patterns."
+  },
+  {
+    "id": "soc-windows-rdp-triage",
+    "name": "Windows RDP Logon Event Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Windows event exports for RDP logons and session reconnect/disconnect activity."
+  },
+  {
+    "id": "soc-firewall-log-summary",
+    "name": "Linux Firewall Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize UFW and kernel firewall log lines by action, source address and destination port."
+  },
+  {
+    "id": "soc-dns-tunnel-heuristic",
+    "name": "DNS Tunneling Heuristic Reviewer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Score DNS query names for unusually long labels, high diversity and excessive subdomain depth."
+  },
+  {
+    "id": "soc-web-probe-triage",
+    "name": "Web Attack Probe Log Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review web access logs for common secret-file, traversal, admin-panel and webshell probe paths."
+  },
+  {
+    "id": "kali-nmap-grepable-review",
+    "name": "Nmap Grepable Output Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Parse Nmap -oG output to summarize live hosts, open TCP ports and service labels."
   }
 ];
 

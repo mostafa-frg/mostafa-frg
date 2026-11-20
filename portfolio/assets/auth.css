@@ -2,3 +2,28 @@
 .ca-option{display:flex;gap:8px;align-items:center;margin:8px 0}.ca-chips{display:flex;gap:8px;flex-wrap:wrap}.ca-chip-high{border-color:#ff6b5c;color:#ff6b5c}.ca-chip-medium{border-color:#f0b84a;color:#f0b84a}.ca-chip-low{border-color:var(--cyan);color:var(--cyan)}.tool-grid{align-items:start}
 
 .setup-note{padding:12px 14px;border:1px solid var(--line);border-radius:10px;color:var(--muted);font-size:.9rem;line-height:1.6;margin:0 0 6px}.auth-card button:disabled{opacity:.65;cursor:wait}
+
+
+/* MOSTA admin console — operational dashboard */
+.dashboard{max-width:1180px}
+.dashboard>.panel{border:1px solid color-mix(in srgb,var(--line) 78%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--panel) 96%,#123a46),var(--panel));box-shadow:0 16px 42px rgba(0,0,0,.16);border-radius:18px}
+.dash-head{padding:24px 26px;border:1px solid var(--line);border-radius:20px;background:radial-gradient(ellipse at 90% 0%,rgba(85,217,242,.09),transparent 48%),var(--panel)}
+.dash-head h1{letter-spacing:-.055em}.dash-head .lead{font-size:13px}
+.overview-head{display:flex;justify-content:space-between;align-items:start;gap:18px;margin-bottom:20px}
+.overview-head h2{margin:8px 0 4px}.overview-head .notice{margin:0;max-width:640px}
+.overview-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.overview-card{min-width:0;padding:18px;border:1px solid var(--line);border-radius:14px;background:color-mix(in srgb,var(--panel) 82%,#102a36)}
+.overview-card span{display:block;color:var(--muted);font:10px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.overview-card strong{display:block;margin-top:12px;font-size:clamp(24px,3vw,34px);letter-spacing:-.05em;font-variant-numeric:tabular-nums}
+.overview-card small{display:block;margin-top:5px;color:var(--muted);font-size:10px}
+.dashboard .field{max-width:520px;margin:12px 0}
+.dashboard .panel h2{letter-spacing:-.035em}
+.user-row,.access-row,.audit-row{background:color-mix(in srgb,var(--panel) 88%,#0b2630)}
+.user-row button,.access-row button{flex:none}
+.audit-row{grid-template-columns:minmax(0,1fr) auto;align-items:start}
+.audit-row p{grid-column:1/-1;margin:2px 0 0;overflow-wrap:anywhere}
+.audit-row small{font-variant-numeric:tabular-nums}
+.dashboard button:focus-visible,.dashboard a:focus-visible,.dashboard input:focus-visible,.dashboard select:focus-visible{outline:2px solid var(--cyan);outline-offset:3px}
+.dashboard button:disabled{opacity:.55;cursor:wait}
+@media(max-width:960px){.overview-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.dashboard{padding-top:28px}.dash-head{align-items:flex-start;flex-direction:column;padding:20px}.overview-head{flex-direction:column}.overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.overview-card{padding:14px}.audit-row{grid-template-columns:1fr}.audit-row p{grid-column:auto}}

@@ -897,7 +897,8 @@ test('new tool categories are present in the registry and homepage navigation', 
   assert.ok(tools.some(tool=>tool.id==='k8s-manifest-audit'&&tool.cat==='cloud'));
   assert.ok(tools.some(tool=>tool.id==='sql-migration-review'&&tool.cat==='database'));
   assert.match(homeMarkup,/tools\.html\?category=cloud/);
-  assert.match(homeMarkup,/tools\.html\?category=database/);\n  assert.match(homeMarkup,/tools\.html\?category=termux/);
+  assert.match(homeMarkup,/tools\.html\?category=database/);
+  assert.match(homeMarkup,/tools\.html\?category=termux/);
 });
 
 test('public homepage does not run the authenticated tool bootstrap', () => {

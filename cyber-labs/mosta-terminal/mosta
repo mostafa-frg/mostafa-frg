@@ -39,5 +39,6 @@ Available commands:
   mmon     Network Monitor
   mscan    Network Security Lab (authorized targets only)
   mauto    Network Automation Lab
-  mosta-index   Search/filter the local upstream CLI catalog\n  mosta-doctor  Installation and dependency health check
+  mosta-index   Search/filter the local upstream CLI catalog
+  mosta-doctor  Installation and dependency health check
 EOF

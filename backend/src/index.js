@@ -1026,14 +1026,14 @@ const TOOLS=[
   {
     "id": "termux-bashrc-audit",
     "name": "Termux Shell Startup Auditor",
-    "group": "Bash Scripting",
+    "group": "Termux",
     "mode": "browser",
     "description": "Review Termux shell startup text for unsafe download execution, eval, weak permissions and embedded secrets."
   },
   {
     "id": "android-manifest-audit",
     "name": "Android Manifest Permission Auditor",
-    "group": "Bash Scripting",
+    "group": "Termux",
     "mode": "browser",
     "description": "Inspect Android manifest permission declarations and highlight sensitive access requests."
   },

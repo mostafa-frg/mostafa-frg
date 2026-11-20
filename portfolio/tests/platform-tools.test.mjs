@@ -749,7 +749,7 @@ test('new Linux, Kali and Termux command builders produce bounded commands witho
   assert.throws(()=>byId('linux-journal-filter').run({unit:'ssh.service',lines:'5001'}),/whole number from 1 to 5000/);
   assert.throws(()=>byId('linux-find-large-files').run({path:'',size:'10'}),/Enter a directory path/);
   assert.match(byId('kali-nmap-service-audit').run({target:'192.0.2.10',ports:'22,443'}),/nmap -sV.*-p '22,443'.*192.0.2.10/);
-  assert.throws(()=>byId('kali-nmap-service-audit').run({target:'example.com;id',ports:'80'}),/valid domain/);
+  assert.throws(()=>byId('kali-nmap-service-audit').run({target:'example.com;id',ports:'80'}),/valid public domain/);
   assert.throws(()=>byId('kali-nmap-service-audit').run({target:'example.com',ports:'80;id'}),/comma-separated TCP ports/);
   assert.throws(()=>byId('kali-nikto-web-audit').run({url:'http://example.com'}),/Only HTTPS URLs/);
   assert.throws(()=>byId('kali-ffuf-content-audit').run({url:'https://example.com/',wordlist:'/tmp/list',rate:'10'}),/literal FUZZ marker/);

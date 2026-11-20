@@ -4,7 +4,7 @@ name: Deploy MOSTA platform
 
 on:
   push:
-    branches: [main, feat/mosta-platform-redesign]
+    branches: [main]
     paths:
       - "backend/**"
       - "portfolio/**"
@@ -135,7 +135,7 @@ jobs:
 
   deploy:
     needs: [validate, security-tests]
-    if: github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feat/mosta-platform-redesign' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-prod]'))
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

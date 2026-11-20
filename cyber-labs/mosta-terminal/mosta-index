@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Read-only index of the external commands exposed by install.sh.
+entries=(
+  "mnmap|Nmap|Network discovery and port scanning"
+  "mnc|netcat|TCP/UDP connectivity"
+  "mdig|dig|DNS queries"
+  "mtcpdump|tcpdump|Packet capture"
+  "mtshark|tshark|Packet analysis"
+  "mwireshark|wireshark|Packet analysis GUI"
+  "mscapy|scapy|Interactive packet crafting and analysis"
+  "msocat|socat|Socket relay and data transfer"
+  "mtracepath|tracepath|Path MTU discovery"
+  "mtraceroute|traceroute|Network path tracing"
+  "mmtr|mtr|Combined ping and traceroute"
+  "mwhois|whois|Registration data lookup"
+  "mcurl|curl|HTTP and URL transfers"
+  "mwget|wget|File retrieval"
+  "mssh|ssh|Secure remote administration"
+  "maircrack|aircrack-ng|Wireless security auditing"
+  "mkismet|kismet|Wireless monitoring"
+  "mnikto|nikto|Web server assessment"
+  "mffuf|ffuf|Web content discovery"
+  "mjohn|john|Password audit"
+  "mhashcat|hashcat|Password recovery and auditing"
+  "mhydra|hydra|Authentication testing"
+  "mzeek|zeek|Network security monitoring"
+  "msuricata|suricata|Network threat detection"
+  "mmetsploit|msfconsole|Security validation framework"
+  "msqlmap|sqlmap|SQL injection testing"
+  "msearchsploit|searchsploit|Exploit reference search"
+  "mburp|burpsuite|Web application security testing"
+  "mzap|zaproxy|Web application security testing"
+  "mmasscan|masscan|High-speed port scanning"
+  "mwhatweb|whatweb|Web technology fingerprinting"
+  "mwifite|wifite|Wireless security auditing"
+  "mdnsrecon|dnsrecon|DNS reconnaissance"
+  "mdnsenum|dnsenum|DNS enumeration"
+  "mnslookup|nslookup|DNS lookup"
+  "mss|ss|Socket inspection"
+  "mip|ip|Linux network configuration"
+  "mping|ping|ICMP connectivity"
+  "mps|ps|Process inspection"
+  "mtop|top|Process monitoring"
+  "mjq|jq|JSON processing"
+  "mopenssl|openssl|Cryptographic utilities"
+  "miperf3|iperf3|Network throughput testing"
+  "mipcalc|ipcalc|IP subnet calculations"
+  "mnetstat|netstat|Network connections"
+  "mifconfig|ifconfig|Interface configuration"
+  "mhtop|htop|Interactive process monitoring"
+  "mtmux|tmux|Terminal multiplexer"
+  "mrsync|rsync|File synchronization"
+  "mlsof|lsof|Open-file inspection"
+  "msha256sum|sha256sum|SHA-256 file hashing"
+  "mfile|file|File type identification"
+  "mstrace|strace|System-call tracing"
+  "mripgrep|rg|Recursive text search"
+  "mfd|fd|File discovery"
+  "mfzf|fzf|Fuzzy command-line search"
+  "mtree|tree|Directory visualization"
+  "mncdu|ncdu|Disk usage analysis"
+  "mmicro|micro|Terminal text editor"
+  "mfiglet|figlet|Terminal text banner"
+  "mtoilet|toilet|Terminal text banner"
+)
+
+usage() {
+  printf '%s\n' "MOSTA External Tool Index"
+  printf '%s\n' "Usage: mosta-index list | search <term>"
+}
+
+case "${1:-}" in
+  list)
+    printf '%-14s %-18s %s\n' "COMMAND" "UPSTREAM" "PURPOSE"
+    for entry in "${entries[@]}"; do
+      IFS='|' read -r alias upstream purpose <<< "$entry"
+      printf '%-14s %-18s %s\n' "$alias" "$upstream" "$purpose"
+    done
+    ;;
+  search)
+    if [ "$#" -ne 2 ] || [ -z "$2" ]; then usage >&2; exit 2; fi
+    term="${2,,}"
+    found=0
+    for entry in "${entries[@]}"; do
+      IFS='|' read -r alias upstream purpose <<< "$entry"
+      if [[ "${alias,,} ${upstream,,} ${purpose,,}" == *"$term"* ]]; then
+        printf '%-14s %-18s %s\n' "$alias" "$upstream" "$purpose"
+        found=1
+      fi
+    done
+    if [ "$found" -eq 0 ]; then
+      printf 'No catalog entries matched: %s\n' "$2" >&2
+      exit 1
+    fi
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac

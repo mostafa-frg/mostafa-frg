@@ -1,17 +1,17 @@
-# Mosta Tool Index
+# Linux Desktop Tool Index
 
-Reference index for native Linux/Termux security and networking tools.
+Reference index for native Linux desktop networking, administration, and security utilities.
 
-The CSV maps each upstream tool to its intended Mosta command alias. Mosta does not rename or reimplement the upstream executable.
+The CSV maps each upstream tool to its optional command alias. The wrapper layer does not rename, reimplement, or bundle upstream executables.
 
-For the supported core Termux networking set:
+From the repository root, install the optional Linux command aliases with:
 
-    cd ../mosta-terminal
+    cd cyber-labs/mosta-terminal
     ./install.sh
 
-Then inspect availability with:
+Then inspect command availability:
 
     mosta-doctor
     mosta-tools
 
-Tools that require root, extra repositories, GUI components, or device-specific capabilities are intentionally treated as separate compatibility cases.
+Tools that require elevated privileges, a graphical desktop, specialized hardware, or separate upstream installation are identified as optional. Availability depends on the Linux distribution and local configuration.

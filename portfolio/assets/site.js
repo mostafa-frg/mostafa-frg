@@ -12,11 +12,15 @@ const main=$('main');
 if(main&&!main.id)main.id='main-content';
 if(main&&!$('.skip-link')){const a=document.createElement('a');a.className='skip-link';a.href='#main-content';a.textContent='Skip to content';document.body.prepend(a);}
 const navRoot=$('.nav');
-if(navRoot&&!$('.nav-actions')){
- const actions=document.createElement('div');actions.className='nav-actions';
- const themeButton=document.createElement('button');themeButton.type='button';themeButton.id='themeSwitch';themeButton.className='theme-switch';themeButton.setAttribute('aria-label','Toggle color theme');themeButton.textContent='◐ DARK';
- const paletteButton=document.createElement('button');paletteButton.type='button';paletteButton.id='openPalette';paletteButton.className='palette-trigger';paletteButton.setAttribute('aria-label','Open quick navigation');paletteButton.textContent='⌘ K';
- actions.append(themeButton,paletteButton);navRoot.append(actions);
+if(navRoot){
+ let actions=$('.nav-actions');
+ if(!actions){actions=document.createElement('div');actions.className='nav-actions';navRoot.append(actions);}
+ if(!$('#themeSwitch')){
+  const themeButton=document.createElement('button');themeButton.type='button';themeButton.id='themeSwitch';themeButton.className='theme-switch';themeButton.setAttribute('aria-label','Toggle color theme');themeButton.textContent='◐ DARK';actions.append(themeButton);
+ }
+ if(!$('#openPalette')){
+  const paletteButton=document.createElement('button');paletteButton.type='button';paletteButton.id='openPalette';paletteButton.className='palette-trigger';paletteButton.setAttribute('aria-label','Open quick navigation');paletteButton.textContent='⌘ ⇧ K';actions.append(paletteButton);
+ }
 }
 const theme=$('#themeSwitch');
 let saved=null;try{saved=localStorage.getItem('mosta-theme')}catch{}
@@ -39,9 +43,9 @@ $$('#siteNav a').forEach(a=>{if(a.getAttribute('href')===page){a.classList.add('
 const cards=$$('.project[data-category]'),filters=$$('[data-filter]'),search=$('#projectSearch'),count=$('#projectCount');let active='all';
 const applyFilters=()=>{const q=(search?.value||'').toLowerCase().trim();let shown=0;cards.forEach(card=>{const categories=(card.dataset.category||'').split(/\s+/);const ok=(active==='all'||categories.includes(active))&&(!q||((card.dataset.search||'')+' '+card.textContent).toLowerCase().includes(q));card.hidden=!ok;if(ok)shown++;});if(count)count.textContent=shown+' / '+cards.length+' PROJECTS';};
 filters.forEach(btn=>btn.addEventListener('click',()=>{active=btn.dataset.filter||'all';filters.forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));applyFilters();}));search?.addEventListener('input',applyFilters);if(cards.length)applyFilters();
-const backdrop=document.createElement('div');backdrop.className='palette-backdrop';backdrop.innerHTML='<section class="palette-dialog" role="dialog" aria-modal="true" aria-label="Quick navigation"><input class="palette-input" type="search" placeholder="Search pages…" aria-label="Search pages"><nav class="palette-list" aria-label="Pages"></nav><p class="palette-hint">ESC TO CLOSE · CTRL / CMD + K TO OPEN</p></section>';document.body.append(backdrop);
+const backdrop=document.createElement('div');backdrop.className='palette-backdrop';backdrop.innerHTML='<section class="palette-dialog" role="dialog" aria-modal="true" aria-label="Quick navigation"><input class="palette-input" type="search" placeholder="Search pages…" aria-label="Search pages"><nav class="palette-list" aria-label="Pages"></nav><p class="palette-hint">ESC TO CLOSE · CTRL / CMD + SHIFT + K TO OPEN</p></section>';document.body.append(backdrop);
 const paletteInput=$('.palette-input'),paletteList=$('.palette-list');
-const destinations=[['Overview','index.html'],['All tools','tools.html'],['Networking tools','tools.html?category=networking'],['Cybersecurity tools','tools.html?category=security'],['SOC & incident response','tools.html?category=soc'],['Linux & systems','tools.html?category=linux'],['Developer tools','tools.html?category=developer'],['Labs & playbooks','projects.html'],['Workspace','auth.html'],['Trust & privacy','security.html'],['Feedback & support','contact.html']];
+const destinations=[['Overview','index.html'],['All tools','tools.html'],['Networking tools','tools.html?category=networking'],['Cybersecurity tools','tools.html?category=security'],['SOC & incident response','tools.html?category=soc'],['Linux & systems','tools.html?category=linux'],['Developer tools','tools.html?category=developer'],['Cloud & DevOps','tools.html?category=cloud'],['Database engineering','tools.html?category=database'],['Labs & playbooks','projects.html'],['Workspace','auth.html'],['Trust & privacy','security.html'],['Feedback & support','contact.html']];
 destinations.forEach(([label,url])=>{const a=document.createElement('a');a.className='palette-link';a.href=url;const name=document.createElement('span'),arrow=document.createElement('span');name.textContent=label;arrow.textContent='↗';arrow.setAttribute('aria-hidden','true');a.append(name,arrow);paletteList.append(a);});
 const trigger=$('#openPalette');
 const openPalette=()=>{backdrop.classList.add('open');paletteInput.value='';paletteList.querySelectorAll('a').forEach(a=>a.hidden=false);paletteInput.focus();};
@@ -49,5 +53,5 @@ const closePalette=()=>{backdrop.classList.remove('open');trigger?.focus();};
 trigger?.addEventListener('click',openPalette);
 backdrop.addEventListener('click',e=>{if(e.target===backdrop)closePalette();});
 paletteInput.addEventListener('input',()=>{const q=paletteInput.value.toLowerCase().trim();paletteList.querySelectorAll('a').forEach(a=>a.hidden=!a.textContent.toLowerCase().includes(q));});
-document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();}if(e.key==='Escape'&&backdrop.classList.contains('open'))closePalette();if(e.key==='Tab'&&backdrop.classList.contains('open')){const focusables=[paletteInput,...paletteList.querySelectorAll('a:not([hidden])')];if(!focusables.length)return;if(e.shiftKey&&document.activeElement===focusables[0]){e.preventDefault();focusables.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===focusables.at(-1)){e.preventDefault();paletteInput.focus();}}});
+document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='k'){e.preventDefault();openPalette();}if(e.key==='Escape'&&backdrop.classList.contains('open'))closePalette();if(e.key==='Tab'&&backdrop.classList.contains('open')){const focusables=[paletteInput,...paletteList.querySelectorAll('a:not([hidden])')];if(!focusables.length)return;if(e.shiftKey&&document.activeElement===focusables[0]){e.preventDefault();focusables.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===focusables.at(-1)){e.preventDefault();paletteInput.focus();}}});
 })();

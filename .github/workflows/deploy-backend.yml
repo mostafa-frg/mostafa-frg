@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: mosta-platform-deploy-v2
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -286,7 +286,7 @@ jobs:
           grep -q "bind('hashForm'" "$tmp/tools.js"
           grep -q "bind('regexForm'" "$tmp/tools.js"
           grep -q "self.onmessage" "$tmp/regex-worker.js"
-          headers="$(curl -sSIL --max-redirs 5 "$SITE_ORIGIN/tools.html")"
+          headers="$(curl -sSL -D - -o /dev/null --max-redirs 5 "$SITE_ORIGIN/tools.html")"
           for header in content-security-policy strict-transport-security x-frame-options x-content-type-options referrer-policy; do
             printf '%s\n' "$headers" | grep -qi "^$header:" || {
               echo "::error::Missing live security header: $header"

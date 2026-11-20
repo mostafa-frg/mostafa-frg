@@ -6,21 +6,26 @@ import { webcrypto } from 'node:crypto';
 import { TextDecoder } from 'node:util';
 
 const source = await readFile(new URL('../assets/platform.js', import.meta.url), 'utf8');
-const registryStart = source.indexOf('const tools=') + 'const tools='.length;
+const directoryMarkup = await readFile(new URL('../tools.html', import.meta.url), 'utf8');
+const homeMarkup = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+const siteSource = await readFile(new URL('../assets/site.js', import.meta.url), 'utf8');
+const registryDeclaration = /(?:const|let)\s+tools\s*=/.exec(source);
+const registryStart = registryDeclaration ? registryDeclaration.index + registryDeclaration[0].length : -1;
 const registryMarker = source.indexOf('\n];\nfunction rows', registryStart);
 const helpersStart = source.indexOf('function rows(');
 const helpersEnd = source.indexOf('const grid=', helpersStart);
 
-assert.ok(registryStart >= 'const tools='.length, 'tool registry exists');
+assert.ok(registryStart > 0, 'tool registry exists');
 assert.ok(registryMarker > registryStart, 'tool registry closes before UI initialization');
 assert.ok(helpersStart >= 0 && helpersEnd > helpersStart, 'pure tool helpers exist');
 
 const registryLiteral = source.slice(registryStart, registryMarker + 2);
 const helpers = source.slice(helpersStart, helpersEnd);
-const tools = vm.runInNewContext(`(()=>{ ${helpers}\n return ${registryLiteral}; })()`, {
+const tools = vm.runInNewContext(`(()=>{ ${helpers}\n const registry=${registryLiteral}; registry.forEach(withValidatedInputs); return registry; })()`, {
   crypto: webcrypto,
   TextEncoder,
   TextDecoder,
+  AbortController,
   Uint8Array,
   atob,
   btoa,
@@ -38,6 +43,12 @@ const tools = vm.runInNewContext(`(()=>{ ${helpers}\n return ${registryLiteral};
     async arrayBuffer() { return new ArrayBuffer(64); },
   }),
   performance,
+  setTimeout,
+  clearTimeout,
+  Worker: class {
+    postMessage() { this.onmessage?.({ data: { ok: true, matches: [] } }); }
+    terminate() {}
+  },
   document: { createElement() { let html = ''; return { set innerHTML(value) { html = value; }, get value() { return html.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&'); } }; } },
   DOMParser: class { parseFromString() { return { querySelector() { return null; } }; } },
   XMLSerializer: class { serializeToString() { return '<root><item>value</item></root>'; } },
@@ -48,19 +59,233 @@ const byId = id => {
   return tool;
 };
 
-test('tool registry has unique IDs and five declared domains', () => {
+
+test('IPv4 subnet boundaries preserve RFC 3021 /31 and single-address /32 behavior', () => {
+  const pointToPoint = byId('subnet').run({ip:'192.0.2.10',prefix:'31'});
+  assert.match(pointToPoint,/Network: 192\.0\.2\.10\/31/);
+  assert.match(pointToPoint,/Broadcast: 192\.0\.2\.11/);
+  assert.match(pointToPoint,/Usable hosts: 2/);
+  const single = byId('subnet').run({ip:'203.0.113.9',prefix:'32'});
+  assert.match(single,/First host: 203\.0\.113\.9/);
+  assert.match(single,/Last host: 203\.0\.113\.9/);
+  assert.match(single,/Usable hosts: 1/);
+  assert.throws(()=>byId('subnet').run({ip:'192.168.1.256',prefix:'24'}),/valid IPv4/);
+});
+
+test('IPv6 compression handles leading, trailing, all-zero and leftmost longest runs', () => {
+  assert.match(byId('ipv6').run({address:'::1'}),/Compressed: ::1/);
+  assert.match(byId('ipv6').run({address:'2001:db8::'}),/Compressed: 2001:db8::/);
+  assert.match(byId('ipv6').run({address:'::'}),/Compressed: ::/);
+  assert.match(byId('ipv6').run({address:'2001:0:0:1:0:0:1:1'}),/Compressed: 2001::1:0:0:1:1/);
+  assert.throws(()=>byId('ipv6').run({address:'2001::1::2'}),/standard hexadecimal IPv6/);
+});
+
+test('Set-Cookie auditor enforces prefix and SameSite=None invariants', () => {
+  const output = byId('cookies').run({cookies:[
+    '__Host-session=abc; Secure; Path=/; Domain=example.com',
+    'session=abc; SameSite=None',
+    '__Secure-id=1; HttpOnly',
+  ].join('\n')});
+  assert.match(output,/__Host- requires Secure, Path=\/ and no Domain attribute/);
+  assert.match(output,/SameSite=None requires Secure/);
+  assert.match(output,/__Secure- prefix requires Secure/);
+});
+
+test('IP range summarizer emits aligned minimal CIDR blocks and rejects reversed ranges', () => {
+  const output = byId('range-cidr').run({start:'192.168.1.1',end:'192.168.1.6'});
+  assert.match(output,/192\.168\.1\.1\/32/);
+  assert.match(output,/192\.168\.1\.2\/31/);
+  assert.match(output,/192\.168\.1\.4\/31/);
+  assert.match(output,/192\.168\.1\.6\/32/);
+  assert.match(output,/CIDR blocks: 4/);
+  assert.throws(()=>byId('range-cidr').run({start:'192.168.1.6',end:'192.168.1.1'}),/End address must not be lower/);
+});
+
+
+
+test('Linux signal reference returns canonical names for numeric and symbolic lookups', () => {
+  const numeric = byId('signals').run({query:'15'});
+  const symbolic = byId('signals').run({query:'SIGTERM'});
+  assert.match(numeric,/Signal: SIGTERM/);
+  assert.match(numeric,/Number: 15/);
+  assert.match(symbolic,/Signal: SIGTERM/);
+  assert.match(symbolic,/Number: 15/);
+  assert.match(byId('signals').run({query:'9'}),/Signal: SIGKILL/);
+  assert.match(byId('signals').run({query:'2'}),/Signal: SIGINT/);
+});
+
+test('tool processing labels distinguish external requests from local-only processing', () => {
+  const external = ['dns','public-ip','mac','latency','speed','crt'];
+  for (const tool of tools) {
+    assert.equal(Boolean(tool.external),external.includes(tool.id),tool.id+' external classification');
+  }
+  for (const id of ['hmac','csp','jwt']) assert.equal(byId(id).external,undefined,id+' must remain local');
+});
+
+test('all registered tools execute a valid representative input', async () => {
+  const samples = {
+    key:'local-test-key',
+    message:'MOSTA integrity test',
+    password:'Correct-Horse-Battery-42!',
+    text:'MOSTA test input',
+    token:'eyJhbGciOiJub25lIn0.eyJzdWIiOiJkZW1vIn0.',
+    config:'enable secret test-secret\nno ip http server\ntransport input ssh\nlogin local\nexec-timeout 5 0',
+    left:'before\nsame',
+    right:'after\nsame',
+    query:'SIGTERM',
+    file:{name:'sample.txt',size:5,arrayBuffer:async()=>new TextEncoder().encode('hello').buffer},
+  };
+  const failures=[];
+  for (const tool of tools) {
+    const values={};
+    for (const field of tool.fields||[]) {
+      const [key,,defaultValue,type,options]=field;
+      if (type==='file') values[key]=samples.file;
+      else if (defaultValue!==undefined&&defaultValue!=='') values[key]=defaultValue;
+      else if (type==='select') values[key]=options?.[0]??'';
+      else if (Object.hasOwn(samples,key)) values[key]=samples[key];
+      else if (key==='domain') values[key]='example.com';
+      else if (key==='text'||key==='message') values[key]='MOSTA test input';
+      else if (key==='password') values[key]='Correct-Horse-Battery-42!';
+      else if (key==='token') values[key]=samples.token;
+      else values[key]='sample input';
+    }
+    try {
+      const output=await tool.run(values);
+      assert.ok(output!==undefined&&output!==null,String(tool.id)+' returned no output');
+      assert.ok(String(output).length>0,String(tool.id)+' returned empty output');
+    } catch (error) {
+      failures.push(tool.id+': '+(error?.message||String(error)));
+    }
+  }
+  assert.deepEqual(failures,[], 'Every tool should execute its representative input without an unexpected error');
+});
+
+test('external provider lookups use abortable request timeouts', async () => {
+  const externalLines=source.split(/\r?\n/).filter(line=>line.includes('external:true'));
+  assert.ok(externalLines.length>=6);
+  for(const line of externalLines)assert.match(line,/fetchWithTimeout\(/);
+  const sandbox={AbortController,setTimeout,clearTimeout,fetch:(_url,options)=>new Promise((resolve,reject)=>{
+    options.signal.addEventListener('abort',()=>reject(new Error('aborted')),{once:true});
+  })};
+  const request=vm.runInNewContext(`${helpers}; fetchWithTimeout('https://example.test',{},5)`,sandbox);
+  await assert.rejects(request,/External request timed out/);
+});
+
+test('select inputs reject values outside their declared allowlists', () => {
+  let checked=0;
+  for(const tool of tools){
+    for(const field of tool.fields||[]){
+      if(field[3]!=='select')continue;
+      const [key,label,, ,options]=field;
+      const values=Object.fromEntries((tool.fields||[]).map(item=>[item[0],item[2]??'']));
+      values[key]='__MOSTA_INVALID_OPTION__';
+      assert.throws(()=>tool.run(values),/Invalid option for .*Choose one of the listed values/,tool.id+' rejects invalid '+label);
+      checked++;
+    }
+  }
+  assert.ok(checked>=20,'Expected broad coverage of enumerated select fields');
+});
+
+test('quick navigation button is injected into existing nav actions without stealing the tool-search shortcut', () => {
+  assert.match(siteSource, /if\(!\$\('#openPalette'\)\)/);
+  assert.match(siteSource, /e\.shiftKey&&e\.key\.toLowerCase\(\)==='k'/);
+  assert.match(source, /e\.key\.toLowerCase\(\)==='k'&&search/);
+});
+
+test('homepage search and quick-access deep links resolve to real tool workspaces', () => {
+  assert.match(homeMarkup,/id="homeToolSearch"/);
+  assert.match(source,/homeSearch\?\.addEventListener\('keydown'/);
+  assert.match(source,/if\(params\.get\('tool'\)\)openTool\(params\.get\('tool'\)\);/);
+  const deepLinks=[...homeMarkup.matchAll(/href="tools\.html\?tool=([^"]+)"/g)].map(match=>decodeURIComponent(match[1]));
+  assert.ok(deepLinks.length>0,'Homepage exposes quick-access tool links');
+  for(const id of deepLinks)assert.ok(tools.some(tool=>tool.id===id),'Homepage deep link resolves: '+id);
+});
+
+test('tool registry has unique IDs and ten declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 56);
+  assert.equal(tools.length, 107);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
-    ['developer', 'linux', 'networking', 'security', 'soc'].sort(),
+    ['bash','cloud','database','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
   );
-  assert.equal(tools.filter(tool => tool.cat === 'networking').length, 17);
-  assert.equal(tools.filter(tool => tool.cat === 'security').length, 15);
-  assert.equal(tools.filter(tool => tool.cat === 'soc').length, 5);
-  assert.equal(tools.filter(tool => tool.cat === 'linux').length, 8);
-  assert.equal(tools.filter(tool => tool.cat === 'developer').length, 11);
+  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,bash:13,developer:11,cloud:2,database:1};
+  for(const [category,count] of Object.entries(expected))
+    assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
+});
+
+
+
+test('new operating-system workspaces contain real handlers and explicit command-only boundaries', async () => {
+  const required = [
+    
+    'bash-quote-builder','bash-array-builder','bash-script-audit','bash-check-command',
+    'kali-nmap-builder','kali-tcpdump-filter','kali-monitor-capability','kali-suid-audit',
+    'linux-find-builder','linux-df-analyzer','linux-process-review',
+    'ubuntu-apt-plan','ubuntu-netplan-review','ubuntu-apparmor-audit','ubuntu-cloud-init-audit',
+  ];
+  for (const id of required) {
+    const tool=byId(id);
+    assert.equal(typeof tool.run,'function',id+' handler');
+  }
+  for (const tool of tools.filter(x=>x.mode==='command')) {
+    assert.match(String(await tool.run(Object.fromEntries((tool.fields||[]).map(f=>[f[0],f[2]??''])))),/./,tool.id+' generated output');
+  }
+  assert.match(byId('kali-nmap-builder').disclaimer,/authorized/i);
+  assert.match(byId('ubuntu-ufw-builder').disclaimer,/remote access/i);
+});
+
+test('Bash argument and environment tools preserve quoting and avoid echoing secret values', () => {
+  const quoted=byId('bash-quote-builder').run({value:"it's a test"});
+  assert.match(quoted, /\\/);
+  const array=byId('bash-array-builder').run({values:'one\nvalue with spaces\nthree'});
+  assert.match(array,/'value with spaces'/);
+  assert.match(array,/\$\{items\[@\]\}/);
+  const audit=byId('bash-env-audit').run({content:'API_TOKEN=super-secret-value\nAPP_ENV=prod'});
+  assert.match(audit,/API_TOKEN appears sensitive/);
+  assert.doesNotMatch(audit,/super-secret-value/);
+});
+
+test('Kali command builders validate targets and produce bounded defensive commands', () => {
+  const cmd=byId('kali-nmap-builder').run({target:'192.0.2.0/24',profile:'common-ports',timing:'3'});
+  assert.match(cmd,/nmap -sT --top-ports 100 -T3/);
+  assert.throws(()=>byId('kali-nmap-builder').run({target:'192.0.2.0/33',profile:'common-ports',timing:'3'}),/0 to 32/);
+  assert.match(byId('kali-wireshark-filter').run({protocol:'dns',ipaddr:'192.0.2.10',port:'53'}),/dns && ip.addr == 192.0.2.10/);
+});
+
+test('Linux find builder and Bash loop reject unsafe paths and arguments', () => {
+   const find=byId('linux-find-builder').run({path:'$HOME/logs',type:'f',pattern:'*.log',days:'7'});
+   assert.match(find,/find "\$HOME"\/logs -type f -name '\*\.log'/);
+   assert.throws(()=>byId('linux-find-builder').run({path:'~attacker/logs',type:'f',pattern:'*.log',days:'7'}),/absolute or safe home-directory path/i);
+   assert.throws(()=>byId('linux-find-builder').run({path:'$HOME/../etc',type:'f',pattern:'*.log',days:'7'}),/parent traversal/i);
+   const loop=byId('bash-loop-builder').run({kind:'lines',source:'$HOME/logs.txt'});
+   assert.match(loop,/done < "\$HOME"\/logs\.txt/);
+   assert.throws(()=>byId('bash-loop-builder').run({kind:'array',source:'items;touch /tmp/pwned'}),/valid Bash variable name/i);
+ });
+
+test('Linux and Ubuntu analyzers detect risky conditions in pasted command output', () => {
+  assert.match(byId('linux-df-analyzer').run({output:'Filesystem 1024-blocks Used Available Capacity Mounted on\n/dev/sda1 1000 900 100 90% /',threshold:'80'}),/WARNING/);
+  assert.match(byId('ubuntu-cloud-init-audit').run({config:'ssh_pwauth: true\ndisable_root: false\nsudo: ALL=(ALL) NOPASSWD:ALL'}),/passwordless sudo/);
+  assert.match(byId('ubuntu-source-audit').run({sources:'deb [trusted=yes] http://repo.example.test stable main'}),/trusted=yes/);
+});
+
+test('tool directory exposes accessible navigation, search, category filters and a real tool workspace', () => {
+  assert.match(directoryMarkup, /<html lang="en">/);
+  assert.match(directoryMarkup, /<main id="main-content">/);
+  assert.match(directoryMarkup, /id="toolSearch"[^>]*type="search"/);
+  assert.match(directoryMarkup, /id="toolGrid"[^>]*aria-live="polite"/);
+  assert.match(directoryMarkup, /id="categoryTabs"/);
+  for (const category of ['all','networking','security','soc','linux','ubuntu','kali','bash','developer']) {
+    assert.match(source, new RegExp(category));
+  }
+  assert.match(directoryMarkup,/id="categoryTabs"/);
+  assert.match(source,/function renderCategories\(\)/);
+  assert.match(source,/function setCategory\(/);
+  assert.match(directoryMarkup, /role="dialog" aria-modal="true"/);
+  assert.match(directoryMarkup, /id="toolRunForm"/);
+  assert.match(directoryMarkup, /id="toolResult" aria-live="polite"/);
+  assert.match(directoryMarkup, /id="clearToolSearch"/);
 });
 
 test('IOC extractor normalizes defanged indicators and classifies hashes', () => {
@@ -156,12 +381,12 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 56);
+  assert.equal(tools.length, 107);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
     assert.ok(tool.desc && tool.desc.length >= 35, tool.id + ' has a task description');
-    assert.ok(['networking','security','soc','linux','developer'].includes(tool.cat));
+    assert.ok(['networking','security','soc','linux','ubuntu','kali','bash','developer','cloud','database'].includes(tool.cat));
     assert.equal(typeof tool.run, 'function', tool.id + ' has a run handler');
     const fieldNames = (tool.fields || []).map(field => field[0]);
     assert.equal(new Set(fieldNames).size, fieldNames.length, tool.id + ' has unique input names');
@@ -277,6 +502,20 @@ test('Dockerfile audit evaluates the final stage rather than earlier build stage
   ].join('\n')});
   assert.doesNotMatch(hardened,/final build stage may run as root/);
   assert.doesNotMatch(hardened,/Base image is unpinned/);
+  const switchedBack = byId('dockerfile-audit').run({dockerfile:[
+    'FROM node:20',
+    'USER app',
+    'RUN npm ci',
+    'USER root',
+    'CMD ["node","server.js"]',
+  ].join('\n')});
+  assert.match(switchedBack,/switches to the root user/);
+  const numericRoot = byId('dockerfile-audit').run({dockerfile:[
+    'FROM node:20',
+    'USER 1000:1000',
+    'USER 0:0',
+  ].join('\n')});
+  assert.match(numericRoot,/switches to the root user/);
 });
 
 
@@ -323,4 +562,182 @@ test('all browser-independent tools execute with representative inputs', async (
     assert.notEqual(output, undefined, tool.id + ' returned undefined');
     assert.notEqual(output, null, tool.id + ' returned null');
   }
+});
+
+test('Bash array builder preserves hostile-looking values as inert single arguments', () => {
+  const values = "plain value\nO'Reilly\n$HOME\n\`id\`\n$(touch /tmp/mosta-pwned)\nvalue; rm -rf /";
+  const output = byId('bash-array-builder').run({values});
+  assert.ok(output.includes("'plain value'"));
+  assert.ok(output.includes("'O'\\''Reilly'"));
+  assert.ok(output.includes("'$HOME'"));
+  assert.ok(output.includes("'\`id\`'"));
+  assert.ok(output.includes("'$(touch /tmp/mosta-pwned)'"));
+  assert.ok(output.includes("'value; rm -rf /'"));
+  assert.ok(output.includes('items=('));
+  assert.throws(()=>byId('bash-array-builder').run({values:Array.from({length:201},(_,i)=>String(i)).join('\n')}),/200 values/);
+});
+
+test('Bash loop builder validates identifiers and constrains path expressions', () => {
+  const array = byId('bash-loop-builder').run({kind:'array',source:'files'});
+  assert.ok(array.includes('for item in "${files[@]}"'));
+  const lines = byId('bash-loop-builder').run({kind:'lines',source:'$HOME/logs/app.log'});
+  assert.ok(lines.includes('done < "$HOME"/logs/app.log'));
+  const glob = byId('bash-loop-builder').run({kind:'glob',source:'~/Downloads/*.txt'});
+  assert.ok(glob.includes('for file in "$HOME"/Downloads/*.txt'));
+  for (const source of ['bad;id','$(id)','../../etc/passwd','name with spaces','a`id`']) {
+    assert.throws(()=>byId('bash-loop-builder').run({kind:'lines',source}),undefined,source+' must be rejected');
+  }
+  assert.throws(()=>byId('bash-loop-builder').run({kind:'array',source:'items;id'}),/valid Bash variable/);
+});
+
+test('Bash trap builder restricts handler names and supported signals', () => {
+  const output = byId('bash-trap-builder').run({handler:'cleanup_tmp',signals:'EXIT INT TERM'});
+  assert.ok(output.includes('TMP_DIR=""'));
+  assert.ok(output.includes('[[ -n "$TMP_DIR" && -d "$TMP_DIR" ]] && rm -rf -- "$TMP_DIR"'));
+  assert.ok(output.includes('trap cleanup_tmp EXIT'));
+  assert.ok(output.includes('trap cleanup_tmp INT'));
+  assert.ok(output.includes('trap cleanup_tmp TERM'));
+  assert.throws(()=>byId('bash-trap-builder').run({handler:'cleanup;id',signals:'EXIT'}),/valid function/);
+  assert.throws(()=>byId('bash-trap-builder').run({handler:'cleanup',signals:'EXIT SIGKILL'}),/only EXIT, INT, TERM or HUP/);
+  assert.throws(()=>byId('bash-trap-builder').run({handler:'cleanup',signals:''}),/only EXIT, INT, TERM or HUP/);
+});
+
+test('Kali journalctl builder enforces priority, unit, time and line bounds', () => {
+  const output = byId('kali-journalctl-builder').run({
+    unit:'ssh.service', since:"today's logs", priority:'warning', lines:'250'
+  });
+  assert.ok(output.includes("journalctl -u 'ssh.service' --since 'today'\\''s logs' -p warning -n 250"));
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning;id',lines:'10'}),/Invalid option for Priority/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning',lines:'0'}),/whole number from 1 to 10000/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning',lines:'10001'}),/whole number from 1 to 10000/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh;id',since:'1 hour ago',priority:'warning',lines:'10'}),/valid unit/);
+  assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'today\n--no-pager; id',priority:'warning',lines:'10'}),/valid unit and short time expression/);
+});
+
+test('Kali and Ubuntu UFW builders reject invalid enums, ports and source addresses', () => {
+  for (const id of ['kali-ufw-builder','ubuntu-ufw-builder']) {
+    const valid = byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.10'});
+    assert.match(valid,/allow from 192\.0\.2\.10 to any port 443 proto tcp/);
+    assert.throws(()=>byId(id).run({action:'allow;id',port:'443',protocol:'tcp',source:''}),/Invalid option for (?:Action|Rule action)/);
+    assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp;id',source:''}),/Invalid option for Protocol/);
+    assert.throws(()=>byId(id).run({action:'allow',port:'65536',protocol:'tcp',source:''}),/whole number from 1 to 65535/);
+    assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.999'}),/valid IPv4/);
+    assert.throws(()=>byId(id).run({action:'allow',port:'443',protocol:'tcp',source:'192.0.2.1; ufw disable'}),/valid IPv4/);
+  }
+});
+
+test('Linux find builder quotes paths and patterns and rejects traversal or invalid enums', () => {
+  const output = byId('linux-find-builder').run({
+    path:'/tmp/log archive', type:'f', pattern:'*.log; touch /tmp/pwned', days:'30'
+  });
+  assert.ok(output.includes("find '/tmp/log archive' -type f -name '*.log; touch /tmp/pwned' -mtime -30 -print"));
+  const home = byId('linux-find-builder').run({path:'$HOME/logs',type:'d',pattern:"O'Reilly*",days:'0'});
+  assert.ok(home.includes('find "$HOME"/logs -type d -name '));
+  assert.ok(home.includes("'O'\\''Reilly*'"));
+  assert.throws(()=>byId('linux-find-builder').run({path:'/var/log',type:'f;id',pattern:'*.log',days:'7'}),/Invalid option for Entry type/);
+  assert.throws(()=>byId('linux-find-builder').run({path:'/var/../etc',type:'f',pattern:'*',days:'7'}),/Parent traversal/);
+  assert.throws(()=>byId('linux-find-builder').run({path:'/var/log',type:'f',pattern:'*.log',days:'36501'}),/whole number from 0 to 36500/);
+  assert.throws(()=>byId('linux-find-builder').run({path:'$(id)',type:'f',pattern:'*',days:'7'}),/absolute or safe home-directory path/);
+});
+
+test('Ubuntu APT planner rejects unknown tasks and malformed package names', () => {
+  assert.ok(byId('ubuntu-apt-plan').run({task:'update-index',package:'curl'}).startsWith('sudo apt update'));
+  assert.throws(()=>byId('ubuntu-apt-plan').run({task:'update; rm -rf /',package:'curl'}),/Invalid option for Maintenance task/);
+  assert.throws(()=>byId('ubuntu-apt-plan').run({task:'install',package:'curl;id'}),/valid package name/);
+  assert.throws(()=>byId('ubuntu-apt-plan').run({task:'remove',package:'--purge'}),/valid package name/);
+  assert.ok(byId('ubuntu-apt-plan').run({task:'install',package:'python3-pip'}).includes('sudo apt install python3-pip'));
+});
+
+test('Kali route, Nmap and hash parsers return bounded deterministic results', () => {
+  const route = byId('kali-route-review').run({output:'default via 192.168.1.1 dev wlan0 metric 100\n192.168.1.0/24 dev wlan0'});
+  assert.match(route,/Routes: 2/);
+  assert.match(route,/Default routes: 1/);
+  assert.match(route,/Interfaces: wlan0/);
+  assert.match(route,/\[DEFAULT\] default via 192\.168\.1\.1/);
+  assert.match(byId('kali-route-review').run({output:'\n\n'}),/Routes: 0/);
+  assert.throws(()=>byId('kali-route-review').run({output:'x'.repeat(100001)}),/maximum 100,000 characters/);
+
+  const nmap = byId('kali-nmap-output-review').run({output:'PORT STATE SERVICE\n22/tcp open ssh\n443/tcp closed https'});
+  assert.match(nmap,/Parsed ports: 2/);
+  assert.match(nmap,/Open: 1/);
+  assert.match(byId('kali-nmap-output-review').run({output:'not an nmap table'}),/Parsed ports: 0/);
+  assert.throws(()=>byId('kali-nmap-output-review').run({output:'x'.repeat(100001)}),/maximum 100,000 characters/);
+
+  assert.match(byId('kali-hash-identify').run({hash:'a'.repeat(64)}),/SHA-256/);
+  assert.match(byId('kali-hash-identify').run({hash:'a'.repeat(33)}),/Unknown common digest length/);
+  assert.throws(()=>byId('kali-hash-identify').run({hash:'abc-123'}),/hexadecimal digest/);
+  assert.throws(()=>byId('kali-hash-identify').run({hash:'a'.repeat(257)}),/maximum 256 hexadecimal characters/);
+  assert.throws(()=>byId('kali-hash-identify').run({hash:'أ'.repeat(32)}),/hexadecimal digest/);
+});
+
+test('Shared input validation bounds text and rejects embedded NUL characters', () => {
+   assert.throws(()=>byId('case').run({text:'x'.repeat(200001),mode:'upper'}),/Text input is too long \(maximum 200000 characters\)/);
+});
+
+
+
+test('Cloudflare Wrangler auditor flags plaintext secret-like variables without echoing values', () => {
+  const output = byId('wrangler-config-audit').run({config:[
+    'name = "worker"',
+    'main = "src/index.js"',
+    'compatibility_date = "2026-11-18"',
+    '[vars]',
+    'API_TOKEN = "do-not-print-this-secret"',
+    '[env.production]',
+  ].join('\n')});
+  assert.match(output,/HIGH line 5/);
+  assert.doesNotMatch(output,/do-not-print-this-secret/);
+  assert.match(output,/Wrangler configuration review/);
+  assert.match(byId('wrangler-config-audit').run({config:'name = "worker"'}),/compatibility_date/);
+});
+
+test('Kubernetes manifest reviewer flags dangerous pod and image settings', () => {
+  const output = byId('k8s-manifest-audit').run({manifest:[
+    'kind: Deployment',
+    'spec:',
+    '  template:',
+    '    spec:',
+    '      hostNetwork: true',
+    '      containers:',
+    '        - name: web',
+    '          image: nginx:latest',
+    '          securityContext:',
+    '            privileged: true',
+    '            runAsUser: 0',
+  ].join('\n')});
+  assert.match(output,/host network namespace/);
+  assert.match(output,/privileged mode/);
+  assert.match(output,/UID 0/);
+  assert.match(output,/not pinned/);
+});
+
+test('SQL migration reviewer detects unbounded writes and destructive DDL', () => {
+  const output = byId('sql-migration-review').run({sql:[
+    'DELETE FROM sessions;',
+    'UPDATE users SET role = "admin";',
+    'DROP TABLE audit_events;',
+    'GRANT SELECT ON users TO PUBLIC;',
+  ].join('\n')});
+  assert.match(output,/DELETE has no WHERE clause/);
+  assert.match(output,/UPDATE has no WHERE clause/);
+  assert.match(output,/destructive DROP/);
+  assert.match(output,/granted to PUBLIC/);
+  const safe = byId('sql-migration-review').run({sql:'BEGIN;\nUPDATE users SET active = false WHERE id = 7;\nCOMMIT;'});
+  assert.doesNotMatch(safe,/UPDATE has no WHERE clause/);
+  assert.throws(()=>byId('sql-migration-review').run({sql:'  '}),/Paste a SQL migration script/);
+});
+
+test('new tool categories are present in the registry and homepage navigation', () => {
+  assert.ok(tools.some(tool=>tool.id==='wrangler-config-audit'&&tool.cat==='cloud'));
+  assert.ok(tools.some(tool=>tool.id==='k8s-manifest-audit'&&tool.cat==='cloud'));
+  assert.ok(tools.some(tool=>tool.id==='sql-migration-review'&&tool.cat==='database'));
+  assert.match(homeMarkup,/tools\.html\?category=cloud/);
+  assert.match(homeMarkup,/tools\.html\?category=database/);
+});
+
+test('public homepage does not run the authenticated tool bootstrap', () => {
+  assert.match(homeMarkup, /id="homeToolTotal"/);
+  assert.match(source, /if\s*\(grid\)\s*initializeAuthorizedTools\(\)/);
+  assert.match(source, /else\s*\{\s*const counts=\{all:tools\.length/);
+  assert.match(source, /\$\$\('\[data-home-count\]'\)\.forEach/);
 });

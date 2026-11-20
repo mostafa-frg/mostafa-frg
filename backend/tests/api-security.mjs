@@ -22,6 +22,11 @@ t('concurrent bootstrap creates exactly one admin',rr.filter(x=>x.s===201).lengt
 const winner=['adminone','admintwo','adminthree'][rr.findIndex(x=>x.s===201)];
 let a=await call('/api/auth/login',{method:'POST',ip:'8.8.8.8',body:{username:winner,password:PW}});const adminCookie=ck(a);
 t('admin login ok + cookie flags',a.s===200&&/HttpOnly/.test(a.sc)&&/Secure/.test(a.sc)&&/SameSite=Strict/.test(a.sc)&&adminCookie.startsWith('__Host-'));
+const adminCatalog=await call('/api/tools',{cookie:adminCookie});
+t('admin tool catalog includes Cloud and database additions',
+  ['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].every(id=>adminCatalog.j.tools.some(tool=>tool.id===id)),
+  JSON.stringify(adminCatalog.j.tools.filter(tool=>['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].includes(tool.id))));
+
 // S-01 lockout DoS
 const att=[];for(let i=0;i<12;i++)att.push((await call('/api/auth/login',{method:'POST',ip:'9.9.9.9',body:{username:winner,password:'guess'+i}})).s);
 t('attacker IP locked after 5 failures',att.slice(0,5).every(c=>c===401)&&att.slice(5).every(c=>c===429),att.join(','));
@@ -54,10 +59,20 @@ a=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username
 a=await call('/api/auth/login',{method:'POST',ip:'12.0.0.1',body:{username:'bob',password:'amber-lantern-quartz-2026'}});const bob=ck(a);
 for(const [p,m] of [['/api/admin/users','GET'],['/api/admin/audit','GET'],['/api/admin/tool-access','GET'],['/api/admin/tools/subnet-calculator','POST']])t(`user blocked: ${m} ${p}`,(await call(p,{method:m,cookie:bob,body:m==='POST'?{enabled:true}:undefined})).s===403);
 t('tool default-deny for user',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'10.0.0.1',prefix:24}})).s===403);
-await call('/api/admin/tools/subnet-calculator',{method:'POST',cookie:adminCookie,body:{enabled:true}});
-a=await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}});t('user allowed after admin enables tool',a.s===200&&a.j.network==='192.168.10.0'&&a.j.usableHosts===254);
+t('user tool catalog is empty before explicit grant',(await call('/api/tools',{cookie:bob})).j.tools.length===0);
+t('legacy global tool grant route is unavailable',(await call('/api/admin/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}})).s===404);
+const charlieCreate=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:'charlie',password:'violet-bridge-orbit-93'}});const charlieId=charlieCreate.j.id;
+const charlie=ck(await call('/api/auth/login',{method:'POST',ip:'12.0.0.3',body:{username:'charlie',password:'violet-bridge-orbit-93'}}));
+const grant=await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:true}});
+t('admin grants subnet to bob account',grant.s===200&&grant.j?.userId===bobId&&grant.j?.tool==='subnet'&&grant.j?.userAccess===true,grant.s+' '+JSON.stringify(grant.j));
+a=await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}});t('user allowed only after account-scoped grant',a.s===200&&a.j.network==='192.168.10.0'&&a.j.usableHosts===254);
+a=await call('/api/tools',{cookie:bob});t('tool catalog exposes granted tool to bob only',a.s===200&&a.j.tools.some(x=>x.id==='subnet')&&a.j.tools.length===1);
+a=await call('/api/tools/subnet',{method:'POST',cookie:charlie,body:{ip:'192.168.10.10',prefix:24}});t('same tool remains denied for another account',a.s===403);
+await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:adminCookie,body:{enabled:false}});
+t('revoked account-scoped grant blocks tool immediately',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}})).s===403);
+t('ungranted account tool catalog remains empty',(await call('/api/tools',{cookie:charlie})).j.tools.length===0);
 t('unauthenticated API blocked',(await call('/api/tools')).s===401);
-a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes implemented tools only',a.s===200&&a.j.tools.length===4&&a.j.tools.every(x=>x.mode==='browser')&&a.j.tools.every(x=>!['log-review','pcap-analysis','network-inventory'].includes(x.id)));
+a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 107-tool registry',a.s===200&&a.j.tools.length===107&&new Set(a.j.tools.map(x=>x.id)).size===107&&!a.j.tools.some(x=>/termux/i.test(x.group+' '+x.id))&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
 await call('/api/admin/users/'+bobId+'/disable',{method:'POST',cookie:adminCookie,body:{}});
 t('disable revokes live session',(await call('/api/auth/me',{cookie:bob})).s===401);
 t('disabled user cannot log in',(await call('/api/auth/login',{method:'POST',ip:'12.0.0.2',body:{username:'bob',password:'amber-lantern-quartz-2026'}})).s===401);
@@ -68,6 +83,7 @@ for(const p of ['/dashboard.html','/dashboard','/dashboard/','/DASHBOARD.html'])
 const red=await call('/dashboard.html');t('redirect carries security headers',!!red.r.headers.get('content-security-policy')&&red.r.headers.get('x-frame-options')==='DENY'&&red.r.headers.get('strict-transport-security'));
 const authed=await call('/dashboard',{cookie:adminCookie});t('authed /dashboard served (assets canonicalise .html -> extensionless)',authed.s===200);
 const authRed=await call('/auth',{cookie:adminCookie});t('authed /auth -> dashboard',authRed.s===302&&/dashboard/.test(authRed.r.headers.get('location')));
+for(const p of ['/tools.html','/tools']){const x=await call(p);t('anonymous tool directory requires sign-in: '+p,x.s===302&&/\/auth\.html$/.test(x.r.headers.get('location')||''));}
 for(const p of ['/api/health','/api/nope','/api/auth/me','/tools.html','/auth.html']){const x=await call(p);const h=x.r.headers;t('headers on '+p+' ('+x.s+')',!!h.get('content-security-policy')&&h.get('x-content-type-options')==='nosniff'&&h.get('x-frame-options')==='DENY'&&!!h.get('strict-transport-security'));}
 const health=await call('/api/health');t('health verifies D1 schema readiness',health.s===200&&health.j.database==='ok'&&health.j.security==='ok');
 t('API cache-control no-store',(await call('/api/health')).r.headers.get('cache-control')==='no-store');

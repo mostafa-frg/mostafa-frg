@@ -99,6 +99,7 @@ jobs:
           const fs = require('node:fs');
           const config = JSON.parse(fs.readFileSync('wrangler.jsonc', 'utf8'));
           config.d1_databases[0].database_id = '00000000-0000-0000-0000-000000000000';
+          config.secrets = { required: [...new Set([...(config.secrets?.required || []), 'ADMIN_BOOTSTRAP_TOKEN'])] };
           fs.writeFileSync('wrangler.local.json', JSON.stringify(config, null, 2) + '\n');
           NODE
           cat > .dev.vars <<'VARS'

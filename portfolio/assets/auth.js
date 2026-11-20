@@ -15,6 +15,7 @@ async function init(){
     const me=await fetch('/api/auth/me',{credentials:'same-origin',cache:'no-store'});
     if(me.ok){location.replace('dashboard.html');return;}
     const state=await api('/auth/setup-status');
+    if(state.environment&&state.environment!=='MOSTA'){const b=document.createElement('div');b.setAttribute('role','alert');b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:99;padding:8px 12px;background:#b45309;color:#fff;text-align:center;font:600 14px system-ui';b.textContent='Preview environment ('+state.environment+') — separate database, NOT production. Accounts here do not exist on the live site.';document.body.prepend(b);}
     if(state.setupRequired){
       $('#authTitle').textContent='Create your admin account';
       $('#authIntro').textContent='Your MOSTA workspace is ready. Set up its first administrator to continue.';

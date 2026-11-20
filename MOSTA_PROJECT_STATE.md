@@ -35,12 +35,13 @@ Last updated: 2026-11-20
 ## Validation history
 
 - Python catalog workflow passed on Python 3.10 and 3.12.
-- Latest 225-entry frontend code and analyzer regression suite passed in Lab Checks run [44767735400](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767735400).
-- Backend black-box API security suite passed on the 225-entry revision in Lab Checks run [44767735400](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767735400).
+- Earlier 219-entry frontend code and analyzer regression suite passed in Lab Checks run [44767735400](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767735400).
+- Backend black-box API security suite passed on the earlier 219-entry revision in Lab Checks run [44767735400](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767735400).
 - Repository-wide Python compilation, portfolio tests, pytest suites, offline network tool smoke tests, log pipeline, PCAP analyzer, HTTP auditor, Flask labs, shell installer/index smoke tests and Docker Compose checks passed again in run [44767986890](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767986890).
 - Cloudflare Workers Preview build succeeded with `npx wrangler preview --config backend/wrangler.jsonc`; it uses the separate `mosta-preview` D1 binding, not the Production database.
 - Added `portfolio/.assetsignore` to exclude the CI-only `tests/` directory from public static assets, and added a workflow guard requiring that exclusion.
 - The feature-branch Preview URL is public by default until protected with Cloudflare Access. No Production deployment was performed.
+- Latest 225-entry revision is under validation in Lab Checks run [44781622275](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44781622275); do not mark the latest six analyzers CI-verified until it succeeds.
 - Production deploy jobs remain skipped because this is a Draft feature-branch PR.
 
 ## Next work

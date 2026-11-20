@@ -939,12 +939,12 @@ test('public homepage does not run the authenticated tool bootstrap', () => {
 
 
 test('Docker, Kubernetes, SSH and Dependabot analyzers detect representative hardening gaps', () => {
-  assert.match(byId('dockerfile-hardening-audit').run({data:'FROM node:latest\\nADD https://example.invalid/app.tar.gz /tmp/a\\nEXPOSE 2375'}),/mutable or unpinned|remote content|2375|no USER/i);
-  assert.match(byId('kubernetes-pod-security-audit').run({data:'kind: Pod\\nspec:\\n  hostNetwork: true\\n  containers:\\n  - securityContext:\\n      privileged: true\\n      runAsUser: 0'}),/privileged|UID 0|host network/i);
-  assert.match(byId('kubernetes-rbac-wildcard-audit').run({data:'kind: ClusterRoleBinding\\nroleRef:\\n  name: cluster-admin\\nsubjects:\\n- kind: Group\\n  name: system:masters\\n---\\nkind: ClusterRole\\nrules:\\n- verbs: ["*"]\\n  resources: ["*"]\\n  apiGroups: ["*"]'}),/cluster-admin|wildcard|system:masters/i);
-  assert.match(byId('ssh-client-config-hardening-audit').run({data:'Host *\\n StrictHostKeyChecking no\\n UserKnownHostsFile /dev/null\\n ForwardAgent yes'}),/host-key verification is disabled|known-host persistence is disabled|agent forwarding/i);
-  assert.match(byId('github-dependabot-config-audit').run({data:'version: 1\\nupdates:\\n  - package-ecosystem: npm\\n    directory: /'}),/expected Dependabot configuration version|schedule interval/i);
-  assert.match(byId('kubernetes-image-policy-audit').run({data:'containers:\\n- image: example/app:latest\\n  imagePullPolicy: IfNotPresent'}),/mutable or untagged|latest tag combined/i);
+  assert.match(byId('dockerfile-hardening-audit').run({data:'FROM node:latest\nADD https://example.invalid/app.tar.gz /tmp/a\nEXPOSE 2375'}),/mutable or unpinned|remote content|2375|no USER/i);
+  assert.match(byId('kubernetes-pod-security-audit').run({data:'kind: Pod\nspec:\n  hostNetwork: true\n  containers:\n  - securityContext:\n      privileged: true\n      runAsUser: 0'}),/privileged|UID 0|host network/i);
+  assert.match(byId('kubernetes-rbac-wildcard-audit').run({data:'kind: ClusterRoleBinding\nroleRef:\n  name: cluster-admin\nsubjects:\n- kind: Group\n  name: system:masters\n---\nkind: ClusterRole\nrules:\n- verbs: ["*"]\n  resources: ["*"]\n  apiGroups: ["*"]'}),/cluster-admin|wildcard|system:masters/i);
+  assert.match(byId('ssh-client-config-hardening-audit').run({data:'Host *\n StrictHostKeyChecking no\n UserKnownHostsFile /dev/null\n ForwardAgent yes'}),/host-key verification is disabled|known-host persistence is disabled|agent forwarding/i);
+  assert.match(byId('github-dependabot-config-audit').run({data:'version: 1\nupdates:\n  - package-ecosystem: npm\n    directory: /'}),/expected Dependabot configuration version|schedule interval/i);
+  assert.match(byId('kubernetes-image-policy-audit').run({data:'containers:\n- image: example/app:latest\n  imagePullPolicy: IfNotPresent'}),/mutable or untagged|latest tag combined/i);
   assert.throws(()=>byId('kubernetes-rbac-wildcard-audit').run({data:'kind: ConfigMap'}),/No Kubernetes RBAC kind/);
   assert.throws(()=>byId('kubernetes-image-policy-audit').run({data:'kind: Pod'}),/No container image declarations/);
 });

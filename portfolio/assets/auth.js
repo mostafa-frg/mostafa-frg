@@ -1,7 +1,12 @@
 (()=>{'use strict';
 const WORKER_ORIGIN='https://mostafa-frg.frh7977.workers.dev';
-if(location.hostname.endsWith('.github.io')){
-  const workerPath=location.pathname.replace(/^\/mostafa-frg(?=\/|$)/,'')||'/auth.html';
+const isGithubPages=location.hostname.endsWith('.github.io');
+const workerPath=isGithubPages
+  ? (location.pathname.replace(/^\/mostafa-frg(?=\/|$)/,'')||'/auth.html')
+  : location.pathname;
+// Authentication must always use the production Worker and its production D1 database.
+// Preview deployments have isolated databases and must never display a misleading setup state.
+if(location.origin!==WORKER_ORIGIN){
   location.replace(WORKER_ORIGIN+workerPath+location.search+location.hash);
   return;
 }

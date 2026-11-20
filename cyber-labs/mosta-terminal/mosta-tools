@@ -45,7 +45,9 @@ Additional security and analysis tools:
   mmetsploit, msqlmap, msearchsploit, mburp, mzap,
   mmasscan, mwhatweb, mwifite, mdnsrecon, mdnsenum
 
-Use mosta-index list or mosta-index search <term> to browse this local catalog.\n\nAll wrappers call the real upstream executable and pass its arguments through.
+Use mosta-index list or mosta-index search <term> to browse this local catalog.
+
+All wrappers call the real upstream executable and pass its arguments through.
 Run mosta-doctor to check actual availability.
 Use security tools only on systems you own or are authorized to assess.
 EOF

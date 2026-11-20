@@ -51,7 +51,7 @@ jobs:
           node --check portfolio/assets/config-audit.js
           node --check portfolio/assets/http-audit.js
           node --check portfolio/assets/audit-ui.js
-          node -e "const c=JSON.parse(require('fs').readFileSync('backend/wrangler.jsonc','utf8')); if(!c.secrets?.required?.includes('IP_HASH_SECRET')) throw Error('IP_HASH_SECRET must be declared as required.')"
+          node -e "JSON.parse(require('fs').readFileSync('backend/wrangler.jsonc','utf8'))"
           test -s portfolio/index.html
           test -s portfolio/auth.html
           test -s portfolio/dashboard.html

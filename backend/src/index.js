@@ -1330,6 +1330,125 @@ const TOOLS=[
     "group": "Kali Linux",
     "mode": "browser",
     "description": "Parse Nmap -oG output to summarize live hosts, open TCP ports and service labels."
+  },
+  {
+    "id": "linux-journald-persistence-audit",
+    "name": "systemd-journald Persistence Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review journald.conf for persistent storage, compression, forwarding and bounded disk use."
+  },
+  {
+    "id": "linux-core-dump-audit",
+    "name": "Linux Core Dump Exposure Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review core_pattern, suid_dumpable and systemd-coredump storage settings."
+  },
+  {
+    "id": "linux-rsyslog-forwarding-audit",
+    "name": "rsyslog Remote Forwarding Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review rsyslog rules for remote forwarding protocol and destination configuration."
+  },
+  {
+    "id": "linux-log-permissions-audit",
+    "name": "Linux Log File Permission Reviewer",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review ls -l output for world-writable or overly permissive log files."
+  },
+  {
+    "id": "linux-ssh-host-key-audit",
+    "name": "OpenSSH Host Key Strength Reviewer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review ssh-keygen -lf output for obsolete DSA keys and undersized RSA host keys."
+  },
+  {
+    "id": "linux-tls-cipher-audit",
+    "name": "TLS Cipher Enumeration Reviewer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review ssl-enum-ciphers output for legacy TLS versions and weak cipher suites."
+  },
+  {
+    "id": "kali-regulatory-domain-audit",
+    "name": "Kali Wi-Fi Regulatory Domain Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Review iw reg get output for unset or world regulatory domains."
+  },
+  {
+    "id": "kali-arp-scan-review",
+    "name": "Kali ARP Discovery Output Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Summarize arp-scan output and flag duplicate IP or MAC mappings."
+  },
+  {
+    "id": "kali-airmon-state-audit",
+    "name": "Kali Monitor Mode State Auditor",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Inspect iw dev and iwconfig output to determine whether interfaces are currently in monitor mode."
+  },
+  {
+    "id": "termux-boot-script-audit",
+    "name": "Termux:Boot Startup Script Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review Termux:Boot startup scripts for risky remote execution, privilege assumptions and broad permissions."
+  },
+  {
+    "id": "termux-ssh-key-audit",
+    "name": "Termux SSH Key Strength Reviewer",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review ssh-keygen -lf output from Termux for obsolete DSA and undersized RSA keys."
+  },
+  {
+    "id": "termux-storage-permission-audit",
+    "name": "Termux Shared Storage Permission Reviewer",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review ls -ld output for shared storage paths and identify missing access or overly broad modes."
+  },
+  {
+    "id": "termux-android-network-audit",
+    "name": "Termux Android Network Property Reviewer",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review selected Android network properties for configured DNS servers and Wi-Fi connectivity metadata."
+  },
+  {
+    "id": "soc-zeek-files-summary",
+    "name": "Zeek File Analysis Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek files.log by MIME type, file source and extraction status."
+  },
+  {
+    "id": "soc-suricata-flow-summary",
+    "name": "Suricata EVE Flow Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Suricata EVE flow records by protocol, source address and destination port."
+  },
+  {
+    "id": "soc-user-agent-review",
+    "name": "Web User-Agent Anomaly Reviewer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review web log user-agent strings for scripting clients, scanners and unusual automation signatures."
+  },
+  {
+    "id": "soc-zeek-weird-summary",
+    "name": "Zeek weird.log Anomaly Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek weird.log events by anomaly name and source endpoint for network investigation."
   }
 ];
 

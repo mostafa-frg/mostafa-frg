@@ -41,7 +41,8 @@ Last updated: 2026-11-20
 - Cloudflare Workers Preview build succeeded with `npx wrangler preview --config backend/wrangler.jsonc`; it uses the separate `mosta-preview` D1 binding, not the Production database.
 - Added `portfolio/.assetsignore` to exclude the CI-only `tests/` directory from public static assets, and added a workflow guard requiring that exclusion.
 - The feature-branch Preview URL is public by default until protected with Cloudflare Access. No Production deployment was performed.
-- Latest 225-entry revision is under validation in Lab Checks run [44781622275](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44781622275); do not mark the latest six analyzers CI-verified until it succeeds.
+- Latest 225-entry revision passed Lab Checks run [44781622275](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44781622275) on attempt 2; both backend-security and Python jobs succeeded. The first attempt failed a timing-sensitive authentication test, and the isolated retry passed.
+- Latest Cloudflare Preview build `2e7915d7-3991-46c2-a2a5-f80fa7ab6cdd` succeeded for commit `a28c33e` using the separate `mosta-preview` D1 binding. Stable Preview URL: https://feat-mosta-1000-cyber-terminal-tools-mostafa-frg.frh7977.workers.dev ; unique deployment URL: https://933246b9-mostafa-frg.frh7977.workers.dev.
 - Production deploy jobs remain skipped because this is a Draft feature-branch PR.
 
 ## Next work

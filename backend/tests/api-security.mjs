@@ -89,6 +89,12 @@ const health=await call('/api/health');t('health verifies D1 schema readiness',h
 t('API cache-control no-store',(await call('/api/health')).r.headers.get('cache-control')==='no-store');
 t('static CSP intact (connect-src crt.sh)',/connect-src 'self'[^;]*crt\.sh/.test((await call('/tools.html')).r.headers.get('content-security-policy')));
 
+// Admin operational overview: aggregates only, no credential/session secrets.
+a=await call('/api/admin/overview',{cookie:adminCookie});
+t('admin overview returns operational aggregates',a.s===200&&a.j.users.total>=1&&a.j.sessions.active>=1&&a.j.toolCatalog.total===107&&Number.isInteger(a.j.activity.failedLogins24h));
+t('non-admin cannot read admin overview',(await call('/api/admin/overview',{cookie:bob})).s===403);
+t('anonymous cannot read admin overview',(await call('/api/admin/overview')).s===401);
+t('overview contains no session tokens or password fields',!JSON.stringify(a.j).match(/password_hash|password_salt|token_hash|session_token/i));
 // ---- Step 2: password policy, change-password, sessions, reset ----
 const mkUser=async(u,pw)=>call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:u,password:pw}});
 t('policy: 13 chars rejected',(await mkUser('carol','short-pass-13')).s===400);

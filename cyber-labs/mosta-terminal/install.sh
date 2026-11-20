@@ -8,7 +8,7 @@ command -v bash >/dev/null 2>&1 || { printf '%s\n' "ERROR: bash is required." >&
 command -v readlink >/dev/null 2>&1 || { printf '%s\n' "ERROR: readlink is required." >&2; exit 1; }
 mkdir -p "$BIN"
 launchers=(run-network-toolkit.sh run-http-auditor.sh run-pcap.sh run-soc.sh run-config-audit.sh run-route.sh run-triage.sh run-fim.sh run-detect.sh run-lognorm.sh run-normalize.sh run-pipeline.sh run-routing.sh run-vlan.sh run-firewall.sh run-ospf.sh run-stp.sh run-nat.sh run-acl.sh run-snmp.sh run-syslog.sh run-flow.sh run-ipam.sh run-subnet.sh run-topology.sh run-ad-audit.sh run-privcheck.sh run-report.sh run-cfg-audit.sh run-dns-lab.sh run-monitor.sh run-scan.sh run-automation.sh)
-commands=(mosta mosta-doctor.sh mnet mhttp mpcap msoc mconf mroute mtriage mtool mfim mdet mlog mnorm mpipe mrt mvlan mfw mospf mstp mnat macl msnmp msyslog mflow mipam msubnet mtopo mad mpriv mreport mcfg mdns mmon mscan mauto mosta-tools)
+commands=(mosta mosta-doctor.sh mosta-index mnet mhttp mpcap msoc mconf mroute mtriage mtool mfim mdet mlog mnorm mpipe mrt mvlan mfw mospf mstp mnat macl msnmp msyslog mflow mipam msubnet mtopo mad mpriv mreport mcfg mdns mmon mscan mauto mosta-tools)
 for f in "${launchers[@]}" "${commands[@]}" banner.sh mosta-external; do
   [ -f "$BASE/$f" ] || { printf 'ERROR: missing launcher file: %s\n' "$f" >&2; exit 1; }
   chmod +x "$BASE/$f"
@@ -36,5 +36,5 @@ for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
 done
 printf '\n%s\n' "Linux desktop CLI installation completed."
 printf '%s\n' "Reload your shell, then run: mosta-doctor"
-printf '%s\n' "Main commands: mosta, mnet, mhttp, mpcap, msoc, mconf, mroute, mtriage, mtool"
+printf '%s\n' "Main commands: mosta, mosta-index, mnet, mhttp, mpcap, msoc, mconf, mroute"
 printf '%s\n' "Run mosta for the complete command index."

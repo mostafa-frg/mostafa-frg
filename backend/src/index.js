@@ -1534,6 +1534,48 @@ const TOOLS=[
     "mode": "browser",
     "description": "Review CODEOWNERS patterns for missing owners and explicit coverage of backend, GitHub workflows and cyber-lab paths."
   },
+  {
+    "id": "dockerfile-hardening-audit",
+    "name": "Dockerfile Hardening Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Review Dockerfile text for root execution, mutable base images, remote ADD sources and exposed Docker daemon ports."
+  },
+  {
+    "id": "kubernetes-pod-security-audit",
+    "name": "Kubernetes Pod Security Context Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect Kubernetes workload YAML text for privileged containers, root execution, host namespaces and unsafe hostPath mounts."
+  },
+  {
+    "id": "kubernetes-rbac-wildcard-audit",
+    "name": "Kubernetes RBAC Scope Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Review Kubernetes Role and ClusterRole YAML for wildcard verbs/resources, cluster-admin bindings and broad system group subjects."
+  },
+  {
+    "id": "ssh-client-config-hardening-audit",
+    "name": "OpenSSH Client Configuration Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review OpenSSH client configuration for disabled host-key checks, agent forwarding and unsafe local command settings."
+  },
+  {
+    "id": "github-dependabot-config-audit",
+    "name": "GitHub Dependabot Configuration Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Review dependabot.yml for schema version, package ecosystem coverage and update scheduling declarations."
+  },
+  {
+    "id": "kubernetes-image-policy-audit",
+    "name": "Kubernetes Container Image Policy Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Review workload YAML for mutable image tags, missing digest pinning and imagePullPolicy inconsistencies."
+  }
 ];
 
 const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}});

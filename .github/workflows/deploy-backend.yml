@@ -195,19 +195,6 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: npx wrangler d1 migrations apply DB --remote --config wrangler.deploy.json
         working-directory: backend
-      - name: Ensure IP hashing secret exists
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          set -euo pipefail
-          if npx wrangler secret list --config wrangler.deploy.json 2>/dev/null | grep -q '"IP_HASH_SECRET"'; then
-            echo "IP_HASH_SECRET is already configured."
-          else
-            openssl rand -base64 48 | npx wrangler secret put IP_HASH_SECRET --config wrangler.deploy.json
-            echo "Generated IP_HASH_SECRET on the Worker (value never printed or stored in GitHub)."
-          fi
-        working-directory: backend
       - name: Manage one-time administrator bootstrap token
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

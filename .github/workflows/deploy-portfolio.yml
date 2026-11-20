@@ -49,6 +49,8 @@ jobs:
           test -s portfolio/assets/regex-worker.js
           test -s portfolio/tests/regex-worker.test.mjs
           test -s portfolio/tests/platform-tools.test.mjs
+          test -s portfolio/.assetsignore
+          grep -Fxq "tests/" portfolio/.assetsignore
           test -s portfolio/tests/terminal-tools.test.mjs
       - name: Validate workflow YAML and reject escaped line breaks
         run: |

@@ -742,7 +742,7 @@ test('new Linux, Kali and Termux command builders produce bounded commands witho
     assert.equal(tool.mode,'command',id+' is clearly labeled as a command builder');
     assert.ok(tool.run({}),id+' returns a command preview');
   }
-  assert.match(byId('linux-service-status').run({unit:"ssh';id"}),/ssh'\\'';id/);
+  assert.throws(()=>byId('linux-service-status').run({unit:"ssh';id"}),/valid systemd unit/);
   assert.throws(()=>byId('linux-service-status').run({unit:'ssh;id'}),/valid systemd unit/);
   assert.match(byId('linux-sha256-file').run({path:"file name; touch /tmp/pwned"}),/sha256sum -- 'file name; touch \/tmp\/pwned'/);
   assert.match(byId('linux-grep-ioc').run({pattern:"x' ; id",path:'/var/log'}),/grep -RInI.*'x'\\'' ; id'/);

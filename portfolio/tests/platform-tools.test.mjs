@@ -727,6 +727,42 @@ test('SQL migration reviewer detects unbounded writes and destructive DDL', () =
   assert.throws(()=>byId('sql-migration-review').run({sql:'  '}),/Paste a SQL migration script/);
 });
 
+
+test('new Linux, Kali and Termux command builders produce bounded commands without execution', () => {
+  const ids = [
+    'linux-listening-sockets','linux-network-state','linux-service-status','linux-journal-filter',
+    'linux-sha256-file','linux-grep-ioc','linux-find-large-files','kali-nmap-service-audit',
+    'kali-nikto-web-audit','kali-ffuf-content-audit','kali-pcap-summary','kali-tcpdump-capture',
+    'linux-dig-record','linux-openssl-tls','linux-curl-security-headers','linux-yara-file-scan',
+    'linux-ufw-status','linux-ssh-config-audit','termux-environment-audit','termux-storage-check',
+    'termux-package-audit','termux-network-diagnostics','kali-tool-presence-audit'
+  ];
+  for (const id of ids) {
+    const tool = byId(id);
+    assert.equal(tool.mode,'command',id+' is clearly labeled as a command builder');
+    assert.ok(tool.run({}),id+' returns a command preview');
+  }
+  assert.match(byId('linux-service-status').run({unit:"ssh';id"}),/ssh'\\'';id/);
+  assert.throws(()=>byId('linux-service-status').run({unit:'ssh;id'}),/valid systemd unit/);
+  assert.match(byId('linux-sha256-file').run({path:"file name; touch /tmp/pwned"}),/sha256sum -- 'file name; touch \/tmp\/pwned'/);
+  assert.match(byId('linux-grep-ioc').run({pattern:"x' ; id",path:'/var/log'}),/grep -RInI.*'x'\\'' ; id'/);
+  assert.throws(()=>byId('linux-journal-filter').run({unit:'ssh.service',lines:'5001'}),/whole number from 1 to 5000/);
+  assert.throws(()=>byId('linux-find-large-files').run({path:'',size:'10'}),/Enter a directory path/);
+  assert.match(byId('kali-nmap-service-audit').run({target:'192.0.2.10',ports:'22,443'}),/nmap -sV.*-p '22,443'.*192.0.2.10/);
+  assert.throws(()=>byId('kali-nmap-service-audit').run({target:'example.com;id',ports:'80'}),/valid domain/);
+  assert.throws(()=>byId('kali-nmap-service-audit').run({target:'example.com',ports:'80;id'}),/comma-separated TCP ports/);
+  assert.throws(()=>byId('kali-nikto-web-audit').run({url:'http://example.com'}),/Only HTTPS URLs/);
+  assert.throws(()=>byId('kali-ffuf-content-audit').run({url:'https://example.com/',wordlist:'/tmp/list',rate:'10'}),/literal FUZZ marker/);
+  assert.throws(()=>byId('kali-ffuf-content-audit').run({url:'https://example.com/FUZZ',wordlist:'/tmp/list',rate:'51'}),/whole number from 1 to 50/);
+  assert.throws(()=>byId('kali-tcpdump-capture').run({iface:'eth0;id',count:'10',output:'capture.pcap'}),/valid interface name/);
+  assert.match(byId('linux-dig-record').run({domain:'example.com',type:'MX'}),/example.com.* MX/);
+  assert.throws(()=>byId('linux-dig-record').run({domain:'bad domain',type:'A'}),/valid public domain/);
+  assert.throws(()=>byId('linux-openssl-tls').run({host:'example.com',port:'65536'}),/whole number from 1 to 65535/);
+  assert.throws(()=>byId('linux-curl-security-headers').run({url:'https://user:pass@example.com'}),/without embedded credentials/);
+  assert.match(byId('linux-yara-file-scan').run({rules:'rules.yar',target:'sample.bin'}),/yara -s 'rules.yar' 'sample.bin'/);
+  assert.match(byId('termux-environment-audit').run({}),/uname -a/);
+});
+
 test('new tool categories are present in the registry and homepage navigation', () => {
   assert.ok(tools.some(tool=>tool.id==='wrangler-config-audit'&&tool.cat==='cloud'));
   assert.ok(tools.some(tool=>tool.id==='k8s-manifest-audit'&&tool.cat==='cloud'));

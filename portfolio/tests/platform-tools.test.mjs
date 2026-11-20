@@ -205,12 +205,12 @@ test('homepage search and quick-access deep links resolve to real tool workspace
 test('tool registry has unique IDs and ten declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 151);
+  assert.equal(tools.length, 170);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
   );
-  const expected={networking:18,security:27,soc:11,linux:27,ubuntu:12,kali:20,bash:19,developer:13,cloud:3,database:1};
+  const expected={networking:19,security:29,soc:19,linux:30,ubuntu:12,kali:22,bash:22,developer:13,cloud:3,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -381,7 +381,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 151);
+  assert.equal(tools.length, 170);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -791,6 +791,34 @@ test('Linux hardening, DevSecOps and SOC analyzers return bounded local findings
   for (const [id,input,expected] of cases) {
     const output=byId(id).run(input);
     assert.match(output,expected,id+' finding');
+  }
+});
+
+
+test('Kali wireless, Linux access controls and SOC log triage analyzers handle representative evidence', () => {
+  const cases = [
+    ['kali-wifi-security-audit',{data:'GuestNet Infra 6 54 Mbit/s 45 --'},/open or unencrypted network/],
+    ['kali-iptables-rules-audit',{data:':INPUT ACCEPT [0:0]\n-A INPUT -p tcp --dport 22 -j ACCEPT'},/INPUT default policy is ACCEPT/],
+    ['linux-sshd-effective-audit',{data:'permitrootlogin yes\npasswordauthentication yes\npubkeyauthentication yes\nmaxauthtries 10'},/Password authentication is enabled/],
+    ['linux-fail2ban-audit',{data:'[sshd]\nenabled = false\nmaxretry = 20'},/no enabled=true jail directive/],
+    ['linux-auditd-rules-audit',{data:'-w /etc/passwd -p wa -k identity'},/missing watch for password database/],
+    ['linux-selinux-status-audit',{data:'SELinux status: disabled'},/SELinux is disabled/],
+    ['linux-apparmor-status-audit',{data:'apparmor module is loaded.\n2 profiles are loaded.\n1 profiles are in enforce mode.\n1 profiles are in complain mode.\n3 processes are unconfined'},/profiles are in complain mode/],
+    ['linux-logrotate-audit',{data:'/var/log/test.log {\n daily\n rotate 2\n}'},/retention count is missing or below 7/],
+    ['linux-listening-port-review',{data:'tcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:*'},/wildcard-bound listening sockets/],
+    ['linux-user-session-audit',{data:'admin pts/0 2026-11-20 09:00 (192.0.2.10)'},/Remote sessions: 1/],
+    ['linux-kernel-message-audit',{data:'[1.0] audit: disabled (until reboot)'},/Security control disabled/],
+    ['termux-sshd-config-audit',{data:'PermitRootLogin yes\nPasswordAuthentication yes'},/Root login disabled/],
+    ['termux-path-audit',{path:':/system/bin'},/empty entry/],
+    ['termux-info-audit',{data:'TERMUX_VERSION=0.1\nTERMUX_APK_RELEASE=PLAY_STORE\nTERMUX_REPO=http://repo.example'},/Play Store build/],
+    ['soc-sysmon-event-summary',{data:'{"EventID":1}\n{"EventID":3}\n{"EventID":22}'},/1=1, 3=1, 22=1/],
+    ['soc-windows-4625-triage',{data:'{"EventID":4625,"TargetUserName":"admin","IpAddress":"192.0.2.10"}'},/Failed logons: 1/],
+    ['soc-ssh-auth-burst',{data:Array(5).fill('Failed password for root from 192.0.2.10 port 50001 ssh2').join('\n')},/192.0.2.10=5/],
+    ['soc-zeek-dns-summary',{data:'#fields\tts\tquery\trcode_name\n1\texample.com\tNOERROR'},/example.com=1/],
+    ['soc-yara-rule-audit',{data:'rule Broken { strings: $a = "x" }'},/condition section missing/],
+  ];
+  for (const [id,input,expected] of cases) {
+    assert.match(byId(id).run(input),expected,id+' representative finding');
   }
 });
 

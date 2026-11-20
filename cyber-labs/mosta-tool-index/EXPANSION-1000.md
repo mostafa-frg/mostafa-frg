@@ -9,7 +9,7 @@ Grow the MOSTA library by **1,000 additional, distinct, useful tool workflows** 
 - Parent browser engineering registry: 107 registered tool definitions.
 - Current branch browser registry: 130 definitions, including 23 new Linux, Kali Linux, Termux, SOC and defensive command builders.
 - Backend authorization catalog: 130 entries; it matches the browser registry one-to-one with no duplicate or missing IDs.
-- CLI CSV index: 60 upstream command entries; aliases are not counted as new tools.
+- CLI CSV index: 61 upstream command entries; aliases are not counted as new tools.
 - Existing terminal wrapper: a fixed allowlist of upstream executables; it does not dynamically trust arbitrary CSV values.
 - Existing platform tests execute representative inputs for every registered browser tool.
 - Existing terminal tests verify catalog and documentation expectations.

@@ -1,0 +1,2 @@
+# CI-only test suites and fixtures are not public static assets.
+tests/

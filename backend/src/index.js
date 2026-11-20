@@ -1575,7 +1575,7 @@ const TOOLS=[
     "group": "Cloud & DevOps",
     "mode": "browser",
     "description": "Review workload YAML for mutable image tags, missing digest pinning and imagePullPolicy inconsistencies."
-  }
+  },
   {
     "id": "docker-compose-security-audit",
     "name": "Docker Compose Security Auditor",

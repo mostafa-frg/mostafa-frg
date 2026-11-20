@@ -202,15 +202,15 @@ test('homepage search and quick-access deep links resolve to real tool workspace
   for(const id of deepLinks)assert.ok(tools.some(tool=>tool.id===id),'Homepage deep link resolves: '+id);
 });
 
-test('tool registry has unique IDs and ten declared workspaces', () => {
+test('tool registry has unique IDs and eleven declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
   assert.equal(tools.length, 170);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
-    ['bash','cloud','database','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
+    ['bash','cloud','database','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
   );
-  const expected={networking:19,security:29,soc:19,linux:30,ubuntu:12,kali:22,bash:22,developer:13,cloud:3,database:1};
+  const expected={networking:19,security:29,soc:19,linux:30,ubuntu:12,kali:22,bash:13,termux:9,developer:13,cloud:3,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -827,7 +827,7 @@ test('new tool categories are present in the registry and homepage navigation', 
   assert.ok(tools.some(tool=>tool.id==='k8s-manifest-audit'&&tool.cat==='cloud'));
   assert.ok(tools.some(tool=>tool.id==='sql-migration-review'&&tool.cat==='database'));
   assert.match(homeMarkup,/tools\.html\?category=cloud/);
-  assert.match(homeMarkup,/tools\.html\?category=database/);
+  assert.match(homeMarkup,/tools\.html\?category=database/);\n  assert.match(homeMarkup,/tools\.html\?category=termux/);
 });
 
 test('public homepage does not run the authenticated tool bootstrap', () => {

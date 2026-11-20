@@ -1,3 +1,4 @@
-.state
-.dev.vars
+node_modules/
+.state/
 wrangler.local.json
+.dev.vars

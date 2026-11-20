@@ -20,7 +20,7 @@ def validate(path: Path) -> list[str]:
             reader = csv.DictReader(stream)
             if tuple(reader.fieldnames or ()) != REQUIRED:
                 return [f"header must be exactly: {','.join(REQUIRED)}"]
-            seen_names: set[str] = set()
+            seen_entries: set[tuple[str, str]] = set()
             seen_aliases: set[str] = set()
             count = 0
             for line, row in enumerate(reader, start=2):
@@ -29,10 +29,10 @@ def validate(path: Path) -> list[str]:
                 if any(not value for value in values.values()):
                     errors.append(f"line {line}: all fields are required")
                     continue
-                name_key = values["name"].casefold()
+                entry_key = (values["name"].casefold(), values["alias"].casefold())
                 alias_key = values["alias"].casefold()
-                if name_key in seen_names:
-                    errors.append(f"line {line}: duplicate tool name {values['name']!r}")
+                if entry_key in seen_entries:
+                    errors.append(f"line {line}: duplicate tool entry {values['name']!r} / {values['alias']!r}")
                 if alias_key in seen_aliases:
                     errors.append(f"line {line}: duplicate alias {values['alias']!r}")
                 if not ALIAS.fullmatch(values["alias"]):
@@ -41,7 +41,7 @@ def validate(path: Path) -> list[str]:
                     errors.append(f"line {line}: invalid category slug {values['category']!r}")
                 if any(ord(ch) < 32 for value in values.values() for ch in value):
                     errors.append(f"line {line}: control characters are not allowed")
-                seen_names.add(name_key)
+                seen_entries.add(entry_key)
                 seen_aliases.add(alias_key)
             if count == 0:
                 errors.append("catalog must contain at least one tool")

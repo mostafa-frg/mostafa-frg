@@ -24,14 +24,21 @@ class CatalogValidationTests(unittest.TestCase):
         ])
         self.assertEqual(validate(path), [])
 
-    def test_rejects_duplicate_alias_and_name(self):
+    def test_rejects_duplicate_alias_and_duplicate_entry(self):
         path = self.write_catalog([
             dict(name="Nmap", alias="mnmap", platform="Kali", category="network", purpose="discovery"),
             dict(name="nmap", alias="mnmap", platform="Termux", category="network", purpose="discovery"),
         ])
         errors = validate(path)
-        self.assertTrue(any("duplicate tool name" in item for item in errors))
+        self.assertTrue(any("duplicate tool entry" in item for item in errors))
         self.assertTrue(any("duplicate alias" in item for item in errors))
+
+    def test_allows_one_package_to_expose_multiple_commands(self):
+        path = self.write_catalog([
+            dict(name="procps", alias="mps", platform="Linux", category="system", purpose="process list"),
+            dict(name="procps", alias="mtop", platform="Linux", category="system", purpose="process monitor"),
+        ])
+        self.assertEqual(validate(path), [])
 
     def test_rejects_invalid_alias_and_missing_fields(self):
         path = self.write_catalog([

@@ -50,7 +50,7 @@ jobs:
           node --check portfolio/assets/config-audit.js
           node --check portfolio/assets/http-audit.js
           node --check portfolio/assets/audit-ui.js
-          node -e "JSON.parse(require('fs').readFileSync('backend/wrangler.jsonc','utf8'))"
+          node -e "const c=JSON.parse(require('fs').readFileSync('backend/wrangler.jsonc','utf8')); if(!c.secrets?.required?.includes('IP_HASH_SECRET')) throw Error('IP_HASH_SECRET must be declared as required.')"
           test -s portfolio/index.html
           test -s portfolio/auth.html
           test -s portfolio/dashboard.html
@@ -235,7 +235,10 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx wrangler deploy --config wrangler.deploy.json
+        run: |
+          set -euo pipefail
+          printf '{}' > "$RUNNER_TEMP/mosta-secrets.json"
+          npx wrangler deploy --config wrangler.deploy.json --secrets-file "$RUNNER_TEMP/mosta-secrets.json"
         working-directory: backend
       - name: Verify live API health
         run: |

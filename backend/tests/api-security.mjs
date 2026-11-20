@@ -34,7 +34,12 @@ const expandedCliToolIds = [
   'linux-cron-audit','linux-systemd-hardening-audit','linux-nginx-config-audit','linux-apache-config-audit',
   'linux-apt-source-audit','linux-gitignore-audit','git-diff-secret-audit','env-file-audit','docker-compose-audit',
   'sigma-rule-audit','suricata-eve-summary','zeek-conn-summary','termux-bashrc-audit','android-manifest-audit',
-  'linux-sysctl-audit','linux-umask-audit','linux-ld-preload-audit'
+  'linux-sysctl-audit','linux-umask-audit','linux-ld-preload-audit',
+  'kali-wifi-security-audit','kali-iptables-rules-audit','linux-sshd-effective-audit','linux-fail2ban-audit',
+  'linux-auditd-rules-audit','linux-selinux-status-audit','linux-apparmor-status-audit','linux-logrotate-audit',
+  'linux-listening-port-review','linux-user-session-audit','linux-kernel-message-audit','termux-sshd-config-audit',
+  'termux-path-audit','termux-info-audit','soc-sysmon-event-summary','soc-windows-4625-triage',
+  'soc-ssh-auth-burst','soc-zeek-dns-summary','soc-yara-rule-audit'
 ];
 t('admin catalog exposes all new Linux, Kali and Termux command builders',
   expandedCliToolIds.every(id=>adminCatalog.j.tools.some(tool=>tool.id===id&&['browser','command'].includes(tool.mode))),
@@ -88,7 +93,7 @@ await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:admin
 t('revoked account-scoped grant blocks tool immediately',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}})).s===403);
 t('ungranted account tool catalog remains empty',(await call('/api/tools',{cookie:charlie})).j.tools.length===0);
 t('unauthenticated API blocked',(await call('/api/tools')).s===401);
-a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 151-tool registry',a.s===200&&a.j.tools.length===151&&new Set(a.j.tools.map(x=>x.id)).size===151&&a.j.tools.some(x=>x.group==='Termux')&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
+a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 170-tool registry',a.s===200&&a.j.tools.length===170&&new Set(a.j.tools.map(x=>x.id)).size===170&&a.j.tools.some(x=>x.group==='Termux')&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
 await call('/api/admin/users/'+bobId+'/disable',{method:'POST',cookie:adminCookie,body:{}});
 t('disable revokes live session',(await call('/api/auth/me',{cookie:bob})).s===401);
 t('disabled user cannot log in',(await call('/api/auth/login',{method:'POST',ip:'12.0.0.2',body:{username:'bob',password:'amber-lantern-quartz-2026'}})).s===401);

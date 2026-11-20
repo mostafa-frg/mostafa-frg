@@ -135,7 +135,7 @@ jobs:
 
   deploy:
     needs: [validate, security-tests]
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || (github.ref == 'refs/heads/feat/mosta-platform-redesign' && github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-prod]'))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:

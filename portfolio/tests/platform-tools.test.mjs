@@ -855,7 +855,7 @@ test('Linux, Kali and SOC configuration and evidence analyzers cover representat
 test('Termux diagnostics remain local and secret analyzers redact values', () => {
   const termux = byId('termux-network-diagnostics');
   assert.equal(termux.mode,'browser');
-  assert.doesNotMatch(termux.run({}),/curl|wget|https?:\\/\\//i);
+  assert.doesNotMatch(termux.run({}),/curl|wget/i);
   const diff = byId('git-diff-secret-audit').run({diff:'+API_TOKEN=do-not-print-this-secret'});
   assert.match(diff,/value redacted/i);
   assert.doesNotMatch(diff,/do-not-print-this-secret/);

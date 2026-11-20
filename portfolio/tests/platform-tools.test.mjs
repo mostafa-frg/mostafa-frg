@@ -210,7 +210,7 @@ test('tool registry has unique IDs and ten declared workspaces', () => {
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
   );
-  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,bash:13,developer:11,cloud:2,database:1};
+  const expected={networking:18,security:18,soc:7,linux:24,ubuntu:12,kali:20,bash:17,developer:11,cloud:2,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });

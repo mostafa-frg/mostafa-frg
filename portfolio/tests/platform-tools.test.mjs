@@ -238,7 +238,7 @@ test('new operating-system workspaces contain real handlers and explicit command
 
 test('Bash argument and environment tools preserve quoting and avoid echoing secret values', () => {
   const quoted=byId('bash-quote-builder').run({value:"it's a test"});
-  assert.match(quoted, /\/);
+  assert.match(quoted, /\\/);
   const array=byId('bash-array-builder').run({values:'one\nvalue with spaces\nthree'});
   assert.match(array,/'value with spaces'/);
   assert.match(array,/\$\{items\[@\]\}/);
@@ -568,7 +568,7 @@ test('Bash array builder preserves hostile-looking values as inert single argume
   const values = "plain value\nO'Reilly\n$HOME\n\`id\`\n$(touch /tmp/mosta-pwned)\nvalue; rm -rf /";
   const output = byId('bash-array-builder').run({values});
   assert.ok(output.includes("'plain value'"));
-  assert.ok(output.includes("'O'\''Reilly'"));
+  assert.ok(output.includes("'O'\\''Reilly'"));
   assert.ok(output.includes("'$HOME'"));
   assert.ok(output.includes("'\`id\`'"));
   assert.ok(output.includes("'$(touch /tmp/mosta-pwned)'"));
@@ -606,7 +606,7 @@ test('Kali journalctl builder enforces priority, unit, time and line bounds', ()
   const output = byId('kali-journalctl-builder').run({
     unit:'ssh.service', since:"today's logs", priority:'warning', lines:'250'
   });
-  assert.ok(output.includes("journalctl -u 'ssh.service' --since 'today'\''s logs' -p warning -n 250"));
+  assert.ok(output.includes("journalctl -u 'ssh.service' --since 'today'\\''s logs' -p warning -n 250"));
   assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning;id',lines:'10'}),/Invalid option for Priority/);
   assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning',lines:'0'}),/whole number from 1 to 10000/);
   assert.throws(()=>byId('kali-journalctl-builder').run({unit:'ssh.service',since:'1 hour ago',priority:'warning',lines:'10001'}),/whole number from 1 to 10000/);
@@ -633,7 +633,7 @@ test('Linux find builder quotes paths and patterns and rejects traversal or inva
   assert.ok(output.includes("find '/tmp/log archive' -type f -name '*.log; touch /tmp/pwned' -mtime -30 -print"));
   const home = byId('linux-find-builder').run({path:'$HOME/logs',type:'d',pattern:"O'Reilly*",days:'0'});
   assert.ok(home.includes('find "$HOME"/logs -type d -name '));
-  assert.ok(home.includes("'O'\''Reilly*'"));
+  assert.ok(home.includes("'O'\\''Reilly*'"));
   assert.throws(()=>byId('linux-find-builder').run({path:'/var/log',type:'f;id',pattern:'*.log',days:'7'}),/Invalid option for Entry type/);
   assert.throws(()=>byId('linux-find-builder').run({path:'/var/../etc',type:'f',pattern:'*',days:'7'}),/Parent traversal/);
   assert.throws(()=>byId('linux-find-builder').run({path:'/var/log',type:'f',pattern:'*.log',days:'36501'}),/whole number from 0 to 36500/);
@@ -745,7 +745,7 @@ test('new Linux, Kali and Termux command builders produce bounded commands witho
   assert.throws(()=>byId('linux-service-status').run({unit:"ssh';id"}),/valid systemd unit/);
   assert.throws(()=>byId('linux-service-status').run({unit:'ssh;id'}),/valid systemd unit/);
   assert.match(byId('linux-sha256-file').run({path:"file name; touch /tmp/pwned"}),/sha256sum -- 'file name; touch \/tmp\/pwned'/);
-  assert.match(byId('linux-grep-ioc').run({pattern:"x' ; id",path:'/var/log'}),/grep -RInI.*'x'\'' ; id'/);
+  assert.match(byId('linux-grep-ioc').run({pattern:"x' ; id",path:'/var/log'}),/grep -RInI.*'x'\\'' ; id'/);
   assert.throws(()=>byId('linux-journal-filter').run({unit:'ssh.service',lines:'5001'}),/whole number from 1 to 5000/);
   assert.throws(()=>byId('linux-find-large-files').run({path:'',size:'10'}),/Enter a directory path/);
   assert.match(byId('kali-nmap-service-audit').run({target:'192.0.2.10',ports:'22,443'}),/nmap -sV.*-p '22,443'.*192.0.2.10/);
@@ -948,7 +948,6 @@ test('Docker, Kubernetes, SSH and Dependabot analyzers detect representative har
   assert.throws(()=>byId('kubernetes-rbac-wildcard-audit').run({data:'kind: ConfigMap'}),/No Kubernetes RBAC kind/);
   assert.throws(()=>byId('kubernetes-image-policy-audit').run({data:'kind: Pod'}),/No container image declarations/);
 });
-
 
 test('Compose, Kubernetes NetworkPolicy, Helm, GitHub branch protection and OS policy analyzers detect gaps', () => {
   assert.match(byId('docker-compose-security-audit').run({data:'services:\n  api:\n    image: api:latest\n    privileged: true\n    network_mode: host\n    volumes:\n      - /var/run/docker.sock:/var/run/docker.sock'}),/privileged|host network|Docker socket|mutable/i);

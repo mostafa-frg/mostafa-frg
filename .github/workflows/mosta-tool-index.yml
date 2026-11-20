@@ -6,7 +6,7 @@ on:
       - "cyber-labs/mosta-tool-index/**"
       - ".github/workflows/mosta-tool-index.yml"
   push:
-    branches: [main]
+    branches: [main, feat/mosta-1000-cyber-terminal-tools]
     paths:
       - "cyber-labs/mosta-tool-index/**"
       - ".github/workflows/mosta-tool-index.yml"

@@ -749,6 +749,167 @@ const TOOLS=[
     "group": "Database Engineering",
     "mode": "browser",
     "description": "Review SQL migration text for unbounded writes, destructive DDL and transaction-boundary issues without database access."
+  },
+  {
+    "id": "linux-listening-sockets",
+    "name": "Linux Listening Socket Inspector",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Generate a read-only ss command to inspect listening TCP/UDP sockets and owning processes."
+  },
+  {
+    "id": "linux-network-state",
+    "name": "Linux Network State Snapshot",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Generate a compact local snapshot of interface addresses, routes and neighbour entries."
+  },
+  {
+    "id": "linux-service-status",
+    "name": "Systemd Service Status Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Build a safely quoted systemctl status command for one service unit."
+  },
+  {
+    "id": "linux-journal-filter",
+    "name": "Journal Log Filter Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Build a bounded journalctl query for a service and recent line count."
+  },
+  {
+    "id": "linux-sha256-file",
+    "name": "File SHA-256 Verification Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Generate a SHA-256 command for a local file path."
+  },
+  {
+    "id": "linux-grep-ioc",
+    "name": "Log IOC Search Builder",
+    "group": "SOC & Incident Response",
+    "mode": "command",
+    "description": "Generate a safely quoted recursive log search for an indicator or text fragment."
+  },
+  {
+    "id": "linux-find-large-files",
+    "name": "Large File Discovery Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Build a find query to locate large regular files under a selected directory."
+  },
+  {
+    "id": "kali-nmap-service-audit",
+    "name": "Nmap Authorized Service Audit Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a scoped service/version discovery command for one authorized IPv4 address or DNS hostname."
+  },
+  {
+    "id": "kali-nikto-web-audit",
+    "name": "Nikto Authorized Web Audit Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a Nikto command for a single HTTPS site with a bounded timeout."
+  },
+  {
+    "id": "kali-ffuf-content-audit",
+    "name": "FFUF Authorized Content Discovery Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a rate-limited FFUF command using an explicit FUZZ marker and a supplied wordlist."
+  },
+  {
+    "id": "kali-pcap-summary",
+    "name": "TShark PCAP Summary Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a read-only packet-capture statistics command for a local PCAP/PCAPNG file."
+  },
+  {
+    "id": "kali-tcpdump-capture",
+    "name": "Tcpdump Bounded Capture Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a bounded packet capture with snap length, packet count and a quoted interface name."
+  },
+  {
+    "id": "linux-dig-record",
+    "name": "DNS Record Query Builder",
+    "group": "Networking",
+    "mode": "command",
+    "description": "Generate a dig query for a selected DNS record type against a domain."
+  },
+  {
+    "id": "linux-openssl-tls",
+    "name": "OpenSSL TLS Certificate Inspection Builder",
+    "group": "Cybersecurity",
+    "mode": "command",
+    "description": "Generate an OpenSSL s_client command to inspect a remote TLS certificate chain."
+  },
+  {
+    "id": "linux-curl-security-headers",
+    "name": "HTTPS Response Header Inspection Builder",
+    "group": "Cybersecurity",
+    "mode": "command",
+    "description": "Generate a constrained curl request to inspect HTTPS response headers."
+  },
+  {
+    "id": "linux-yara-file-scan",
+    "name": "YARA Local File Scan Builder",
+    "group": "SOC & Incident Response",
+    "mode": "command",
+    "description": "Generate a local YARA scan command using an explicit rule file and evidence path."
+  },
+  {
+    "id": "linux-ufw-status",
+    "name": "UFW Firewall Status Audit Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Generate a read-only command to inspect UFW status and numbered rules."
+  },
+  {
+    "id": "linux-ssh-config-audit",
+    "name": "SSH Effective Configuration Audit Builder",
+    "group": "Cybersecurity",
+    "mode": "command",
+    "description": "Generate a read-only sshd configuration test and effective configuration dump."
+  },
+  {
+    "id": "termux-environment-audit",
+    "name": "Termux Environment Diagnostics Builder",
+    "group": "Termux",
+    "mode": "command",
+    "description": "Generate a safe read-only Termux environment report."
+  },
+  {
+    "id": "termux-storage-check",
+    "name": "Termux Shared Storage Permission Check",
+    "group": "Termux",
+    "mode": "command",
+    "description": "Generate a read-only check for Termux shared-storage access and common storage paths."
+  },
+  {
+    "id": "termux-package-audit",
+    "name": "Termux Package Health Audit Builder",
+    "group": "Termux",
+    "mode": "command",
+    "description": "Generate safe package-manager diagnostics for Termux without upgrading or installing packages."
+  },
+  {
+    "id": "termux-network-diagnostics",
+    "name": "Termux Network Diagnostics Builder",
+    "group": "Termux",
+    "mode": "command",
+    "description": "Generate a local network diagnostics report using available Termux-compatible commands."
+  },
+  {
+    "id": "kali-tool-presence-audit",
+    "name": "Kali Security Tool Presence Audit Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a non-invasive command to report whether common Kali utilities are installed."
   }
 ];
 

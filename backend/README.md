@@ -81,3 +81,10 @@ There is no email reset by design. If the administrator password is lost:
    ```
 
    This also removes the admin's sessions (cascade). Users created earlier keep their accounts.
+
+## Preview vs production ("my admin account disappeared")
+
+Preview/branch deployments use a **separate, empty** D1 database (`mosta-preview`) and report `environment: "MOSTA Preview"`
+from `/api/health` and `/api/auth/setup-status`; the sign-in page shows an orange banner there. An administrator created on
+production does not exist on a preview, and vice versa. Check the URL first, then open
+`https://<production-host>/api/auth/setup-status`: `"setupRequired": false` means an administrator exists.

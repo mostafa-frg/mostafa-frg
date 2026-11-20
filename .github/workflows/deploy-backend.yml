@@ -4,7 +4,7 @@ name: Deploy MOSTA platform
 
 on:
   push:
-    branches: [main]
+    branches: [main, feat/mosta-platform-redesign]
     paths:
       - "backend/**"
       - "portfolio/**"

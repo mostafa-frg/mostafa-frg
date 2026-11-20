@@ -25,7 +25,7 @@ Last updated: 2026-11-20
 
 - Local read-only `mosta-index` CLI catalog browser: list, search, platform/category filters and JSON output.
 - CSV catalog validator with unit tests and Python 3.10/3.12 GitHub Actions workflow.
-- 95 new frontend utilities covering Linux, Kali Linux, SOC/DFIR, Termux/Android, networking, DevSecOps and defensive configuration review.
+- 101 new frontend utilities covering Linux, Kali Linux, SOC/DFIR, Termux/Android, networking, DevSecOps and defensive configuration review.
 - Matching backend catalog entries and per-user default-deny access model.
 - Dedicated Termux & Android Terminal workspace on the portfolio homepage.
 - Command builders produce command text only; the website does not execute shell commands on visitor devices.
@@ -47,7 +47,7 @@ Last updated: 2026-11-20
 
 1. Check and fix every failing check for the current PR head before expanding further.
 2. Add real, tested tools in small domain batches; update frontend and backend registries together.
-3. Add representative tests for every new tool and update category counts. The latest eighteen local analyzers cover GitHub Actions, IAM JSON, CycloneDX SBOM, Defender, Windows Firewall, Linux mount options, BitLocker, RDP, UAC, Python requirements, npm lockfiles and CODEOWNERS.
+3. Add representative tests for every new tool and update category counts. The latest eighteen local analyzers cover GitHub Actions, IAM JSON, CycloneDX SBOM, Defender, Windows Firewall, Linux mount options, BitLocker, RDP, UAC, Python requirements, npm lockfiles, CODEOWNERS, Dockerfile hardening, Kubernetes pod security, Kubernetes RBAC, SSH client configuration, Dependabot configuration and Kubernetes image policy.
 4. Expand terminal catalog with verified upstream package metadata, installation checks and platform-specific guidance for Kali and Termux.
 5. Continue until 1,000 distinct new tools meet the implemented + tested acceptance gates.
 6. Keep PR #7 Draft until the full target and review criteria are met; do not merge or deploy without explicit approval.

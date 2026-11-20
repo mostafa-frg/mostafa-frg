@@ -7,8 +7,8 @@ Grow the MOSTA library by **1,000 additional, distinct, useful tool workflows** 
 ## Current audited baseline on the parent branch
 
 - Parent browser engineering registry: 107 registered tool definitions.
-- Current branch browser registry: 170 definitions, including 63 new Linux, Kali Linux, Termux, Android, SOC and defensive-security utilities.
-- Backend authorization catalog: 170 entries; it matches the browser registry one-to-one with no duplicate or missing IDs.
+- Current branch browser registry: 190 definitions, including 83 new Linux, Kali Linux, Termux, Android, SOC and defensive-security utilities.
+- Backend authorization catalog: 190 entries; it matches the browser registry one-to-one with no duplicate or missing IDs.
 - CLI CSV index: 61 upstream command entries; aliases are not counted as new tools.
 - Existing terminal wrapper: a fixed allowlist of upstream executables; it does not dynamically trust arbitrary CSV values.
 - Existing platform tests execute representative inputs for every registered browser tool.
@@ -57,8 +57,8 @@ The 1,000-tool target is complete only when 1,000 distinct entries are implement
 
 - A deterministic CSV validator with unit tests and a GitHub Actions workflow.
 - `mosta-index`, a local read-only catalog browser with list, search, category/platform filters and JSON output.
-- 63 new browser-side utilities across Linux administration, Kali Linux authorized assessment, SOC/DFIR, Termux and Android diagnostics, and defensive configuration review. Command builders generate reviewed command text only; they do not execute shell commands from the website. Local analyzers process pasted evidence in the browser.
-- Matching backend catalog and authorization metadata for all 63 additions. Frontend and backend registry IDs were compared: 170 each, with no duplicate or missing IDs.
+- 83 new browser-side utilities across Linux administration, Kali Linux authorized assessment, SOC/DFIR, Termux and Android diagnostics, and defensive configuration review. Command builders generate reviewed command text only; they do not execute shell commands from the website. Local analyzers process pasted evidence in the browser.
+- Matching backend catalog and authorization metadata for all 83 additions. Frontend and backend registry IDs were compared: 190 each, with no duplicate or missing IDs.
 - Regression tests cover command generation, quoting, input bounds, host/URL restrictions and rejection of shell metacharacters in constrained fields.
 
-These are the first 63 of the requested 1,000 new tools. The 1,000-tool goal is not complete, and no entry is called CI-verified until the relevant workflow passes.
+These are the first 83 of the requested 1,000 new tools. The 1,000-tool goal is not complete, and no entry is called CI-verified until the relevant workflow passes.

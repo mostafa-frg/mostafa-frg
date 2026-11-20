@@ -1576,6 +1576,48 @@ const TOOLS=[
     "mode": "browser",
     "description": "Review workload YAML for mutable image tags, missing digest pinning and imagePullPolicy inconsistencies."
   }
+  {
+    "id": "docker-compose-security-audit",
+    "name": "Docker Compose Security Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Review Compose text for privileged services, host networking, host mounts, exposed daemon sockets and mutable images."
+  },
+  {
+    "id": "kubernetes-network-policy-audit",
+    "name": "Kubernetes NetworkPolicy Coverage Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect NetworkPolicy YAML for broad ingress/egress selectors, unrestricted peers and missing default-deny coverage indicators."
+  },
+  {
+    "id": "helm-values-security-audit",
+    "name": "Helm Values Security Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Review Helm values YAML for insecure container settings, plaintext credentials, host access and disabled network policy."
+  },
+  {
+    "id": "github-branch-protection-audit",
+    "name": "GitHub Branch Protection Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Review a branch-protection JSON export for missing pull-request reviews, status checks and force-push restrictions."
+  },
+  {
+    "id": "linux-systemd-socket-audit",
+    "name": "systemd Socket Unit Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review systemd .socket unit text for wildcard listeners, root ownership and permissive socket modes."
+  },
+  {
+    "id": "windows-powershell-execution-policy-audit",
+    "name": "Windows PowerShell Execution Policy Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review Get-ExecutionPolicy -List output for Bypass/Unrestricted scopes and process-level policy overrides."
+  }
 ];
 
 const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}});

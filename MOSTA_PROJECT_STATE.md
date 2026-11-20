@@ -14,18 +14,18 @@ Last updated: 2026-11-20
 ## Tool inventory
 
 - Parent browser registry: 107 definitions.
-- Expansion branch browser registry: 225 definitions.
-- New additions on this branch: 118.
-- Backend catalog: 225 definitions.
+- Expansion branch browser registry: 231 definitions.
+- New additions on this branch: 124.
+- Backend catalog: 231 definitions.
 - Frontend/backend IDs were compared: no missing or duplicate IDs at the latest audit.
 - Upstream CLI CSV index: 61 entries; do not add this count to the browser registry because these are separate inventories.
-- Requested target: 1,000 genuinely distinct new tools. Remaining target after current additions: 882. Do not count placeholders, renamed aliases or reference-only links.
+- Requested target: 1,000 genuinely distinct new tools. Remaining target after current additions: 876. Do not count placeholders, renamed aliases or reference-only links.
 
 ## Implemented in PR #7
 
 - Local read-only `mosta-index` CLI catalog browser: list, search, platform/category filters and JSON output.
 - CSV catalog validator with unit tests and Python 3.10/3.12 GitHub Actions workflow.
-- 101 new frontend utilities covering Linux, Kali Linux, SOC/DFIR, Termux/Android, networking, DevSecOps and defensive configuration review.
+- 107 new frontend utilities covering Linux, Kali Linux, SOC/DFIR, Termux/Android, networking, DevSecOps and defensive configuration review.
 - Matching backend catalog entries and per-user default-deny access model.
 - Dedicated Termux & Android Terminal workspace on the portfolio homepage.
 - Command builders produce command text only; the website does not execute shell commands on visitor devices.
@@ -41,7 +41,7 @@ Last updated: 2026-11-20
 - Cloudflare Workers Preview build succeeded with `npx wrangler preview --config backend/wrangler.jsonc`; it uses the separate `mosta-preview` D1 binding, not the Production database.
 - Added `portfolio/.assetsignore` to exclude the CI-only `tests/` directory from public static assets, and added a workflow guard requiring that exclusion.
 - The feature-branch Preview URL is public by default until protected with Cloudflare Access. No Production deployment was performed.
-- Latest 225-entry revision passed Lab Checks run [44781622275](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44781622275) on attempt 2; both backend-security and Python jobs succeeded. The first attempt failed a timing-sensitive authentication test, and the isolated retry passed.
+- Latest 231-entry revision passed Lab Checks run [44781622275](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44781622275) on attempt 2; both backend-security and Python jobs succeeded. The first attempt failed a timing-sensitive authentication test, and the isolated retry passed.
 - Latest Cloudflare Preview build `2e7915d7-3991-46c2-a2a5-f80fa7ab6cdd` succeeded for commit `a28c33e` using the separate `mosta-preview` D1 binding. Stable Preview URL: https://feat-mosta-1000-cyber-terminal-tools-mostafa-frg.frh7977.workers.dev ; unique deployment URL: https://933246b9-mostafa-frg.frh7977.workers.dev.
 - Production deploy jobs remain skipped because this is a Draft feature-branch PR.
 
@@ -49,7 +49,7 @@ Last updated: 2026-11-20
 
 1. Check and fix every failing check for the current PR head before expanding further.
 2. Add real, tested tools in small domain batches; update frontend and backend registries together.
-3. Add representative tests for every new tool and update category counts. The latest eighteen local analyzers cover GitHub Actions, IAM JSON, CycloneDX SBOM, Defender, Windows Firewall, Linux mount options, BitLocker, RDP, UAC, Python requirements, npm lockfiles, CODEOWNERS, Dockerfile hardening, Kubernetes pod security, Kubernetes RBAC, SSH client configuration, Dependabot configuration and Kubernetes image policy.
+3. Add representative tests for every new tool and update category counts. The latest twenty-four local analyzers cover GitHub Actions, IAM JSON, CycloneDX SBOM, Defender, Windows Firewall, Linux mount options, BitLocker, RDP, UAC, Python requirements, npm lockfiles, CODEOWNERS, Dockerfile hardening, Kubernetes pod security, Kubernetes RBAC, SSH client configuration, Dependabot configuration, Kubernetes image policy, Docker Compose security, Kubernetes NetworkPolicy, Helm values, GitHub branch protection, systemd socket units and PowerShell execution policy.
 4. Expand terminal catalog with verified upstream package metadata, installation checks and platform-specific guidance for Kali and Termux.
 5. Continue until 1,000 distinct new tools meet the implemented + tested acceptance gates.
 6. Keep PR #7 Draft until the full target and review criteria are met; do not merge or deploy without explicit approval.

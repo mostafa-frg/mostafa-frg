@@ -301,4 +301,36 @@ jobs:
           done
           printf '%s\n' "$headers" | grep -qi '^x-frame-options: DENY'
           printf '%s\n' "$headers" | grep -qi '^x-content-type-options: nosniff'
-          echo "Live platform, 56 tool definitions, browser-tool handlers, regex worker, and security headers passed."
+          catalog_code="$(curl -sS -o "$tmp/catalog.json" -w '%{http_code}' "$SITE_ORIGIN/api/public/tools")"
+          if [ "$catalog_code" != "200" ]; then
+            echo "::error::Guest catalog API failed (HTTP $catalog_code)."
+            exit 1
+          fi
+          node - "$tmp/catalog.json" <<'NODE'
+          const fs = require('node:fs');
+          const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          const allowed = new Set(['browser', 'browser-file', 'external', 'command']);
+          const keys = 'description,group,id,mode,name';
+          if (data.authenticated !== false || data.role !== 'guest' || !Array.isArray(data.tools) || data.tools.length !== 107) {
+            throw new Error('Guest catalog response or expected 107-tool count is invalid.');
+          }
+          if (!data.tools.every(tool => allowed.has(tool.mode) && Object.keys(tool).sort().join(',') === keys)) {
+            throw new Error('Guest catalog contains an unsafe mode or unexpected metadata field.');
+          }
+          console.log('Guest catalog passed: 107 tools, safe modes, metadata only.');
+          NODE
+          for path in /api/tools /api/admin/users /api/admin/overview; do
+            code="$(curl -sS -o "$tmp/protected" -w '%{http_code}' "$SITE_ORIGIN$path")"
+            if [ "$code" != "401" ]; then
+              echo "::error::Guest access control failed for $path (HTTP $code)."
+              exit 1
+            fi
+            echo "OK guest blocked from $path (HTTP 401)"
+          done
+          dashboard_code="$(curl -sS -o /dev/null -w '%{http_code}' "$SITE_ORIGIN/dashboard.html")"
+          if [ "$dashboard_code" != "302" ]; then
+            echo "::error::Guest dashboard gate failed (HTTP $dashboard_code)."
+            exit 1
+          fi
+          echo "OK guest dashboard gate (HTTP 302)"
+          echo "Live platform, 56 client-side tool definitions, 107 public catalog tools, protected admin APIs, browser-tool handlers, regex worker, and security headers passed."

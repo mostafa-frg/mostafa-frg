@@ -1450,6 +1450,48 @@ const TOOLS=[
     "mode": "browser",
     "description": "Summarize Zeek weird.log events by anomaly name and source endpoint for network investigation."
   }
+  {
+    "id": "github-actions-workflow-audit",
+    "name": "GitHub Actions Workflow Security Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Review GitHub Actions YAML for risky triggers, broad permissions, mutable action references and persisted checkout credentials."
+  },
+  {
+    "id": "terraform-iam-policy-audit",
+    "name": "Terraform IAM Policy JSON Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Inspect AWS-style IAM policy JSON for wildcard actions, resources, principals and broad Allow statements."
+  },
+  {
+    "id": "cyclonedx-sbom-audit",
+    "name": "CycloneDX SBOM Inventory Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Parse a CycloneDX JSON SBOM locally and flag duplicate package URLs or missing component metadata."
+  },
+  {
+    "id": "windows-defender-status-audit",
+    "name": "Windows Defender Status Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Interpret Get-MpComputerStatus properties and identify disabled Microsoft Defender protection controls."
+  },
+  {
+    "id": "windows-firewall-profile-audit",
+    "name": "Windows Firewall Profile Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review Get-NetFirewallProfile output for disabled profiles and permissive default inbound rules."
+  },
+  {
+    "id": "linux-mount-hardening-audit",
+    "name": "Linux Mount Options Hardening Auditor",
+    "group": "Ubuntu",
+    "mode": "browser",
+    "description": "Review findmnt target/options output for missing nodev, nosuid and noexec protections on temporary filesystems."
+  },
 ];
 
 const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}});

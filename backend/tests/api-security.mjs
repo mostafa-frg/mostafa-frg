@@ -27,6 +27,14 @@ t('admin tool catalog includes Cloud and database additions',
   ['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].every(id=>adminCatalog.j.tools.some(tool=>tool.id===id)),
   JSON.stringify(adminCatalog.j.tools.filter(tool=>['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].includes(tool.id))));
 
+// Public guest access: catalog only; protected account/admin routes remain private.
+const guestCatalog=await call('/api/public/tools');
+t('guest can load the public tool catalog without a session',guestCatalog.s===200&&guestCatalog.j.authenticated===false&&guestCatalog.j.role==='guest'&&guestCatalog.j.tools.length===107,'tools='+guestCatalog.j?.tools?.length);
+t('public catalog contains only browser-safe and command-builder modes',guestCatalog.s===200&&guestCatalog.j.tools.every(x=>['browser','browser-file','external','command'].includes(x.mode)));
+t('public catalog exposes metadata only',guestCatalog.s===200&&guestCatalog.j.tools.every(x=>Object.keys(x).sort().join(',')==='description,group,id,mode,name'));
+t('authenticated tool catalog remains protected', (await call('/api/tools')).s===401);
+t('guest cannot access admin user records',(await call('/api/admin/users')).s===401);
+t('guest cannot access admin overview',(await call('/api/admin/overview')).s===401);
 // S-01 lockout DoS
 const att=[];for(let i=0;i<12;i++)att.push((await call('/api/auth/login',{method:'POST',ip:'9.9.9.9',body:{username:winner,password:'guess'+i}})).s);
 t('attacker IP locked after 5 failures',att.slice(0,5).every(c=>c===401)&&att.slice(5).every(c=>c===429),att.join(','));

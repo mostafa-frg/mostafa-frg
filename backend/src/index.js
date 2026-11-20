@@ -1,3 +1,4 @@
+// Cloudflare Workers WebCrypto supports PBKDF2 iteration counts up to 100,000.
 const COOKIE="__Host-mosta_session",SESSION=604800,ITER=100000,LOGIN_PAIR_LIMIT=5,LOGIN_IP_LIMIT=20,BOOT_LIMIT=5,WINDOW=900,MAX_BODY=16384,MAX_SESSIONS=10;
 class HttpError extends Error{constructor(status,message){super(message);this.status=status;}}
 const TOOLS=[

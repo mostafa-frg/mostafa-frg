@@ -14,12 +14,12 @@ Last updated: 2026-11-20
 ## Tool inventory
 
 - Parent browser registry: 107 definitions.
-- Expansion branch browser registry: 190 definitions.
-- New additions on this branch: 83.
-- Backend catalog: 190 definitions.
+- Expansion branch browser registry: 207 definitions.
+- New additions on this branch: 100.
+- Backend catalog: 207 definitions.
 - Frontend/backend IDs were compared: no missing or duplicate IDs at the latest audit.
 - Upstream CLI CSV index: 61 entries; do not add this count to the browser registry because these are separate inventories.
-- Requested target: 1,000 genuinely distinct new tools. Remaining target after current additions: 917. Do not count placeholders, renamed aliases or reference-only links.
+- Requested target: 1,000 genuinely distinct new tools. Remaining target after current additions: 900. Do not count placeholders, renamed aliases or reference-only links.
 
 ## Implemented in PR #7
 
@@ -36,7 +36,7 @@ Last updated: 2026-11-20
 
 - Python catalog workflow passed on Python 3.10 and 3.12.
 - Full frontend workflow passed on the earlier 170-entry revision; later revisions expanded to 190 entries and require their latest CI results to be checked.
-- Backend black-box API security suite passed on the 170-entry revision; latest 190-entry revision is being checked.
+- Backend black-box API security suite passed on the 170-entry revision; latest 207-entry revision is being checked.
 - Existing repository-wide Python compile and portfolio test steps passed on the latest run.
 - Do not claim the latest full CI is green until all current PR checks complete successfully.
 

@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Read-only index of the external commands exposed by install.sh.
 entries=(
-  "mnmap|nmap|Network discovery and port scanning"
+  "mnmap|Nmap|Network discovery and port scanning"
   "mnc|netcat|TCP/UDP connectivity"
   "mdig|dig|DNS queries"
   "mtcpdump|tcpdump|Packet capture"

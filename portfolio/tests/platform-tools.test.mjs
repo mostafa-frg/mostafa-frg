@@ -851,6 +851,21 @@ test('Linux, Kali and SOC configuration and evidence analyzers cover representat
   }
 });
 
+
+test('Termux diagnostics remain local and secret analyzers redact values', () => {
+  const termux = byId('termux-network-diagnostics');
+  assert.equal(termux.mode,'browser');
+  assert.doesNotMatch(termux.run({}),/curl|wget|https?:\\/\\//i);
+  const diff = byId('git-diff-secret-audit').run({diff:'+API_TOKEN=do-not-print-this-secret'});
+  assert.match(diff,/value redacted/i);
+  assert.doesNotMatch(diff,/do-not-print-this-secret/);
+  const env = byId('env-file-audit').run({data:'DATABASE_PASSWORD=another-private-value'});
+  assert.match(env,/DATABASE_PASSWORD/);
+  assert.doesNotMatch(env,/another-private-value/);
+  assert.match(byId('kali-nmap-service-audit').disclaimer,/written authorization/);
+  assert.match(byId('kali-ffuf-content-audit').disclaimer,/authorized test target/);
+});
+
 test('new tool categories are present in the registry and homepage navigation', () => {
   assert.ok(tools.some(tool=>tool.id==='wrangler-config-audit'&&tool.cat==='cloud'));
   assert.ok(tools.some(tool=>tool.id==='k8s-manifest-audit'&&tool.cat==='cloud'));

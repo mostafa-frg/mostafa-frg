@@ -59,7 +59,7 @@ The installer creates links under ~/.local/bin, installs the declared Python lab
     mscan
     mauto
 
-Run mosta for the full command index, mosta-index list/search to browse the upstream CLI catalog, and mosta-doctor to inspect installed dependencies. The index browser reads local CSV data and never executes a selected upstream tool.
+Run `mosta` for the full command index. Use `mosta-index list` or `mosta-index search <term>` to browse the upstream CLI catalog, and `mosta-doctor` to inspect installed dependencies. The index browser reads local CSV data and never executes a selected upstream tool.
 
 ## Native Linux commands
 

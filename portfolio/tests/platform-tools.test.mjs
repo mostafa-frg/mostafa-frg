@@ -908,7 +908,7 @@ test('six additional security and operations analyzers return bounded local find
 });
 
 test('Windows BitLocker, RDP and UAC posture analyzers detect insecure settings', () => {
-  assert.match(byId('windows-bitlocker-status-audit').run({data:'MountPoint : C:\\\nVolumeStatus : FullyDecrypted\nProtectionStatus : Off\nEncryptionPercentage : 0'}),/fully decrypted|ProtectionStatus is Off/i);
+  assert.match(byId('windows-bitlocker-status-audit').run({data:'MountPoint : C:\nVolumeStatus : FullyDecrypted\nProtectionStatus : Off\nEncryptionPercentage : 0'}),/fully decrypted|ProtectionStatus is Off/i);
   assert.match(byId('windows-rdp-posture-audit').run({data:'fDenyTSConnections : 0\nUserAuthentication : 0\nPortNumber : 3389'}),/NLA is disabled|Network Level Authentication is disabled/i);
   assert.match(byId('windows-uac-policy-audit').run({data:'EnableLUA : 0\nConsentPromptBehaviorAdmin : 0\nPromptOnSecureDesktop : 0'}),/disables UAC|Never notify/i);
 });

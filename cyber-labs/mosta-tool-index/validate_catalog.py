@@ -28,16 +28,15 @@ def validate(path: Path) -> list[str]:
                 values = {key: (row.get(key) or "").strip() for key in REQUIRED}
                 if any(not value for value in values.values()):
                     errors.append(f"line {line}: all fields are required")
-                    continue
                 entry_key = (values["name"].casefold(), values["alias"].casefold())
                 alias_key = values["alias"].casefold()
                 if entry_key in seen_entries:
                     errors.append(f"line {line}: duplicate tool entry {values['name']!r} / {values['alias']!r}")
                 if alias_key in seen_aliases:
                     errors.append(f"line {line}: duplicate alias {values['alias']!r}")
-                if not ALIAS.fullmatch(values["alias"]):
+                if values["alias"] and not ALIAS.fullmatch(values["alias"]):
                     errors.append(f"line {line}: invalid MOSTA alias {values['alias']!r}")
-                if not CATEGORY.fullmatch(values["category"]):
+                if values["category"] and not CATEGORY.fullmatch(values["category"]):
                     errors.append(f"line {line}: invalid category slug {values['category']!r}")
                 if any(ord(ch) < 32 for value in values.values() for ch in value):
                     errors.append(f"line {line}: control characters are not allowed")

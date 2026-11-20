@@ -68,6 +68,12 @@ jobs:
           assert 'password_iter' in cols, 'password_iter column missing'
           indexes = {r[1] for r in db.execute("PRAGMA index_list(users)")}
           assert 'idx_single_admin' in indexes, "Single-admin constraint missing"
+          session_indexes = {r[1] for r in db.execute('PRAGMA index_list(sessions)')}
+          audit_indexes = {r[1] for r in db.execute('PRAGMA index_list(audit_logs)')}
+          access_indexes = {r[1] for r in db.execute('PRAGMA index_list(user_tool_access)')}
+          assert 'idx_sessions_expires_at' in session_indexes, "Session expiry index missing"
+          assert 'idx_audit_action_created' in audit_indexes, "Audit action/time index missing"
+          assert 'idx_user_tool_access_user_enabled' in access_indexes, "User tool access index missing"
           assert not list(db.execute("PRAGMA foreign_key_check")), "Foreign-key check failed"
           print("D1 schema validation passed.")
           PY

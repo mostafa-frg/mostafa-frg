@@ -343,3 +343,11 @@ body.portal[data-theme=dark]{
 @media(prefers-reduced-motion:reduce){
  .portal .directory-tool,.portal .domain-card,.portal .quick-link,.portal .tool-run-form .btn{transition:none}
 }
+
+/* Public guest access notice */
+.guest-access-note{display:flex;align-items:center;gap:14px;margin:0 0 20px;padding:15px 17px;border:1px solid color-mix(in srgb,var(--cyan) 28%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--panel) 92%,#0c3540)}
+.guest-status-dot{width:8px;height:8px;flex:none;border-radius:50%;background:var(--lime);box-shadow:0 0 0 4px color-mix(in srgb,var(--lime) 13%,transparent)}
+.guest-access-note>div{display:grid;gap:4px;min-width:0;flex:1}.guest-access-note strong{font:10px var(--mono);letter-spacing:.1em;color:var(--cyan)}.guest-access-note span:not(.guest-status-dot){font-size:11px;color:var(--muted);line-height:1.6}.guest-access-note>a{font:10px var(--mono);color:var(--cyan);white-space:nowrap;text-decoration:none}.guest-access-note>a:hover{text-decoration:underline}
+@media(max-width:700px){.guest-access-note{align-items:flex-start;flex-wrap:wrap}.guest-access-note>a{margin-left:22px;white-space:normal}}
+
+.public-access-hint{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 0;color:var(--muted);font:10px var(--mono);letter-spacing:.025em}.public-access-hint>span{color:var(--lime);font-size:9px}.public-access-hint a{color:var(--cyan);text-decoration:none}.public-access-hint a:hover{text-decoration:underline}

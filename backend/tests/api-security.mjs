@@ -27,6 +27,19 @@ t('admin tool catalog includes Cloud and database additions',
   ['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].every(id=>adminCatalog.j.tools.some(tool=>tool.id===id)),
   JSON.stringify(adminCatalog.j.tools.filter(tool=>['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].includes(tool.id))));
 
+// Public pages stay public; the admin dashboard remains authenticated.
+const guestToolsPage=await call('/tools');
+t('guest can open the tool library without login',guestToolsPage.s===200&&!guestToolsPage.r.headers.get('location'));
+const guestDashboard=await call('/dashboard.html');
+t('guest dashboard remains protected by login redirect',guestDashboard.s===302&&(guestDashboard.r.headers.get('location')||'').includes('/auth.html'));
+// Public guest access: catalog only; protected account/admin routes remain private.
+const guestCatalog=await call('/api/public/tools');
+t('guest can load the public tool catalog without a session',guestCatalog.s===200&&guestCatalog.j.authenticated===false&&guestCatalog.j.role==='guest'&&guestCatalog.j.tools.length===107,'tools='+guestCatalog.j?.tools?.length);
+t('public catalog contains only browser-safe and command-builder modes',guestCatalog.s===200&&guestCatalog.j.tools.every(x=>['browser','browser-file','external','command'].includes(x.mode)));
+t('public catalog exposes metadata only',guestCatalog.s===200&&guestCatalog.j.tools.every(x=>Object.keys(x).sort().join(',')==='description,group,id,mode,name'));
+t('authenticated tool catalog remains protected', (await call('/api/tools')).s===401);
+t('guest cannot access admin user records',(await call('/api/admin/users')).s===401);
+t('guest cannot access admin overview',(await call('/api/admin/overview')).s===401);
 // S-01 lockout DoS
 const att=[];for(let i=0;i<12;i++)att.push((await call('/api/auth/login',{method:'POST',ip:'9.9.9.9',body:{username:winner,password:'guess'+i}})).s);
 t('attacker IP locked after 5 failures',att.slice(0,5).every(c=>c===401)&&att.slice(5).every(c=>c===429),att.join(','));
@@ -83,12 +96,18 @@ for(const p of ['/dashboard.html','/dashboard','/dashboard/','/DASHBOARD.html'])
 const red=await call('/dashboard.html');t('redirect carries security headers',!!red.r.headers.get('content-security-policy')&&red.r.headers.get('x-frame-options')==='DENY'&&red.r.headers.get('strict-transport-security'));
 const authed=await call('/dashboard',{cookie:adminCookie});t('authed /dashboard served (assets canonicalise .html -> extensionless)',authed.s===200);
 const authRed=await call('/auth',{cookie:adminCookie});t('authed /auth -> dashboard',authRed.s===302&&/dashboard/.test(authRed.r.headers.get('location')));
-for(const p of ['/tools.html','/tools']){const x=await call(p);t('anonymous tool directory requires sign-in: '+p,x.s===302&&/\/auth\.html$/.test(x.r.headers.get('location')||''));}
+for(const p of ['/tools.html','/tools']){const x=await call(p),loc=x.r.headers.get('location')||'',allowed=x.s===200||(x.s===307&&/\/tools$/.test(loc));t('anonymous tool directory remains public: '+p,allowed&&!/auth\.html/.test(loc),x.s+' '+loc);}
 for(const p of ['/api/health','/api/nope','/api/auth/me','/tools.html','/auth.html']){const x=await call(p);const h=x.r.headers;t('headers on '+p+' ('+x.s+')',!!h.get('content-security-policy')&&h.get('x-content-type-options')==='nosniff'&&h.get('x-frame-options')==='DENY'&&!!h.get('strict-transport-security'));}
 const health=await call('/api/health');t('health verifies D1 schema readiness',health.s===200&&health.j.database==='ok'&&health.j.security==='ok');
 t('API cache-control no-store',(await call('/api/health')).r.headers.get('cache-control')==='no-store');
 t('static CSP intact (connect-src crt.sh)',/connect-src 'self'[^;]*crt\.sh/.test((await call('/tools.html')).r.headers.get('content-security-policy')));
 
+// Admin operational overview: aggregates only, no credential/session secrets.
+a=await call('/api/admin/overview',{cookie:adminCookie});
+t('admin overview returns operational aggregates',a.s===200&&a.j.users.total>=1&&a.j.sessions.active>=1&&a.j.toolCatalog.total===107&&Number.isInteger(a.j.activity.failedLogins24h));
+t('non-admin cannot read admin overview',(await call('/api/admin/overview',{cookie:charlie})).s===403);
+t('anonymous cannot read admin overview',(await call('/api/admin/overview')).s===401);
+t('overview contains no session tokens or password fields',!JSON.stringify(a.j).match(/password_hash|password_salt|token_hash|session_token/i));
 // ---- Step 2: password policy, change-password, sessions, reset ----
 const mkUser=async(u,pw)=>call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:u,password:pw}});
 t('policy: 13 chars rejected',(await mkUser('carol','short-pass-13')).s===400);

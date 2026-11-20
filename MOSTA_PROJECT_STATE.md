@@ -36,9 +36,9 @@ Last updated: 2026-11-20
 
 - Python catalog workflow passed on Python 3.10 and 3.12.
 - Full frontend workflow passed on the earlier 170-entry revision; later revisions expanded to 190 entries and require their latest CI results to be checked.
-- Backend black-box API security suite passed on the 170-entry revision; latest 207-entry revision is being checked.
-- Existing repository-wide Python compile and portfolio test steps passed on the latest run.
-- Do not claim the latest full CI is green until all current PR checks complete successfully.
+- Backend black-box API security suite passed on the 207-entry revision.
+- Repository-wide Python compilation, portfolio tests, pytest suites, offline network tool smoke tests, log pipeline, PCAP analyzer, HTTP auditor, Flask labs, shell installer/index smoke tests and Docker Compose checks all passed.
+- All current PR validation workflows passed. Deployment jobs were skipped because this is a Draft feature-branch PR, not a production-main deployment.
 
 ## Next work
 

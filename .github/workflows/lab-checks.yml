@@ -171,7 +171,7 @@ jobs:
           test -L "$HOME/.local/bin/run-network-toolkit"
           mnet subnet 192.168.50.10/24 | grep -q "Network: 192.168.50.0"
           mosta | grep -q "mosta-doctor"
-          mosta-index list | grep -q "Nmap"
+          mosta-index list | grep "Nmap" >/dev/null
           mosta-index search tcpdump | grep -q "mtcpdump"
           if mosta-index search __mosta_missing_catalog_entry__; then
             echo "::error::mosta-index should return non-zero for an empty search."

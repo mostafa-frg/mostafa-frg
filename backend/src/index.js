@@ -910,6 +910,153 @@ const TOOLS=[
     "group": "Kali Linux",
     "mode": "command",
     "description": "Generate a non-invasive command to report whether common Kali utilities are installed."
+  },
+  {
+    "id": "linux-sudoers-audit",
+    "name": "Linux Sudoers Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review sudoers policy for broad privilege grants, NOPASSWD and authentication overrides."
+  },
+  {
+    "id": "linux-passwd-audit",
+    "name": "Linux Passwd Account Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Analyze passwd text for duplicate UIDs, unexpected UID 0 accounts and interactive system accounts."
+  },
+  {
+    "id": "linux-authorized-keys-audit",
+    "name": "SSH Authorized Keys Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review authorized_keys lines for obsolete key algorithms, duplicate keys and missing source restrictions."
+  },
+  {
+    "id": "linux-capabilities-audit",
+    "name": "Linux File Capabilities Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review getcap output and highlight powerful Linux capabilities assigned to executables."
+  },
+  {
+    "id": "linux-cron-audit",
+    "name": "Linux Cron Persistence Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Inspect cron entries for risky download-and-execute patterns, temporary paths and reboot persistence."
+  },
+  {
+    "id": "linux-systemd-hardening-audit",
+    "name": "systemd Service Hardening Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review systemd unit text for privilege and filesystem isolation controls."
+  },
+  {
+    "id": "linux-nginx-config-audit",
+    "name": "Nginx Server Configuration Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review Nginx configuration snippets for directory listing, version disclosure and missing baseline headers."
+  },
+  {
+    "id": "linux-apache-config-audit",
+    "name": "Apache HTTP Server Configuration Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review Apache configuration for server disclosure, directory indexing, TRACE and TLS baseline."
+  },
+  {
+    "id": "linux-apt-source-audit",
+    "name": "APT Repository Trust Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Inspect APT source entries for insecure HTTP, trusted=yes and repositories without scoped signing keys."
+  },
+  {
+    "id": "linux-gitignore-audit",
+    "name": "Git Secret Exclusion Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Check .gitignore text for common environment files, private keys, certificates and secret directories."
+  },
+  {
+    "id": "git-diff-secret-audit",
+    "name": "Git Diff Secret Scanner",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Scan pasted diff text for common credential patterns while redacting detected values from output."
+  },
+  {
+    "id": "env-file-audit",
+    "name": "Environment File Secret Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Identify secret-like environment variable names and redact their values in the result."
+  },
+  {
+    "id": "docker-compose-audit",
+    "name": "Docker Compose Security Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect Compose YAML text for privileged containers, host namespaces, exposed Docker socket and unpinned images."
+  },
+  {
+    "id": "sigma-rule-audit",
+    "name": "Sigma Detection Rule Structure Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review Sigma YAML text for required rule fields, detection condition and basic metadata quality."
+  },
+  {
+    "id": "suricata-eve-summary",
+    "name": "Suricata EVE JSON Alert Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Suricata EVE JSONL alerts locally by signature and category."
+  },
+  {
+    "id": "zeek-conn-summary",
+    "name": "Zeek conn.log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek tab-separated connection logs by service and connection state."
+  },
+  {
+    "id": "termux-bashrc-audit",
+    "name": "Termux Shell Startup Auditor",
+    "group": "Bash Scripting",
+    "mode": "browser",
+    "description": "Review Termux shell startup text for unsafe download execution, eval, weak permissions and embedded secrets."
+  },
+  {
+    "id": "android-manifest-audit",
+    "name": "Android Manifest Permission Auditor",
+    "group": "Bash Scripting",
+    "mode": "browser",
+    "description": "Inspect Android manifest permission declarations and highlight sensitive access requests."
+  },
+  {
+    "id": "linux-sysctl-audit",
+    "name": "Linux Kernel Network Sysctl Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review sysctl values for common unsafe IP forwarding, redirect and kernel hardening settings."
+  },
+  {
+    "id": "linux-umask-audit",
+    "name": "Linux Default umask Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Interpret an octal umask and estimate default file and directory permissions."
+  },
+  {
+    "id": "linux-ld-preload-audit",
+    "name": "Linux Dynamic Linker Preload Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review ld.so.preload entries for unexpected libraries and writable or temporary paths."
   }
 ];
 

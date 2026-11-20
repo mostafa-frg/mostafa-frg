@@ -14,12 +14,12 @@ Last updated: 2026-11-20
 ## Tool inventory
 
 - Parent browser registry: 107 definitions.
-- Expansion branch browser registry: 219 definitions.
-- New additions on this branch: 112.
-- Backend catalog: 219 definitions.
+- Expansion branch browser registry: 225 definitions.
+- New additions on this branch: 118.
+- Backend catalog: 225 definitions.
 - Frontend/backend IDs were compared: no missing or duplicate IDs at the latest audit.
 - Upstream CLI CSV index: 61 entries; do not add this count to the browser registry because these are separate inventories.
-- Requested target: 1,000 genuinely distinct new tools. Remaining target after current additions: 888. Do not count placeholders, renamed aliases or reference-only links.
+- Requested target: 1,000 genuinely distinct new tools. Remaining target after current additions: 882. Do not count placeholders, renamed aliases or reference-only links.
 
 ## Implemented in PR #7
 
@@ -35,8 +35,8 @@ Last updated: 2026-11-20
 ## Validation history
 
 - Python catalog workflow passed on Python 3.10 and 3.12.
-- Latest 219-entry frontend code and analyzer regression suite passed in Lab Checks run [44767735400](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767735400).
-- Backend black-box API security suite passed on the 219-entry revision in Lab Checks run [44767735400](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767735400).
+- Latest 225-entry frontend code and analyzer regression suite passed in Lab Checks run [44767735400](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767735400).
+- Backend black-box API security suite passed on the 225-entry revision in Lab Checks run [44767735400](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767735400).
 - Repository-wide Python compilation, portfolio tests, pytest suites, offline network tool smoke tests, log pipeline, PCAP analyzer, HTTP auditor, Flask labs, shell installer/index smoke tests and Docker Compose checks passed again in run [44767986890](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44767986890).
 - Cloudflare Workers Preview build succeeded with `npx wrangler preview --config backend/wrangler.jsonc`; it uses the separate `mosta-preview` D1 binding, not the Production database.
 - Added `portfolio/.assetsignore` to exclude the CI-only `tests/` directory from public static assets, and added a workflow guard requiring that exclusion.
@@ -47,7 +47,7 @@ Last updated: 2026-11-20
 
 1. Check and fix every failing check for the current PR head before expanding further.
 2. Add real, tested tools in small domain batches; update frontend and backend registries together.
-3. Add representative tests for every new tool and update category counts. The latest twelve local analyzers cover GitHub Actions, IAM JSON, CycloneDX SBOM, Defender, Windows Firewall, Linux mount options, BitLocker, RDP, UAC, Python requirements, npm lockfiles and CODEOWNERS.
+3. Add representative tests for every new tool and update category counts. The latest eighteen local analyzers cover GitHub Actions, IAM JSON, CycloneDX SBOM, Defender, Windows Firewall, Linux mount options, BitLocker, RDP, UAC, Python requirements, npm lockfiles and CODEOWNERS.
 4. Expand terminal catalog with verified upstream package metadata, installation checks and platform-specific guidance for Kali and Termux.
 5. Continue until 1,000 distinct new tools meet the implemented + tested acceptance gates.
 6. Keep PR #7 Draft until the full target and review criteria are met; do not merge or deploy without explicit approval.

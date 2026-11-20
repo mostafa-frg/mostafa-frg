@@ -23,6 +23,37 @@ const winner=['adminone','admintwo','adminthree'][rr.findIndex(x=>x.s===201)];
 let a=await call('/api/auth/login',{method:'POST',ip:'8.8.8.8',body:{username:winner,password:PW}});const adminCookie=ck(a);
 t('admin login ok + cookie flags',a.s===200&&/HttpOnly/.test(a.sc)&&/Secure/.test(a.sc)&&/SameSite=Strict/.test(a.sc)&&adminCookie.startsWith('__Host-'));
 const adminCatalog=await call('/api/tools',{cookie:adminCookie});
+const expandedCliToolIds = [
+  'linux-listening-sockets','linux-network-state','linux-service-status','linux-journal-filter',
+  'linux-sha256-file','linux-grep-ioc','linux-find-large-files','kali-nmap-service-audit',
+  'kali-nikto-web-audit','kali-ffuf-content-audit','kali-pcap-summary','kali-tcpdump-capture',
+  'linux-dig-record','linux-openssl-tls','linux-curl-security-headers','linux-yara-file-scan',
+  'linux-ufw-status','linux-ssh-config-audit','termux-environment-audit','termux-storage-check',
+  'termux-package-audit','termux-network-diagnostics','kali-tool-presence-audit',
+  'linux-sudoers-audit','linux-passwd-audit','linux-authorized-keys-audit','linux-capabilities-audit',
+  'linux-cron-audit','linux-systemd-hardening-audit','linux-nginx-config-audit','linux-apache-config-audit',
+  'linux-apt-source-audit','linux-gitignore-audit','git-diff-secret-audit','env-file-audit','docker-compose-audit',
+  'sigma-rule-audit','suricata-eve-summary','zeek-conn-summary','termux-bashrc-audit','android-manifest-audit',
+  'linux-sysctl-audit','linux-umask-audit','linux-ld-preload-audit',
+  'kali-wifi-security-audit','kali-iptables-rules-audit','linux-sshd-effective-audit','linux-fail2ban-audit',
+  'linux-auditd-rules-audit','linux-selinux-status-audit','linux-apparmor-status-audit','linux-logrotate-audit',
+  'linux-listening-port-review','linux-user-session-audit','linux-kernel-message-audit','termux-sshd-config-audit',
+  'termux-path-audit','termux-info-audit','soc-sysmon-event-summary','soc-windows-4625-triage',
+  'soc-ssh-auth-burst','soc-zeek-dns-summary','soc-yara-rule-audit',
+  'linux-nftables-audit','linux-pam-policy-audit','linux-login-defs-audit','linux-mount-options-audit',
+  'linux-hosts-file-audit','linux-resolver-audit','linux-known-hosts-audit','linux-ldd-audit',
+  'termux-getprop-audit','termux-ssh-client-audit','kali-monitor-capability-review','kali-wireless-interface-review',
+  'soc-zeek-http-summary','soc-zeek-ssl-summary','soc-powershell-4104-triage','soc-windows-rdp-triage',
+  'soc-firewall-log-summary','soc-dns-tunnel-heuristic','soc-web-probe-triage','kali-nmap-grepable-review',
+  'linux-journald-persistence-audit','linux-core-dump-audit','linux-rsyslog-forwarding-audit',
+  'linux-log-permissions-audit','linux-ssh-host-key-audit','linux-tls-cipher-audit',
+  'kali-regulatory-domain-audit','kali-arp-scan-review','kali-airmon-state-audit',
+  'termux-boot-script-audit','termux-ssh-key-audit','termux-storage-permission-audit','termux-android-network-audit',
+  'soc-zeek-files-summary','soc-suricata-flow-summary','soc-user-agent-review','soc-zeek-weird-summary'
+];
+t('admin catalog exposes all new Linux, Kali and Termux command builders',
+  expandedCliToolIds.every(id=>adminCatalog.j.tools.some(tool=>tool.id===id&&['browser','command'].includes(tool.mode))),
+  'expected '+expandedCliToolIds.length+' expanded Linux, Kali, Termux and defensive tools');
 t('admin tool catalog includes Cloud and database additions',
   ['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].every(id=>adminCatalog.j.tools.some(tool=>tool.id===id)),
   JSON.stringify(adminCatalog.j.tools.filter(tool=>['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].includes(tool.id))));
@@ -72,7 +103,7 @@ await call('/api/admin/users/'+bobId+'/tools/subnet',{method:'POST',cookie:admin
 t('revoked account-scoped grant blocks tool immediately',(await call('/api/tools/subnet',{method:'POST',cookie:bob,body:{ip:'192.168.10.10',prefix:24}})).s===403);
 t('ungranted account tool catalog remains empty',(await call('/api/tools',{cookie:charlie})).j.tools.length===0);
 t('unauthenticated API blocked',(await call('/api/tools')).s===401);
-a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 107-tool registry',a.s===200&&a.j.tools.length===107&&new Set(a.j.tools.map(x=>x.id)).size===107&&!a.j.tools.some(x=>/termux/i.test(x.group+' '+x.id))&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
+a=await call('/api/tools',{cookie:adminCookie});t('catalog exposes the complete 207-tool registry',a.s===200&&a.j.tools.length===207&&new Set(a.j.tools.map(x=>x.id)).size===207&&a.j.tools.some(x=>x.group==='Termux')&&a.j.tools.some(x=>x.group==='Kali Linux')&&a.j.tools.some(x=>x.group==='Bash Scripting')&&a.j.tools.some(x=>x.mode==='command'));
 await call('/api/admin/users/'+bobId+'/disable',{method:'POST',cookie:adminCookie,body:{}});
 t('disable revokes live session',(await call('/api/auth/me',{cookie:bob})).s===401);
 t('disabled user cannot log in',(await call('/api/auth/login',{method:'POST',ip:'12.0.0.2',body:{username:'bob',password:'amber-lantern-quartz-2026'}})).s===401);

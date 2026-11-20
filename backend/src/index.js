@@ -749,6 +749,706 @@ const TOOLS=[
     "group": "Database Engineering",
     "mode": "browser",
     "description": "Review SQL migration text for unbounded writes, destructive DDL and transaction-boundary issues without database access."
+  },
+  {
+    "id": "linux-listening-sockets",
+    "name": "Linux Listening Socket Inspector",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Generate a read-only ss command to inspect listening TCP/UDP sockets and owning processes."
+  },
+  {
+    "id": "linux-network-state",
+    "name": "Linux Network State Snapshot",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Generate a compact local snapshot of interface addresses, routes and neighbour entries."
+  },
+  {
+    "id": "linux-service-status",
+    "name": "Systemd Service Status Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Build a safely quoted systemctl status command for one service unit."
+  },
+  {
+    "id": "linux-journal-filter",
+    "name": "Journal Log Filter Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Build a bounded journalctl query for a service and recent line count."
+  },
+  {
+    "id": "linux-sha256-file",
+    "name": "File SHA-256 Verification Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Generate a SHA-256 command for a local file path."
+  },
+  {
+    "id": "linux-grep-ioc",
+    "name": "Log IOC Search Builder",
+    "group": "SOC & Incident Response",
+    "mode": "command",
+    "description": "Generate a safely quoted recursive log search for an indicator or text fragment."
+  },
+  {
+    "id": "linux-find-large-files",
+    "name": "Large File Discovery Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Build a find query to locate large regular files under a selected directory."
+  },
+  {
+    "id": "kali-nmap-service-audit",
+    "name": "Nmap Authorized Service Audit Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a scoped service/version discovery command for one authorized IPv4 address or DNS hostname."
+  },
+  {
+    "id": "kali-nikto-web-audit",
+    "name": "Nikto Authorized Web Audit Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a Nikto command for a single HTTPS site with a bounded timeout."
+  },
+  {
+    "id": "kali-ffuf-content-audit",
+    "name": "FFUF Authorized Content Discovery Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a rate-limited FFUF command using an explicit FUZZ marker and a supplied wordlist."
+  },
+  {
+    "id": "kali-pcap-summary",
+    "name": "TShark PCAP Summary Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a read-only packet-capture statistics command for a local PCAP/PCAPNG file."
+  },
+  {
+    "id": "kali-tcpdump-capture",
+    "name": "Tcpdump Bounded Capture Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a bounded packet capture with snap length, packet count and a quoted interface name."
+  },
+  {
+    "id": "linux-dig-record",
+    "name": "DNS Record Query Builder",
+    "group": "Networking",
+    "mode": "command",
+    "description": "Generate a dig query for a selected DNS record type against a domain."
+  },
+  {
+    "id": "linux-openssl-tls",
+    "name": "OpenSSL TLS Certificate Inspection Builder",
+    "group": "Cybersecurity",
+    "mode": "command",
+    "description": "Generate an OpenSSL s_client command to inspect a remote TLS certificate chain."
+  },
+  {
+    "id": "linux-curl-security-headers",
+    "name": "HTTPS Response Header Inspection Builder",
+    "group": "Cybersecurity",
+    "mode": "command",
+    "description": "Generate a constrained curl request to inspect HTTPS response headers."
+  },
+  {
+    "id": "linux-yara-file-scan",
+    "name": "YARA Local File Scan Builder",
+    "group": "SOC & Incident Response",
+    "mode": "command",
+    "description": "Generate a local YARA scan command using an explicit rule file and evidence path."
+  },
+  {
+    "id": "linux-ufw-status",
+    "name": "UFW Firewall Status Audit Builder",
+    "group": "Linux",
+    "mode": "command",
+    "description": "Generate a read-only command to inspect UFW status and numbered rules."
+  },
+  {
+    "id": "linux-ssh-config-audit",
+    "name": "SSH Effective Configuration Audit Builder",
+    "group": "Cybersecurity",
+    "mode": "command",
+    "description": "Generate a read-only sshd configuration test and effective configuration dump."
+  },
+  {
+    "id": "termux-environment-audit",
+    "name": "Termux Environment Diagnostics Builder",
+    "group": "Termux",
+    "mode": "command",
+    "description": "Generate a safe read-only Termux environment report."
+  },
+  {
+    "id": "termux-storage-check",
+    "name": "Termux Shared Storage Permission Check",
+    "group": "Termux",
+    "mode": "command",
+    "description": "Generate a read-only check for Termux shared-storage access and common storage paths."
+  },
+  {
+    "id": "termux-package-audit",
+    "name": "Termux Package Health Audit Builder",
+    "group": "Termux",
+    "mode": "command",
+    "description": "Generate safe package-manager diagnostics for Termux without upgrading or installing packages."
+  },
+  {
+    "id": "termux-network-diagnostics",
+    "name": "Termux Network Diagnostics Builder",
+    "group": "Termux",
+    "mode": "command",
+    "description": "Generate a local network diagnostics report using available Termux-compatible commands."
+  },
+  {
+    "id": "kali-tool-presence-audit",
+    "name": "Kali Security Tool Presence Audit Builder",
+    "group": "Kali Linux",
+    "mode": "command",
+    "description": "Generate a non-invasive command to report whether common Kali utilities are installed."
+  },
+  {
+    "id": "linux-sudoers-audit",
+    "name": "Linux Sudoers Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review sudoers policy for broad privilege grants, NOPASSWD and authentication overrides."
+  },
+  {
+    "id": "linux-passwd-audit",
+    "name": "Linux Passwd Account Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Analyze passwd text for duplicate UIDs, unexpected UID 0 accounts and interactive system accounts."
+  },
+  {
+    "id": "linux-authorized-keys-audit",
+    "name": "SSH Authorized Keys Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review authorized_keys lines for obsolete key algorithms, duplicate keys and missing source restrictions."
+  },
+  {
+    "id": "linux-capabilities-audit",
+    "name": "Linux File Capabilities Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review getcap output and highlight powerful Linux capabilities assigned to executables."
+  },
+  {
+    "id": "linux-cron-audit",
+    "name": "Linux Cron Persistence Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Inspect cron entries for risky download-and-execute patterns, temporary paths and reboot persistence."
+  },
+  {
+    "id": "linux-systemd-hardening-audit",
+    "name": "systemd Service Hardening Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review systemd unit text for privilege and filesystem isolation controls."
+  },
+  {
+    "id": "linux-nginx-config-audit",
+    "name": "Nginx Server Configuration Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review Nginx configuration snippets for directory listing, version disclosure and missing baseline headers."
+  },
+  {
+    "id": "linux-apache-config-audit",
+    "name": "Apache HTTP Server Configuration Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review Apache configuration for server disclosure, directory indexing, TRACE and TLS baseline."
+  },
+  {
+    "id": "linux-apt-source-audit",
+    "name": "APT Repository Trust Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Inspect APT source entries for insecure HTTP, trusted=yes and repositories without scoped signing keys."
+  },
+  {
+    "id": "linux-gitignore-audit",
+    "name": "Git Secret Exclusion Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Check .gitignore text for common environment files, private keys, certificates and secret directories."
+  },
+  {
+    "id": "git-diff-secret-audit",
+    "name": "Git Diff Secret Scanner",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Scan pasted diff text for common credential patterns while redacting detected values from output."
+  },
+  {
+    "id": "env-file-audit",
+    "name": "Environment File Secret Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Identify secret-like environment variable names and redact their values in the result."
+  },
+  {
+    "id": "docker-compose-audit",
+    "name": "Docker Compose Security Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect Compose YAML text for privileged containers, host namespaces, exposed Docker socket and unpinned images."
+  },
+  {
+    "id": "sigma-rule-audit",
+    "name": "Sigma Detection Rule Structure Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review Sigma YAML text for required rule fields, detection condition and basic metadata quality."
+  },
+  {
+    "id": "suricata-eve-summary",
+    "name": "Suricata EVE JSON Alert Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Suricata EVE JSONL alerts locally by signature and category."
+  },
+  {
+    "id": "zeek-conn-summary",
+    "name": "Zeek conn.log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek tab-separated connection logs by service and connection state."
+  },
+  {
+    "id": "termux-bashrc-audit",
+    "name": "Termux Shell Startup Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review Termux shell startup text for unsafe download execution, eval, weak permissions and embedded secrets."
+  },
+  {
+    "id": "android-manifest-audit",
+    "name": "Android Manifest Permission Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Inspect Android manifest permission declarations and highlight sensitive access requests."
+  },
+  {
+    "id": "linux-sysctl-audit",
+    "name": "Linux Kernel Network Sysctl Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review sysctl values for common unsafe IP forwarding, redirect and kernel hardening settings."
+  },
+  {
+    "id": "linux-umask-audit",
+    "name": "Linux Default umask Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Interpret an octal umask and estimate default file and directory permissions."
+  },
+  {
+    "id": "linux-ld-preload-audit",
+    "name": "Linux Dynamic Linker Preload Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review ld.so.preload entries for unexpected libraries and writable or temporary paths."
+  },
+  {
+    "id": "kali-wifi-security-audit",
+    "name": "Wireless Network Security Review",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Review Wi-Fi scan output for open, WEP and legacy WPA networks."
+  },
+  {
+    "id": "kali-iptables-rules-audit",
+    "name": "iptables Ruleset Exposure Auditor",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Review iptables-save output for permissive default policies and broad inbound accepts."
+  },
+  {
+    "id": "linux-sshd-effective-audit",
+    "name": "OpenSSH Effective Settings Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review sshd -T output for root login, password authentication and forwarding exposure."
+  },
+  {
+    "id": "linux-fail2ban-audit",
+    "name": "Fail2ban Jail Configuration Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review Fail2ban jail configuration for enabled jails and bounded ban thresholds."
+  },
+  {
+    "id": "linux-auditd-rules-audit",
+    "name": "Linux auditd Rules Coverage Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Check auditd rules for account files, privilege policy and immutable configuration."
+  },
+  {
+    "id": "linux-selinux-status-audit",
+    "name": "SELinux Enforcement State Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Interpret getenforce and sestatus output to identify disabled or permissive SELinux states."
+  },
+  {
+    "id": "linux-apparmor-status-audit",
+    "name": "AppArmor Profile State Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Summarize AppArmor status output and identify unconfined processes or missing profiles."
+  },
+  {
+    "id": "linux-logrotate-audit",
+    "name": "logrotate Policy Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review logrotate configuration for retention, compression and safe file ownership settings."
+  },
+  {
+    "id": "linux-listening-port-review",
+    "name": "Listening Port Exposure Reviewer",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Parse ss listening socket output and highlight wildcard-bound management and database services."
+  },
+  {
+    "id": "linux-user-session-audit",
+    "name": "Linux Interactive Session Reviewer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review who output for remote sessions and unusual concurrent interactive logins."
+  },
+  {
+    "id": "linux-kernel-message-audit",
+    "name": "Linux Kernel Message Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Triage dmesg output for kernel taint, OOM, call traces and security control warnings."
+  },
+  {
+    "id": "termux-sshd-config-audit",
+    "name": "Termux OpenSSH Server Config Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review Termux sshd_config for root login, password authentication and weak forwarding settings."
+  },
+  {
+    "id": "termux-path-audit",
+    "name": "Termux PATH Safety Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review a PATH value for empty entries, writable temporary directories and missing Termux prefix."
+  },
+  {
+    "id": "termux-info-audit",
+    "name": "Termux Environment Metadata Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review termux-info output for app package provenance, architecture and repository metadata."
+  },
+  {
+    "id": "soc-sysmon-event-summary",
+    "name": "Windows Sysmon Event Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Sysmon JSONL exports by Event ID for process, network, image-load and DNS activity."
+  },
+  {
+    "id": "soc-windows-4625-triage",
+    "name": "Windows Failed Logon 4625 Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Analyze Windows Security Event 4625 JSONL exports and summarize source IPs and targeted accounts."
+  },
+  {
+    "id": "soc-ssh-auth-burst",
+    "name": "SSH Authentication Burst Detector",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Group failed SSH password events by source address and flag repeated authentication failures."
+  },
+  {
+    "id": "soc-zeek-dns-summary",
+    "name": "Zeek DNS Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek dns.log queries, response codes and high-volume queried domains."
+  },
+  {
+    "id": "soc-yara-rule-audit",
+    "name": "YARA Rule Structure Reviewer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Check YARA rule text for rule blocks, condition clauses and basic rule hygiene."
+  },
+  {
+    "id": "linux-nftables-audit",
+    "name": "nftables Firewall Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review nft list ruleset text for permissive input policies and broad accept rules."
+  },
+  {
+    "id": "linux-pam-policy-audit",
+    "name": "Linux PAM Authentication Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review PAM configuration for account lockout, password quality and null-password settings."
+  },
+  {
+    "id": "linux-login-defs-audit",
+    "name": "Linux login.defs Password Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review password aging and password hash algorithm settings."
+  },
+  {
+    "id": "linux-mount-options-audit",
+    "name": "Linux Sensitive Mount Options Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review mount output for /tmp, /var/tmp and /dev/shm noexec, nodev and nosuid protections."
+  },
+  {
+    "id": "linux-hosts-file-audit",
+    "name": "Linux Hosts File Override Auditor",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Review /etc/hosts mappings for unexpected public-domain overrides and duplicate hostnames."
+  },
+  {
+    "id": "linux-resolver-audit",
+    "name": "Linux DNS Resolver Configuration Auditor",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Review resolv.conf nameservers, search domains and resolver entries."
+  },
+  {
+    "id": "linux-known-hosts-audit",
+    "name": "SSH known_hosts Integrity Reviewer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review known_hosts text for duplicate entries, hashed host records and obsolete key algorithms."
+  },
+  {
+    "id": "linux-ldd-audit",
+    "name": "Linux Shared Library Dependency Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review ldd output for unresolved shared libraries and unexpected dependency paths."
+  },
+  {
+    "id": "termux-getprop-audit",
+    "name": "Android Build Security Properties Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review selected Android getprop values for debuggable builds and weak ADB security settings."
+  },
+  {
+    "id": "termux-ssh-client-audit",
+    "name": "Termux SSH Client Configuration Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review SSH client config for disabled host-key checking, agent forwarding and insecure local commands."
+  },
+  {
+    "id": "kali-monitor-capability-review",
+    "name": "Kali Wireless Monitor Capability Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Inspect iw list output to determine whether a wireless driver advertises monitor mode support."
+  },
+  {
+    "id": "kali-wireless-interface-review",
+    "name": "Kali Wireless Interface State Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Review iw dev output for interface type and identify whether a device is already in monitor mode."
+  },
+  {
+    "id": "soc-zeek-http-summary",
+    "name": "Zeek HTTP Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek http.log methods, status codes, hosts and request paths."
+  },
+  {
+    "id": "soc-zeek-ssl-summary",
+    "name": "Zeek TLS Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek ssl.log TLS versions, validation results and server names."
+  },
+  {
+    "id": "soc-powershell-4104-triage",
+    "name": "PowerShell Script Block 4104 Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review Windows PowerShell 4104 script-block text for encoded commands and suspicious execution patterns."
+  },
+  {
+    "id": "soc-windows-rdp-triage",
+    "name": "Windows RDP Logon Event Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Windows event exports for RDP logons and session reconnect/disconnect activity."
+  },
+  {
+    "id": "soc-firewall-log-summary",
+    "name": "Linux Firewall Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize UFW and kernel firewall log lines by action, source address and destination port."
+  },
+  {
+    "id": "soc-dns-tunnel-heuristic",
+    "name": "DNS Tunneling Heuristic Reviewer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Score DNS query names for unusually long labels, high diversity and excessive subdomain depth."
+  },
+  {
+    "id": "soc-web-probe-triage",
+    "name": "Web Attack Probe Log Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review web access logs for common secret-file, traversal, admin-panel and webshell probe paths."
+  },
+  {
+    "id": "kali-nmap-grepable-review",
+    "name": "Nmap Grepable Output Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Parse Nmap -oG output to summarize live hosts, open TCP ports and service labels."
+  },
+  {
+    "id": "linux-journald-persistence-audit",
+    "name": "systemd-journald Persistence Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review journald.conf for persistent storage, compression, forwarding and bounded disk use."
+  },
+  {
+    "id": "linux-core-dump-audit",
+    "name": "Linux Core Dump Exposure Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review core_pattern, suid_dumpable and systemd-coredump storage settings."
+  },
+  {
+    "id": "linux-rsyslog-forwarding-audit",
+    "name": "rsyslog Remote Forwarding Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review rsyslog rules for remote forwarding protocol and destination configuration."
+  },
+  {
+    "id": "linux-log-permissions-audit",
+    "name": "Linux Log File Permission Reviewer",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review ls -l output for world-writable or overly permissive log files."
+  },
+  {
+    "id": "linux-ssh-host-key-audit",
+    "name": "OpenSSH Host Key Strength Reviewer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review ssh-keygen -lf output for obsolete DSA keys and undersized RSA host keys."
+  },
+  {
+    "id": "linux-tls-cipher-audit",
+    "name": "TLS Cipher Enumeration Reviewer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review ssl-enum-ciphers output for legacy TLS versions and weak cipher suites."
+  },
+  {
+    "id": "kali-regulatory-domain-audit",
+    "name": "Kali Wi-Fi Regulatory Domain Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Review iw reg get output for unset or world regulatory domains."
+  },
+  {
+    "id": "kali-arp-scan-review",
+    "name": "Kali ARP Discovery Output Reviewer",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Summarize arp-scan output and flag duplicate IP or MAC mappings."
+  },
+  {
+    "id": "kali-airmon-state-audit",
+    "name": "Kali Monitor Mode State Auditor",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Inspect iw dev and iwconfig output to determine whether interfaces are currently in monitor mode."
+  },
+  {
+    "id": "termux-boot-script-audit",
+    "name": "Termux:Boot Startup Script Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review Termux:Boot startup scripts for risky remote execution, privilege assumptions and broad permissions."
+  },
+  {
+    "id": "termux-ssh-key-audit",
+    "name": "Termux SSH Key Strength Reviewer",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review ssh-keygen -lf output from Termux for obsolete DSA and undersized RSA keys."
+  },
+  {
+    "id": "termux-storage-permission-audit",
+    "name": "Termux Shared Storage Permission Reviewer",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review ls -ld output for shared storage paths and identify missing access or overly broad modes."
+  },
+  {
+    "id": "termux-android-network-audit",
+    "name": "Termux Android Network Property Reviewer",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review selected Android network properties for configured DNS servers and Wi-Fi connectivity metadata."
+  },
+  {
+    "id": "soc-zeek-files-summary",
+    "name": "Zeek File Analysis Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek files.log by MIME type, file source and extraction status."
+  },
+  {
+    "id": "soc-suricata-flow-summary",
+    "name": "Suricata EVE Flow Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Suricata EVE flow records by protocol, source address and destination port."
+  },
+  {
+    "id": "soc-user-agent-review",
+    "name": "Web User-Agent Anomaly Reviewer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review web log user-agent strings for scripting clients, scanners and unusual automation signatures."
+  },
+  {
+    "id": "soc-zeek-weird-summary",
+    "name": "Zeek weird.log Anomaly Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek weird.log events by anomaly name and source endpoint for network investigation."
   }
 ];
 

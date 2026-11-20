@@ -27,6 +27,11 @@ t('admin tool catalog includes Cloud and database additions',
   ['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].every(id=>adminCatalog.j.tools.some(tool=>tool.id===id)),
   JSON.stringify(adminCatalog.j.tools.filter(tool=>['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].includes(tool.id))));
 
+// Public pages stay public; the admin dashboard remains authenticated.
+const guestToolsPage=await call('/tools.html');
+t('guest can open the tool library without login',guestToolsPage.s===200&&!guestToolsPage.r.headers.get('location'));
+const guestDashboard=await call('/dashboard.html');
+t('guest dashboard remains protected by login redirect',guestDashboard.s===302&&(guestDashboard.r.headers.get('location')||'').includes('/auth.html'));
 // Public guest access: catalog only; protected account/admin routes remain private.
 const guestCatalog=await call('/api/public/tools');
 t('guest can load the public tool catalog without a session',guestCatalog.s===200&&guestCatalog.j.authenticated===false&&guestCatalog.j.role==='guest'&&guestCatalog.j.tools.length===107,'tools='+guestCatalog.j?.tools?.length);

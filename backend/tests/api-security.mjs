@@ -29,11 +29,16 @@ const expandedCliToolIds = [
   'kali-nikto-web-audit','kali-ffuf-content-audit','kali-pcap-summary','kali-tcpdump-capture',
   'linux-dig-record','linux-openssl-tls','linux-curl-security-headers','linux-yara-file-scan',
   'linux-ufw-status','linux-ssh-config-audit','termux-environment-audit','termux-storage-check',
-  'termux-package-audit','termux-network-diagnostics','kali-tool-presence-audit'
+  'termux-package-audit','termux-network-diagnostics','kali-tool-presence-audit',
+  'linux-sudoers-audit','linux-passwd-audit','linux-authorized-keys-audit','linux-capabilities-audit',
+  'linux-cron-audit','linux-systemd-hardening-audit','linux-nginx-config-audit','linux-apache-config-audit',
+  'linux-apt-source-audit','linux-gitignore-audit','git-diff-secret-audit','env-file-audit','docker-compose-audit',
+  'sigma-rule-audit','suricata-eve-summary','zeek-conn-summary','termux-bashrc-audit','android-manifest-audit',
+  'linux-sysctl-audit','linux-umask-audit','linux-ld-preload-audit'
 ];
 t('admin catalog exposes all new Linux, Kali and Termux command builders',
   expandedCliToolIds.every(id=>adminCatalog.j.tools.some(tool=>tool.id===id&&tool.mode==='command')),
-  'expected '+expandedCliToolIds.length+' new command entries');
+  'expected '+expandedCliToolIds.length+' expanded Linux, Kali, Termux and defensive tools');
 t('admin tool catalog includes Cloud and database additions',
   ['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].every(id=>adminCatalog.j.tools.some(tool=>tool.id===id)),
   JSON.stringify(adminCatalog.j.tools.filter(tool=>['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].includes(tool.id))));

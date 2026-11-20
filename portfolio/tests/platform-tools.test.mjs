@@ -386,7 +386,7 @@ test('every registered utility has a unique ID, description, category and execut
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
     assert.ok(tool.desc && tool.desc.length >= 35, tool.id + ' has a task description');
-    assert.ok(['networking','security','soc','linux','ubuntu','kali','bash','developer','cloud','database'].includes(tool.cat));
+    assert.ok(['networking','security','soc','linux','ubuntu','kali','bash','termux','developer','cloud','database'].includes(tool.cat));
     assert.equal(typeof tool.run, 'function', tool.id + ' has a run handler');
     const fieldNames = (tool.fields || []).map(field => field[0]);
     assert.equal(new Set(fieldNames).size, fieldNames.length, tool.id + ' has unique input names');
@@ -854,7 +854,7 @@ test('Linux, Kali and SOC configuration and evidence analyzers cover representat
 
 test('Termux diagnostics remain local and secret analyzers redact values', () => {
   const termux = byId('termux-network-diagnostics');
-  assert.equal(termux.mode,'browser');
+  assert.equal(termux.mode,'command');
   assert.doesNotMatch(termux.run({}),/curl|wget/i);
   const diff = byId('git-diff-secret-audit').run({diff:'+API_TOKEN=do-not-print-this-secret'});
   assert.match(diff,/value redacted/i);

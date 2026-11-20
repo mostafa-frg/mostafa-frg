@@ -2,7 +2,6 @@ name: Deploy MOSTA portfolio
 
 on:
   pull_request:
-    branches: [main]
     paths:
       - "portfolio/**"
       - ".github/workflows/deploy-portfolio.yml"

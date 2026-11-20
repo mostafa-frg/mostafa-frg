@@ -92,7 +92,7 @@ t('static CSP intact (connect-src crt.sh)',/connect-src 'self'[^;]*crt\.sh/.test
 // Admin operational overview: aggregates only, no credential/session secrets.
 a=await call('/api/admin/overview',{cookie:adminCookie});
 t('admin overview returns operational aggregates',a.s===200&&a.j.users.total>=1&&a.j.sessions.active>=1&&a.j.toolCatalog.total===107&&Number.isInteger(a.j.activity.failedLogins24h));
-t('non-admin cannot read admin overview',(await call('/api/admin/overview',{cookie:bob})).s===403);
+t('non-admin cannot read admin overview',(await call('/api/admin/overview',{cookie:charlie})).s===403);
 t('anonymous cannot read admin overview',(await call('/api/admin/overview')).s===401);
 t('overview contains no session tokens or password fields',!JSON.stringify(a.j).match(/password_hash|password_salt|token_hash|session_token/i));
 // ---- Step 2: password policy, change-password, sessions, reset ----

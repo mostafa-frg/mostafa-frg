@@ -7,8 +7,8 @@ Grow the MOSTA library by **1,000 additional, distinct, useful tool workflows** 
 ## Current audited baseline on the parent branch
 
 - Parent browser engineering registry: 107 registered tool definitions.
-- Current branch browser registry: 225 definitions, including 118 new Linux, Kali Linux, Termux, Android, SOC and defensive-security utilities.
-- Backend authorization catalog: 225 entries; it matches the browser registry one-to-one with no duplicate or missing IDs.
+- Current branch browser registry: 231 definitions, including 124 new Linux, Kali Linux, Termux, Android, SOC and defensive-security utilities.
+- Backend authorization catalog: 231 entries; it matches the browser registry one-to-one with no duplicate or missing IDs.
 - CLI CSV index: 61 upstream command entries; aliases are not counted as new tools.
 - Existing terminal wrapper: a fixed allowlist of upstream executables; it does not dynamically trust arbitrary CSV values.
 - Existing platform tests execute representative inputs for every registered browser tool.
@@ -57,16 +57,16 @@ The 1,000-tool target is complete only when 1,000 distinct entries are implement
 
 - A deterministic CSV validator with unit tests and a GitHub Actions workflow.
 - `mosta-index`, a local read-only catalog browser with list, search, category/platform filters and JSON output.
-- 118 new browser-side utilities across Linux administration, Kali Linux authorized assessment, SOC/DFIR, Termux and Android diagnostics, DevSecOps supply-chain review, Windows endpoint posture and defensive configuration review. Command builders generate reviewed command text only; they do not execute shell commands from the website. Local analyzers process pasted evidence in the browser.
-- Matching backend catalog and authorization metadata for all 118 additions. Frontend and backend registry IDs were compared: 225 each, with no duplicate or missing IDs.
+- 124 new browser-side utilities across Linux administration, Kali Linux authorized assessment, SOC/DFIR, Termux and Android diagnostics, DevSecOps supply-chain review, Windows endpoint posture and defensive configuration review. Command builders generate reviewed command text only; they do not execute shell commands from the website. Local analyzers process pasted evidence in the browser.
+- Matching backend catalog and authorization metadata for all 124 additions. Frontend and backend registry IDs were compared: 231 each, with no duplicate or missing IDs.
 - Regression tests cover command generation, quoting, input bounds, host/URL restrictions and rejection of shell metacharacters in constrained fields.
 
-These are the first 118 of the requested 1,000 new tools. The previous increments added twelve endpoint, supply-chain and configuration analyzers. The latest increment adds six container and platform analyzers: Dockerfile hardening, Kubernetes Pod security context, Kubernetes RBAC wildcard scope, OpenSSH client hardening, GitHub Dependabot configuration and Kubernetes container image policy. The 1,000-tool goal is not complete, and no entry is called CI-verified until the relevant workflow passes.
+These are the first 124 of the requested 1,000 new tools. The previous increments added twelve endpoint, supply-chain and configuration analyzers. The latest two increments add twelve container and platform analyzers: Dockerfile hardening, Kubernetes Pod security context, Kubernetes RBAC wildcard scope, OpenSSH client hardening, GitHub Dependabot configuration, Kubernetes container image policy, Docker Compose security, Kubernetes NetworkPolicy, Helm values, GitHub branch protection, systemd socket unit review and PowerShell execution policy. The 1,000-tool goal is not complete, and no entry is called CI-verified until the relevant workflow passes.
 
 
 ## Latest validation checkpoint (2026-11-20)
 
-- Browser and backend catalogs contain 225 unique IDs each, with exact one-to-one parity.
+- Browser and backend catalogs contain 231 unique IDs each, with exact one-to-one parity.
 - The latest six container/platform analyzers have representative regression tests in the portfolio suite.
 - Lab Checks run [44781622275](https://github.com/mostafa-frg/mostafa-frg/actions/runs/44781622275) passed on attempt 2; `backend-security` and `python` jobs both succeeded. The first attempt had a timing-sensitive authentication test failure; the isolated retry passed.
 - Cloudflare Workers Preview build `2e7915d7-3991-46c2-a2a5-f80fa7ab6cdd` succeeded for commit `a28c33e`; it deploys against the isolated preview configuration, not Production.

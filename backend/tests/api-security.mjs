@@ -23,6 +23,17 @@ const winner=['adminone','admintwo','adminthree'][rr.findIndex(x=>x.s===201)];
 let a=await call('/api/auth/login',{method:'POST',ip:'8.8.8.8',body:{username:winner,password:PW}});const adminCookie=ck(a);
 t('admin login ok + cookie flags',a.s===200&&/HttpOnly/.test(a.sc)&&/Secure/.test(a.sc)&&/SameSite=Strict/.test(a.sc)&&adminCookie.startsWith('__Host-'));
 const adminCatalog=await call('/api/tools',{cookie:adminCookie});
+const expandedCliToolIds = [
+  'linux-listening-sockets','linux-network-state','linux-service-status','linux-journal-filter',
+  'linux-sha256-file','linux-grep-ioc','linux-find-large-files','kali-nmap-service-audit',
+  'kali-nikto-web-audit','kali-ffuf-content-audit','kali-pcap-summary','kali-tcpdump-capture',
+  'linux-dig-record','linux-openssl-tls','linux-curl-security-headers','linux-yara-file-scan',
+  'linux-ufw-status','linux-ssh-config-audit','termux-environment-audit','termux-storage-check',
+  'termux-package-audit','termux-network-diagnostics','kali-tool-presence-audit'
+];
+t('admin catalog exposes all new Linux, Kali and Termux command builders',
+  expandedCliToolIds.every(id=>adminCatalog.j.tools.some(tool=>tool.id===id&&tool.mode==='command')),
+  'expected '+expandedCliToolIds.length+' new command entries');
 t('admin tool catalog includes Cloud and database additions',
   ['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].every(id=>adminCatalog.j.tools.some(tool=>tool.id===id)),
   JSON.stringify(adminCatalog.j.tools.filter(tool=>['wrangler-config-audit','k8s-manifest-audit','sql-migration-review'].includes(tool.id))));

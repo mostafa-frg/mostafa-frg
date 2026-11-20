@@ -1057,6 +1057,139 @@ const TOOLS=[
     "group": "Cybersecurity",
     "mode": "browser",
     "description": "Review ld.so.preload entries for unexpected libraries and writable or temporary paths."
+  },
+  {
+    "id": "kali-wifi-security-audit",
+    "name": "Wireless Network Security Review",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Review Wi-Fi scan output for open, WEP and legacy WPA networks."
+  },
+  {
+    "id": "kali-iptables-rules-audit",
+    "name": "iptables Ruleset Exposure Auditor",
+    "group": "Kali Linux",
+    "mode": "browser",
+    "description": "Review iptables-save output for permissive default policies and broad inbound accepts."
+  },
+  {
+    "id": "linux-sshd-effective-audit",
+    "name": "OpenSSH Effective Settings Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review sshd -T output for root login, password authentication and forwarding exposure."
+  },
+  {
+    "id": "linux-fail2ban-audit",
+    "name": "Fail2ban Jail Configuration Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review Fail2ban jail configuration for enabled jails and bounded ban thresholds."
+  },
+  {
+    "id": "linux-auditd-rules-audit",
+    "name": "Linux auditd Rules Coverage Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Check auditd rules for account files, privilege policy and immutable configuration."
+  },
+  {
+    "id": "linux-selinux-status-audit",
+    "name": "SELinux Enforcement State Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Interpret getenforce and sestatus output to identify disabled or permissive SELinux states."
+  },
+  {
+    "id": "linux-apparmor-status-audit",
+    "name": "AppArmor Profile State Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Summarize AppArmor status output and identify unconfined processes or missing profiles."
+  },
+  {
+    "id": "linux-logrotate-audit",
+    "name": "logrotate Policy Auditor",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Review logrotate configuration for retention, compression and safe file ownership settings."
+  },
+  {
+    "id": "linux-listening-port-review",
+    "name": "Listening Port Exposure Reviewer",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Parse ss listening socket output and highlight wildcard-bound management and database services."
+  },
+  {
+    "id": "linux-user-session-audit",
+    "name": "Linux Interactive Session Reviewer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review who output for remote sessions and unusual concurrent interactive logins."
+  },
+  {
+    "id": "linux-kernel-message-audit",
+    "name": "Linux Kernel Message Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Triage dmesg output for kernel taint, OOM, call traces and security control warnings."
+  },
+  {
+    "id": "termux-sshd-config-audit",
+    "name": "Termux OpenSSH Server Config Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review Termux sshd_config for root login, password authentication and weak forwarding settings."
+  },
+  {
+    "id": "termux-path-audit",
+    "name": "Termux PATH Safety Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review a PATH value for empty entries, writable temporary directories and missing Termux prefix."
+  },
+  {
+    "id": "termux-info-audit",
+    "name": "Termux Environment Metadata Auditor",
+    "group": "Termux",
+    "mode": "browser",
+    "description": "Review termux-info output for app package provenance, architecture and repository metadata."
+  },
+  {
+    "id": "soc-sysmon-event-summary",
+    "name": "Windows Sysmon Event Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Sysmon JSONL exports by Event ID for process, network, image-load and DNS activity."
+  },
+  {
+    "id": "soc-windows-4625-triage",
+    "name": "Windows Failed Logon 4625 Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Analyze Windows Security Event 4625 JSONL exports and summarize source IPs and targeted accounts."
+  },
+  {
+    "id": "soc-ssh-auth-burst",
+    "name": "SSH Authentication Burst Detector",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Group failed SSH password events by source address and flag repeated authentication failures."
+  },
+  {
+    "id": "soc-zeek-dns-summary",
+    "name": "Zeek DNS Log Summarizer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Zeek dns.log queries, response codes and high-volume queried domains."
+  },
+  {
+    "id": "soc-yara-rule-audit",
+    "name": "YARA Rule Structure Reviewer",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Check YARA rule text for rule blocks, condition clauses and basic rule hygiene."
   }
 ];
 

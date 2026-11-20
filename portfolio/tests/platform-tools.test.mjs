@@ -805,7 +805,7 @@ test('Kali wireless, Linux access controls and SOC log triage analyzers handle r
     ['linux-selinux-status-audit',{data:'SELinux status: disabled'},/SELinux is disabled/],
     ['linux-apparmor-status-audit',{data:'apparmor module is loaded.\n2 profiles are loaded.\n1 profiles are in enforce mode.\n1 profiles are in complain mode.\n3 processes are unconfined'},/profiles are in complain mode/],
     ['linux-logrotate-audit',{data:'/var/log/test.log {\n daily\n rotate 2\n}'},/retention count is missing or below 7/],
-    ['linux-listening-port-review',{data:'tcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:*'},/wildcard-bound listening sockets/],
+    ['linux-listening-port-review',{data:'tcp LISTEN 0 128 0.0.0.0:22 0.0.0.0:*'},/Wildcard-bound listeners: 1/],
     ['linux-user-session-audit',{data:'admin pts/0 2026-11-20 09:00 (192.0.2.10)'},/Remote sessions: 1/],
     ['linux-kernel-message-audit',{data:'[1.0] audit: disabled (until reboot)'},/Security control disabled/],
     ['termux-sshd-config-audit',{data:'PermitRootLogin yes\nPasswordAuthentication yes'},/Root login disabled/],

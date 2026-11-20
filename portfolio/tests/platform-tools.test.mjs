@@ -894,12 +894,12 @@ test('Linux hardening, Kali wireless and SOC analyzers cover the final Phase 1 b
 
 test('six additional security and operations analyzers return bounded local findings', () => {
   const cases = [
-    ['github-actions-workflow-audit',{data:'on: pull_request_target\\npermissions: write-all\\njobs:\\n  test:\\n    steps:\\n      - uses: actions/checkout@v4\\n        with:\\n          persist-credentials: true'},/pull_request_target|write-all|persist-credentials|mutable/i],
+    ['github-actions-workflow-audit',{data:'on: pull_request_target\npermissions: write-all\njobs:\n  test:\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          persist-credentials: true'},/pull_request_target|write-all|persist-credentials|mutable/i],
     ['terraform-iam-policy-audit',{data:'{"Statement":[{"Effect":"Allow","Action":"*","Resource":"*"}]}'},/wildcard action scope|all resources/i],
     ['cyclonedx-sbom-audit',{data:'{"bomFormat":"CycloneDX","specVersion":"1.5","components":[{"type":"library","name":"demo","purl":"pkg:npm/demo"},{"type":"library","name":"demo","purl":"pkg:npm/demo"}]}'},/duplicate package URLs/i],
-    ['windows-defender-status-audit',{data:'AntivirusEnabled : True\\nRealTimeProtectionEnabled : False\\nBehaviorMonitorEnabled : True'},/RealTimeProtectionEnabled is False/i],
-    ['windows-firewall-profile-audit',{data:'Name : Public\\nEnabled : False\\nDefaultInboundAction : Allow\\nDefaultOutboundAction : Allow'},/Public firewall profile is disabled|default inbound action is Allow/i],
-    ['linux-mount-hardening-audit',{data:'/tmp rw,relatime\\n/var/tmp rw,nosuid,nodev\\n/dev/shm rw,nosuid,nodev,noexec'},/missing nodev|missing nosuid|missing noexec/i],
+    ['windows-defender-status-audit',{data:'AntivirusEnabled : True\nRealTimeProtectionEnabled : False\nBehaviorMonitorEnabled : True'},/RealTimeProtectionEnabled is False/i],
+    ['windows-firewall-profile-audit',{data:'Name : Public\nEnabled : False\nDefaultInboundAction : Allow\nDefaultOutboundAction : Allow'},/Public firewall profile is disabled|default inbound action is Allow/i],
+    ['linux-mount-hardening-audit',{data:'/tmp rw,relatime\n/var/tmp rw,nosuid,nodev\n/dev/shm rw,nosuid,nodev,noexec'},/missing nodev|missing nosuid|missing noexec/i],
   ];
   for (const [id,input,expected] of cases) assert.match(byId(id).run(input),expected,id+' representative finding');
   assert.throws(()=>byId('terraform-iam-policy-audit').run({data:'not json'}),/valid IAM policy JSON/);

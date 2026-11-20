@@ -1,4 +1,5 @@
 name: Deploy MOSTA platform
+# Production deployments are managed here; do not add a parallel Cloudflare Builds trigger.
 # Keep deployment workflow in sync with the current first-admin setup flow.
 # Refresh bootstrap secret after administrator token rotation.
 

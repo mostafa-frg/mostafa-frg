@@ -1492,6 +1492,48 @@ const TOOLS=[
     "mode": "browser",
     "description": "Review findmnt target/options output for missing nodev, nosuid and noexec protections on temporary filesystems."
   },
+  {
+    "id": "windows-bitlocker-status-audit",
+    "name": "Windows BitLocker Volume Status Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Interpret Get-BitLockerVolume output and identify volumes that are decrypted or have protection suspended."
+  },
+  {
+    "id": "windows-rdp-posture-audit",
+    "name": "Windows Remote Desktop Posture Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review selected Windows registry values for Remote Desktop enablement, Network Level Authentication and listening port."
+  },
+  {
+    "id": "windows-uac-policy-audit",
+    "name": "Windows UAC Policy Auditor",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Review exported Windows UAC registry values for disabled consent prompts, LUA and secure-desktop behavior."
+  },
+  {
+    "id": "python-requirements-supply-chain-audit",
+    "name": "Python Requirements Supply-Chain Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Review requirements.txt entries for unpinned versions, direct VCS references, plaintext package indexes and missing hashes."
+  },
+  {
+    "id": "npm-lockfile-integrity-audit",
+    "name": "npm Lockfile Integrity Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Inspect npm package-lock JSON for unsupported lockfile versions, missing integrity hashes and insecure HTTP package resolutions."
+  },
+  {
+    "id": "codeowners-coverage-audit",
+    "name": "GitHub CODEOWNERS Coverage Auditor",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Review CODEOWNERS patterns for missing owners and explicit coverage of backend, GitHub workflows and cyber-lab paths."
+  },
 ];
 
 const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}});

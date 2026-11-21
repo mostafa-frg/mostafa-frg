@@ -45,7 +45,7 @@ Never report a test as passed unless it actually ran and its output/status was o
 - Prefer small, reviewable commits and tests with each behavior change.
 
 ## Release boundary
-Default state is **no merge, no production deployment, no production data/schema/secret changes**. These require explicit human authorization for the specific action. PR #5 must remain open and unmerged unless the human owner changes this instruction.
+Default state is **no merge, no Production deployment, no Production data/schema/secret changes**. These require explicit human authorization for the specific action. PR #5 was merged before this coordination snapshot was refreshed; the earlier instruction to keep it open is historical and cannot be applied retroactively. All future merges and Production actions still require explicit human authorization for the specific action.
 
 ## Honest security posture
 The objective is zero known unresolved release-blocking defects, not a claim of zero vulnerabilities. A clean scan or green CI is not proof of security. Unknowns and coverage gaps must remain visible.

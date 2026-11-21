@@ -57,6 +57,15 @@ const spray=[];for(let i=0;i<25;i++)spray.push((await call('/api/auth/login',{me
 t('per-IP password spraying throttled at 20',spray.slice(0,20).every(c=>c===401)&&spray.slice(20).every(c=>c===429),[...new Set(spray)].join(','));
 // audit of failures
 a=await call('/api/admin/audit',{cookie:adminCookie});t('failed logins are audited',a.j.events.some(e=>e.action==='auth.login_failed'),a.j.events.filter(e=>e.action==='auth.login_failed').length+' events');
+const auditMarker=await call('/api/admin/users',{method:'POST',cookie:adminCookie,body:{username:'auditmarker',password:'violet-bridge-orbit-93'}});
+t('audit pagination fixture created',auditMarker.s===201);
+const auditFirst=await call('/api/admin/audit?limit=1',{cookie:adminCookie});
+t('audit endpoint returns bounded cursor page',auditFirst.s===200&&auditFirst.j.events.length===1&&auditFirst.j.hasMore===true&&typeof auditFirst.j.nextCursor==='string'&&auditFirst.j.nextCursor.length>0&&auditFirst.j.events[0].action==='admin.user.create'&&auditFirst.j.events[0].detail==='auditmarker');
+const auditSecond=await call('/api/admin/audit?limit=1&before='+encodeURIComponent(auditFirst.j.nextCursor),{cookie:adminCookie});
+t('audit cursor returns the distinct older event',auditSecond.s===200&&auditSecond.j.events.length===1&&auditSecond.j.events[0].action!=='admin.user.create');
+t('audit endpoint rejects oversized page limits',(await call('/api/admin/audit?limit=1000',{cookie:adminCookie})).s===400);
+t('audit endpoint rejects malformed cursors',(await call('/api/admin/audit?before=abc',{cookie:adminCookie})).s===400);
+t('audit endpoint rejects integers beyond JS safe precision',(await call('/api/admin/audit?before=9007199254740992',{cookie:adminCookie})).s===400);
 // timing equalisation
 const time=async(u,ip)=>{const s=performance.now();await call('/api/auth/login',{method:'POST',ip,body:{username:u,password:'wrong-password-xyz'}});return performance.now()-s};
 const med=x=>x.sort((p,q)=>p-q)[Math.floor(x.length/2)];

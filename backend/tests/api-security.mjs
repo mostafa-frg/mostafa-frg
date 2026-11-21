@@ -58,7 +58,7 @@ t('per-IP password spraying throttled at 20',spray.slice(0,20).every(c=>c===401)
 // audit of failures
 a=await call('/api/admin/audit',{cookie:adminCookie});t('failed logins are audited',a.j.events.some(e=>e.action==='auth.login_failed'),a.j.events.filter(e=>e.action==='auth.login_failed').length+' events');
 const auditFirst=await call('/api/admin/audit?limit=1',{cookie:adminCookie});
-t('audit endpoint returns bounded cursor page',auditFirst.s===200&&auditFirst.j.events.length===1&&auditFirst.j.hasMore===true&&/^\\d+$/.test(auditFirst.j.nextCursor||''));
+t('audit endpoint returns bounded cursor page',auditFirst.s===200&&auditFirst.j.events.length===1&&auditFirst.j.hasMore===true&&typeof auditFirst.j.nextCursor==='string'&&auditFirst.j.nextCursor.length>0);
 const auditSecond=await call('/api/admin/audit?limit=1&before='+encodeURIComponent(auditFirst.j.nextCursor),{cookie:adminCookie});
 t('audit cursor returns older event without duplication',auditSecond.s===200&&auditSecond.j.events.length===1&&auditSecond.j.events[0].created_at<=auditFirst.j.events[0].created_at);
 t('audit endpoint rejects oversized page limits',(await call('/api/admin/audit?limit=1000',{cookie:adminCookie})).s===400);

@@ -20,7 +20,7 @@ From the repository root:
     chmod +x install.sh
     ./install.sh
 
-The installer creates links under ~/.local/bin, installs the declared Python lab requirements, and adds that directory to existing Bash/Zsh startup files. Reload the shell, then run:
+The installer creates links under ~/.local/bin and adds that directory to existing Bash/Zsh startup files. It deliberately does not install Python requirements from other labs: install only the requirements file belonging to the lab you intend to run, preferably in a dedicated virtual environment. Reload the shell, then run:
 
     mosta-doctor
     mosta

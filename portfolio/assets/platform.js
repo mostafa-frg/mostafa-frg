@@ -379,7 +379,99 @@ if(/\b(?:nc|ncat|netcat)\b.*\s-(?:e|c)\s/.test(cmd)||/\/dev\/tcp\//.test(cmd)||/
 if(/base64\s+(?:-d|--decode)/.test(cmd))f.push('MEDIUM ['+id+'] base64 decoding on the command line: '+cmd);
 if(/chmod\s+(?:[0-7]?777|a\+rwx|\+x)\s+\/(?:tmp|var\/tmp|dev\/shm)\//.test(cmd))f.push('MEDIUM ['+id+'] executable/world-writable file in a temp directory: '+cmd);
 if(/(?:^|\s)(?:\/tmp|\/var\/tmp|\/dev\/shm)\/\S+/.test(c.args[0]||'')){f.push('MEDIUM ['+id+'] binary executed from a temp directory: '+c.args[0]);}}
-return rows([['Commands rebuilt',calls.size],['Findings',f.length]])+'\n\nCommands:\n'+out.join('\n')+'\n\nFindings:\n'+(f.join('\n')||'No findings from these checks.');}}
+return rows([['Commands rebuilt',calls.size],['Findings',f.length]])+'\n\nCommands:\n'+out.join('\n')+'\n\nFindings:\n'+(f.join('\n')||'No findings from these checks.');}},
+{id:'cipher-suite-classifier',name:'TLS Cipher Suite Classifier',cat:'security',symbol:'CS',desc:'Classify TLS cipher suites (OpenSSL or IANA names, one per line or colon separated) as recommended, legacy, weak or insecure, with forward secrecy and AEAD flags and the reason.',tags:'tls ssl cipher suite openssl iana forward secrecy aead rc4 3des null export anon',fields:[['text','Cipher suite names','ECDHE-RSA-AES128-GCM-SHA256\nTLS_AES_256_GCM_SHA384\nAES256-SHA\nDES-CBC3-SHA\nRC4-SHA\nTLS_RSA_WITH_NULL_SHA256\nADH-AES128-SHA','textarea']],run:v=>{
+const names=v.text.split(/[\s,:;]+/).map(s=>s.trim()).filter(Boolean);
+if(!names.length)throw Error('Enter at least one cipher suite name.');
+if(names.length>2000)throw Error('Too many cipher suites (maximum 2000).');
+const order={INSECURE:0,WEAK:1,LEGACY:2,RECOMMENDED:3};const out=[];const count={INSECURE:0,WEAK:0,LEGACY:0,RECOMMENDED:0,UNKNOWN:0};
+for(const raw of names){
+const up=raw.toUpperCase();
+if(/^TLS_(AES_(128|256)_GCM_SHA(256|384)|CHACHA20_POLY1305_SHA256|AES_128_CCM_SHA256)$/.test(up)){out.push(raw+' => RECOMMENDED | fs=yes | aead=yes | TLS 1.3 suite');count.RECOMMENDED++;continue;}
+if(up==='TLS_AES_128_CCM_8_SHA256'){out.push(raw+' => LEGACY | fs=yes | aead=yes | TLS 1.3 suite with truncated 8-byte authentication tag (CCM_8)');count.LEGACY++;continue;}
+const t=up.split(/[-_]/).filter(Boolean);const has=x=>t.includes(x);const joined=t.join('-');
+const encKnown=has('AES')||/^AES(128|256)$/.test(t.find(x=>/^AES/.test(x))||'')||t.some(x=>/^(AES|CAMELLIA|ARIA)(128|256)?$/.test(x))||has('CHACHA20')||has('NULL')||has('RC4')||has('RC2')||has('DES')||has('3DES')||has('IDEA')||has('SEED')||has('DES40');
+if(!encKnown||t.length<2||/^[!+@-]/.test(raw)||/^(ALL|HIGH|MEDIUM|LOW|DEFAULT|COMPLEMENTOFALL|COMPLEMENTOFDEFAULT|STRENGTH|SECLEVEL)/.test(up)){out.push(raw+' => UNKNOWN | not a recognised cipher suite name (cipher-string keywords such as HIGH or !aNULL are not suites)');count.UNKNOWN++;continue;}
+const isNull=has('NULL');
+const anon=has('ANON')||/^(ADH|AECDH)-/.test(joined);
+const exp=has('EXPORT')||has('EXP')||has('40')||has('56')&&!has('AES');
+const rc4=has('RC4'),rc2=has('RC2');
+const tdes=has('3DES')||has('CBC3')||has('EDE3')||has('EDE');
+const des=(has('DES')||has('DES40'))&&!tdes;
+const idea=has('IDEA'),seed=has('SEED');
+const md5=has('MD5');
+const aead=/GCM|CCM|POLY1305/.test(joined);
+const ccm8=has('CCM8')||(has('CCM')&&has('8'));
+const fs=/(^|-)(ECDHE|DHE|EDH)(-|$)/.test(joined)||/(^|-)(ECDHE|DHE|DH)-PSK/.test(joined)||/^TLS-(ECDHE|DHE)-/.test(joined)||/^TLS-PSK-DHE-/.test(joined)||/^TLS-(ECDHE|DHE)-PSK/.test(joined)||/PSK-DHE/.test(joined);
+const fsFlag=fs&&!anon;
+const reasons=[];let level;
+if(isNull)reasons.push('NULL encryption: traffic is sent in clear');
+if(anon)reasons.push('anonymous key exchange: no server authentication (man-in-the-middle)');
+if(exp)reasons.push('EXPORT-grade 40/56-bit key');
+if(rc4)reasons.push('RC4 stream cipher is prohibited (RFC 7465)');
+if(rc2)reasons.push('RC2 is obsolete');
+if(des)reasons.push('single DES (56-bit key) is broken');
+if(reasons.length)level='INSECURE';
+else{
+if(tdes)reasons.push('3DES 64-bit block (Sweet32, CVE-2016-2183)');
+if(idea)reasons.push('IDEA is obsolete');
+if(seed)reasons.push('SEED is obsolete');
+if(md5)reasons.push('MD5-based MAC');
+if(reasons.length)level='WEAK';
+else{
+if(!fsFlag)reasons.push('no forward secrecy (static key exchange)');
+if(!aead)reasons.push('CBC mode with HMAC (padding-oracle history: Lucky13, POODLE-TLS)');
+if(ccm8)reasons.push('truncated 8-byte authentication tag (CCM_8)');
+if(reasons.length)level='LEGACY';else{level='RECOMMENDED';reasons.push('forward secrecy with an AEAD cipher');}
+}}
+count[level]++;
+out.push(raw+' => '+level+' | fs='+(fsFlag?'yes':'no')+' | aead='+(aead&&!isNull?'yes':'no')+' | '+reasons.join('; '));
+}
+return rows([['Suites checked',names.length],['Recommended',count.RECOMMENDED],['Legacy',count.LEGACY],['Weak',count.WEAK],['Insecure',count.INSECURE],['Unknown',count.UNKNOWN]])+'\n\n'+out.join('\n')+'\n\nPolicy: RECOMMENDED = forward secrecy + AEAD. Classification is by suite name; it does not test what a server actually negotiates.';}}
+,
+{id:'jwt-security-audit',name:'JWT Security Audit',cat:'security',symbol:'JA',desc:'Audit a JWT you already hold for risky algorithm, header and claim settings (alg none, missing or ms exp, jku/jwk/kid abuse, long lifetime). Does not verify signatures or attack anything.',tags:'jwt jws jwe alg none exp nbf kid jku jwk token audit oauth oidc',fields:[['token','JWT (compact form)','eyJhbGciOiJSUzI1NiIsImprdSI6Imh0dHA6Ly9ldmlsLmV4YW1wbGUvandrcy5qc29uIiwia2lkIjoiLi4vLi4vZGV2L251bGwifQ.eyJpc3MiOiJodHRwczovL2lkLmV4YW1wbGUiLCJhdWQiOiJhcGkiLCJzdWIiOiJ1MSIsImlhdCI6MTc5NTI0Nzk0MCwiZXhwIjoxNzk1MjUxNjAwfQ.AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8','textarea'],['now','Current time (ISO 8601, leave blank for now - optional)','','text']],run:v=>{
+const tok=v.token.trim().replace(/^Bearer\s+/i,'');
+if(!tok)throw Error('Paste a JWT.');
+const parts=tok.split('.');
+const dec=(s)=>{if(!/^[A-Za-z0-9_-]*$/.test(s)||s.length%4===1)throw Error('not valid base64url');const b=atob(s.replace(/-/g,'+').replace(/_/g,'/'));return new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(b,c=>c.charCodeAt(0)));};
+const f=[];const add=(sev,code,msg)=>f.push('['+sev+'] '+code+': '+msg);
+let now;if(String(v.now||'').trim()){const d=Date.parse(v.now.trim());if(isNaN(d))throw Error('Current time is not a valid ISO 8601 date.');now=Math.floor(d/1000);}else now=Math.floor(Date.now()/1000);
+if(parts.length===5){let alg='?';try{const h=JSON.parse(dec(parts[0]));alg=h.alg+' / '+h.enc;}catch(e){}
+return rows([['Type','JWE (encrypted, 5 parts)'],['Header alg / enc',alg],['Findings',0]])+'\n\nA JWE payload is encrypted; its claims cannot be inspected without the key.';}
+if(parts.length!==3)throw Error('A compact JWT has 3 dot-separated parts (or 5 for JWE); found '+parts.length+'.');
+let h,p;
+try{h=JSON.parse(dec(parts[0]));}catch(e){throw Error('Header is not valid base64url JSON.');}
+try{p=JSON.parse(dec(parts[1]));}catch(e){throw Error('Payload is not valid base64url JSON.');}
+if(!h||typeof h!=='object'||Array.isArray(h)||!p||typeof p!=='object'||Array.isArray(p))throw Error('Header and payload must be JSON objects.');
+const alg=h.alg;
+if(alg===undefined)add('HIGH','ALG_MISSING','header has no "alg" parameter.');
+else if(typeof alg!=='string')add('HIGH','ALG_INVALID','"alg" is not a string.');
+else if(alg.toLowerCase()==='none')add('CRITICAL','ALG_NONE','alg is "none": the token is unsigned. A server that accepts it lets anyone forge claims.');
+else if(/^HS(256|384|512)$/.test(alg))add('INFO','HS_SHARED','HMAC ('+alg+') uses a shared secret; make sure it is long and random, and never accept this token on a service that expects an asymmetric key.');
+else if(!/^(RS|PS|ES)(256|384|512)$|^EdDSA$/.test(alg))add('MEDIUM','ALG_UNUSUAL','unrecognised alg "'+alg+'".');
+if(parts[2]===''&&!(typeof alg==='string'&&alg.toLowerCase()==='none'))add('HIGH','UNSIGNED','signature part is empty although alg is "'+alg+'".');
+if(h.jku!==undefined)add('HIGH','JKU','header contains jku ('+String(h.jku).slice(0,120)+'): a server that fetches keys from it can be pointed at an attacker key set.');
+if(h.x5u!==undefined)add('HIGH','X5U','header contains x5u ('+String(h.x5u).slice(0,120)+'): same remote key-fetch risk as jku.');
+if(h.jwk!==undefined)add('HIGH','JWK_EMBEDDED','header embeds a public key (jwk): never trust a key supplied by the token itself.');
+if(h.kid!==undefined){const k=String(h.kid);if(/\.\.|[\/\\]|['"`;|$<>]|\s--|%00|%2e/i.test(k))add('HIGH','KID_RISK','kid "'+k.slice(0,80)+'" contains path or injection characters; if used in a file or SQL lookup it is exploitable.');else add('INFO','KID','kid present ("'+k.slice(0,80)+'"); make sure it is only matched against a fixed key list.');}
+if(h.crit!==undefined)add('INFO','CRIT','header has crit: the verifier must understand every listed extension or reject the token.');
+const num=(x)=>typeof x==='number'&&isFinite(x);
+if(p.exp===undefined)add('MEDIUM','EXP_MISSING','no exp claim: the token never expires.');
+else if(!num(p.exp))add('HIGH','EXP_INVALID','exp is not a number ('+JSON.stringify(p.exp).slice(0,40)+').');
+else{
+if(p.exp>1e11)add('MEDIUM','EXP_MS','exp '+p.exp+' looks like milliseconds; JWT NumericDate is seconds.');
+else if(p.exp<=now)add('INFO','EXP_EXPIRED','expired '+(now-p.exp)+' seconds ago.');
+if(num(p.iat)&&p.exp<=1e11&&p.exp-p.iat>86400)add('LOW','LIFETIME_LONG','lifetime exp-iat is '+Math.round((p.exp-p.iat)/3600)+' hours (more than 24).');
+}
+if(p.nbf!==undefined){if(!num(p.nbf))add('HIGH','NBF_INVALID','nbf is not a number.');else if(p.nbf>now)add('INFO','NBF_FUTURE','not valid yet; nbf is '+(p.nbf-now)+' seconds in the future.');}
+if(p.iat!==undefined){if(!num(p.iat))add('HIGH','IAT_INVALID','iat is not a number.');else if(p.iat>now+60)add('LOW','IAT_FUTURE','iat is '+(p.iat-now)+' seconds in the future (clock skew or forged).');}
+const miss=['iss','aud','sub'].filter(c=>p[c]===undefined);
+if(miss.length)add('LOW','CLAIMS_MISSING','missing '+miss.join(', ')+': validators cannot check issuer/audience/subject.');
+const sens=Object.keys(p).filter(k=>/^(password|passwd|pwd|secret|api_?key|private_?key|ssn|credit_?card|card_?number)$/i.test(k));
+if(sens.length)add('MEDIUM','SENSITIVE_CLAIM','payload exposes '+sens.join(', ')+'; JWT payloads are only encoded, not encrypted.');
+const order={CRITICAL:0,HIGH:1,MEDIUM:2,LOW:3,INFO:4};f.sort((x,y)=>order[/^\[(\w+)\]/.exec(x)[1]]-order[/^\[(\w+)\]/.exec(y)[1]]);
+return rows([['Type','JWS (signed, 3 parts)'],['Header alg',alg===undefined?'(none)':String(alg)],['Claims',Object.keys(p).join(', ')||'(none)'],['Evaluated at (UTC)',new Date(now*1000).toISOString()],['Findings',f.length]])+'\n\n'+(f.join('\n')||'No findings from these checks.')+'\n\nThe signature is NOT verified. This audit only reads the token you pasted.';}}
+
 ];
 function rows(items){return items.map(x=>x[0]+': '+x[1]).join('\n');}
 function integer(x,min,max){const n=Number(x);if(!Number.isInteger(n)||n<min||n>max)throw Error('Enter a whole number from '+min+' to '+max+'.');return n;}

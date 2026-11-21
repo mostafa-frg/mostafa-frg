@@ -1122,6 +1122,69 @@ const TOOLS=[
     "group": "SOC & Incident Response",
     "mode": "browser",
     "description": "Static review of YARA rules: duplicate names, missing conditions, undefined or unused strings, very short strings and missing metadata. Does not replace compiling with yara."
+  },
+  {
+    "id": "sysmon-event-summary",
+    "name": "Sysmon Event Summary & Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Sysmon XML events and flag encoded PowerShell, LOLBin abuse, Office child processes, LSASS access, remote threads and Run-key persistence."
+  },
+  {
+    "id": "windows-logon-summary",
+    "name": "Windows Logon Event Summary (4624/4625)",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Security log XML: failed/successful logons by user and IP, brute-force and password-spraying patterns, success after failures, audit log cleared and account changes."
+  },
+  {
+    "id": "powershell-encoded-decoder",
+    "name": "PowerShell -EncodedCommand Decoder",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Decode PowerShell -EncodedCommand payloads (Base64 of UTF-16LE) and list suspicious keywords and URLs, defanged. Decoding only; nothing is executed."
+  },
+  {
+    "id": "ioc-defang",
+    "name": "IOC Defang / Refang",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Defang URLs, IPv4 addresses, emails and common domains for safe sharing (hxxps://evil[.]com) or refang them for lookups."
+  },
+  {
+    "id": "ip-in-cidr-list",
+    "name": "IP Matcher (IPv4/IPv6 CIDR list)",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Check which IP addresses fall inside a list of CIDR blocks or single IPs, for blocklist, allowlist and scope checks. IPv4 and IPv6."
+  },
+  {
+    "id": "forensic-timestamps",
+    "name": "Forensic Timestamp Converter",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Convert Unix, Windows FILETIME, WebKit/Chrome, macOS absolute and .NET tick values to UTC (and an ISO date back to all formats) with plausibility marks."
+  },
+  {
+    "id": "file-signature-id",
+    "name": "File Signature (Magic Bytes) Identifier",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Identify a file type from its first bytes (hex): PE, ELF, Mach-O, PDF, Office/OLE, ZIP, gzip, 7z, RAR, PNG, JPEG, GIF, SQLite, PCAP, LNK, scripts and more."
+  },
+  {
+    "id": "layered-decoder",
+    "name": "Layered Decoder (Base64 / Hex / URL)",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Peel nested encodings automatically (Base64, hex, URL percent-encoding) and show every layer, to unwrap obfuscated payloads safely. Decoding only; nothing is executed."
+  },
+  {
+    "id": "auditd-execve-summary",
+    "name": "auditd EXECVE Command Summary",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Rebuild commands from auditd EXECVE records and flag download-and-run, reverse shells, base64 decoding, world-writable chmod and shell piping."
   }
 ];
 

@@ -66,12 +66,16 @@ Run from the repo root:
 - "Zero errors" cannot be guaranteed; the guarantee is that no tool ships without passing known-answer tests and the gate.
 
 ## Status (update every session)
-- Last updated: 2026-11-21 by Claude. Working branch: `platform/clean-v3` (160 tools; 102 frontend tests, 103 backend checks green;
-  browser sweep: all new tools run clean).
-- Phase 2 batch 1 done (10 tools): x509-inspector, ssh-fingerprint, nmap-grepable-parser, suricata-eve-summary, zeek-conn-summary,
-  sudoers-audit, passwd-shadow-audit, checksum-calc, luhn-check, yara-rule-lint. Ground truth: openssl, independent Python, published
-  CRC/Luhn check values, yara-python compile of the fixture.
-- Decision: the catalog stays in one `platform.js` until about 400 tools (about 270 KB gzip-compressible); the split (Phase 1) is
-  deferred because CI, tests and the deploy smoke check all read that file. Do it before the file passes that size.
-- `main` was last seen at 0b90b7c. The older `feat/*` and `fix/terminal-tools-*` branches are superseded; do not merge them.
-- Next action: Phase 2 batch 2 (log analyzers: Sysmon/Windows event, web access attack patterns, auth.log, firewall; TLS/headers).
+- Last updated: 2026-11-21 by Claude. Working branch: `platform/clean-v3` (169 tools; 112 frontend tests, 103 backend checks green;
+  browser run of every new tool clean).
+- Batch 1 (10): x509-inspector, ssh-fingerprint, nmap-grepable-parser, suricata-eve-summary, zeek-conn-summary, sudoers-audit,
+  passwd-shadow-audit, checksum-calc, luhn-check, yara-rule-lint.
+- Batch 2 (9): sysmon-event-summary, windows-logon-summary, powershell-encoded-decoder, ioc-defang, ip-in-cidr-list,
+  forensic-timestamps, file-signature-id, layered-decoder, auditd-execve-summary. Ground truth: Python (base64, datetime, ipaddress),
+  the `file` command on real generated files, documented Sysmon/Security/auditd schemas; mutation-checked (5 deliberate bugs, all caught).
+- Test standard going forward: derive expected values from an independent source, then mutate the tool to prove the test fails.
+- Decision: the catalog stays in one `platform.js` until about 400 tools; the split (Phase 1) is deferred because CI, tests and the
+  deploy smoke check all read that file.
+- `main` last seen at 0b90b7c. Older `feat/*` and `fix/terminal-tools-*` branches are superseded; do not merge them.
+- Next action: Phase 2 batch 3 (TLS/web: CSP/CORS/cookie review expansions, HTTP request smuggling indicators, DNS records audit,
+  robots/security.txt checks, JWT algorithm audit, password policy auditor, SSH client/server config audit).

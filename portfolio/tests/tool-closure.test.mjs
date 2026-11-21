@@ -296,7 +296,7 @@ test('port reference covers common services and unknown queries', async () => {
 });
 
 test('every registered tool has a dedicated closure test (guards future additions)', async () => {
-  const files = ['platform-tools.test.mjs', 'tool-closure.test.mjs', 'tool-closure-b.test.mjs', 'tool-closure-c.test.mjs'];
+  const files = ['platform-tools.test.mjs', 'tool-closure.test.mjs', 'tool-closure-b.test.mjs', 'tool-closure-c.test.mjs', 'tool-closure-d.test.mjs'];
   let text = '';
   for (const f of files) text += await readFile(new URL('./' + f, import.meta.url), 'utf8');
   text = text.replace(/const overrides = \{[\s\S]*?\n  \};/, '');

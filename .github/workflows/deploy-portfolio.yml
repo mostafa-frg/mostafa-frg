@@ -85,6 +85,7 @@ jobs:
           node --test portfolio/tests/tool-closure.test.mjs
           node --test portfolio/tests/tool-closure-b.test.mjs
           node --test portfolio/tests/tool-closure-c.test.mjs
+          node --test portfolio/tests/tool-closure-d.test.mjs
       - name: Test terminal catalog data, commands and roadmap
         run: node --test portfolio/tests/terminal-tools.test.mjs
       - name: Audit HTML links, navigation and external links

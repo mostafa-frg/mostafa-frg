@@ -761,7 +761,7 @@ const TOOLS=[
   },
   {
     "id": "text-hex",
-    "name": "Text \u21c4 Hex Converter",
+    "name": "Text ⇄ Hex Converter",
     "group": "Developer",
     "mode": "browser",
     "description": "Convert UTF-8 text to hexadecimal bytes and decode hex back to text."
@@ -1052,6 +1052,76 @@ const TOOLS=[
     "group": "Networking",
     "mode": "browser",
     "description": "Convert a MAC address between colon, hyphen, Cisco dotted and plain formats and read its multicast and local bits."
+  },
+  {
+    "id": "x509-inspector",
+    "name": "X.509 Certificate Inspector (PEM)",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Parse a PEM certificate locally: subject, issuer, validity, SANs, key type and size, signature algorithm, SHA-256 fingerprint, plus expiry and weakness findings."
+  },
+  {
+    "id": "ssh-fingerprint",
+    "name": "SSH Public Key Fingerprint",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Compute SHA256 and legacy MD5 fingerprints for authorized_keys / .pub lines and flag weak key types and sizes."
+  },
+  {
+    "id": "nmap-grepable-parser",
+    "name": "Nmap Grepable (-oG) Parser",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Summarize Nmap grepable output: hosts up, open ports and services, and exposed high-risk services."
+  },
+  {
+    "id": "suricata-eve-summary",
+    "name": "Suricata EVE Alert Summary",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Suricata eve.json alert lines: top signatures, severities, categories and source/destination pairs."
+  },
+  {
+    "id": "zeek-conn-summary",
+    "name": "Zeek conn.log Summary",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize a Zeek TSV conn.log: top talkers by bytes, services, connection states, long connections and scan-like sources."
+  },
+  {
+    "id": "sudoers-audit",
+    "name": "sudoers Rule Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review sudoers text for NOPASSWD ALL, shell-escape binaries, wildcards, !authenticate and dangerous Defaults."
+  },
+  {
+    "id": "passwd-shadow-audit",
+    "name": "passwd / shadow Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Check /etc/passwd (and optional shadow) for extra UID 0 accounts, empty passwords, weak hash types and system accounts with login shells."
+  },
+  {
+    "id": "checksum-calc",
+    "name": "CRC and Adler Checksum Calculator",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Compute CRC-32, CRC-32C, CRC-16 (ARC and CCITT-FALSE), CRC-8 and Adler-32 for text or hex bytes; check values match the standard catalogue."
+  },
+  {
+    "id": "luhn-check",
+    "name": "Luhn Checksum Validator",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Validate numbers with the Luhn algorithm, compute the check digit for a payload and identify the card network by prefix. Digits are masked in the output."
+  },
+  {
+    "id": "yara-rule-lint",
+    "name": "YARA Rule Linter",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Static review of YARA rules: duplicate names, missing conditions, undefined or unused strings, very short strings and missing metadata. Does not replace compiling with yara."
   }
 ];
 

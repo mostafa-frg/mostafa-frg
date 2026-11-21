@@ -16,9 +16,9 @@
 **Decision:** Every claim is tied to an exact commit SHA, test command, CI run, or source evidence. Unknown is not PASS.
 **Reason:** Avoid false confidence and stale status.
 
-## DEC-005 — PR #5 remains isolated
-**Decision:** The coordination foundation is created on a separate branch from `main`; PR #5 remains open and unmerged.
-**Reason:** Do not mix orchestration scaffolding with the redesign/security review under evaluation.
+## DEC-005 — Coordination work is isolated from application changes
+**Decision:** The coordination foundation is maintained on its own branch and PR, separate from application implementation. PR #5 was merged after the initial coordination snapshot; the earlier statement that it must remain open is historical and no longer describes live repository state.
+**Reason:** Keep orchestration scaffolding separate from application changes while keeping status records aligned with GitHub.
 
 ## DEC-006 — Security review is independent
 **Decision:** The implementer cannot self-approve security-sensitive work. High/Critical findings block release until fixed and retested.

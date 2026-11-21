@@ -6,7 +6,7 @@
 - Repository: `mostafa-frg/mostafa-frg`
 - Default branch: `main`
 - PR #5: MERGED. Do not continue PR #5-specific work as though it were an open review.
-- PR #6: OPEN, DRAFT; branch `chore/mosta-multi-agent-foundation`; head `912a89f62baa5e8b3767158bee267071d1b661ca`; base `main`; mergeable=true at last fetch.
+- PR #6: OPEN, DRAFT; branch `chore/mosta-multi-agent-foundation`; head `7c9e6fee359fcece350a05f1ea7b2f2709e6fb88`; base `main`; mergeable=true at last fetch.
 - PR #7: OPEN, DRAFT; branch `feat/mosta-1000-cyber-terminal-tools`; base `feat/mosta-platform-redesign`; head updated during this review to `a1eff15feea8f020b878a345c99bb8e3bbd95db1`; mergeable=false at last fetch. Base branch must be reviewed before retargeting.
 - PR #9: OPEN, DRAFT; branch `feat/mosta-admin-console-audit-pagination`; base `main`; head updated during this review to `0b131836334ac24624e880c134f3f0f0dc48e470`; mergeable=true at last fetch.
 

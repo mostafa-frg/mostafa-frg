@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const WORKER_ORIGIN='https://mostafa-frg.frh7977.workers.dev';
 if(location.hostname.endsWith('.github.io')){
-  const workerPath=location.pathname.replace(/^\\/mostafa-frg(?=\\/|$)/,'')||'/dashboard.html';
+  const workerPath=location.pathname.replace(/^\/mostafa-frg(?=\/|$)/,'')||'/dashboard.html';
   location.replace(WORKER_ORIGIN+workerPath+location.search+location.hash);
   return;
 }

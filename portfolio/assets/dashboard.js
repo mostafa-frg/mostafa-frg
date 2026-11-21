@@ -101,7 +101,7 @@ async function loadAudit(reset=true){
     const params=new URLSearchParams({limit:'50'});if(!reset&&auditCursor)params.set('before',auditCursor);
     const data=await api('/admin/audit?'+params.toString());
     cachedAudit=reset?(data.events||[]):cachedAudit.concat(data.events||[]);
-    auditCursor=data.nextCursor||null;auditHasMore===false;
+    auditCursor=data.nextCursor||null;
     auditHasMore=!!data.hasMore;renderAudit();
   }catch(error){setStatus('Audit log: '+error.message);}
   finally{auditLoading=false;renderAudit();}
@@ -126,12 +126,15 @@ async function load(){
       try{await loadUsers();}catch(error){setStatus('User management: '+error.message);}
       const tasks=[['overview',overview],['permissions',access],['audit log',()=>loadAudit(true)],['sessions',sessions]];
       const results=await Promise.allSettled(tasks.map(([,task])=>task()));
-      results.forEach((result,index)=>{if(result.status==='rejected')setStatus(tasks[index][0]+': '+result.reason.message);});
+      const failures=results.map((result,index)=>result.status==='rejected'?tasks[index][0]+': '+result.reason.message:null).filter(Boolean);
+      if(failures.length)setStatus('Workspace loaded with issues: '+failures.join(' · '));
+      else setStatus('Workspace ready.',true);
+      return;
     }
     setStatus('Workspace ready.',true);
   }catch(error){setStatus(error.message);if(error.message==='Authentication required.')location.replace('auth.html');}
 }
-$('#refreshOverview')?.addEventListener('click',async()=>{const button=$('#refreshOverview');button.disabled=true;try{await Promise.all([overview(),loadUsers(),access(),loadAudit(true),sessions()]);setStatus('Admin data refreshed.',true);}catch(error){setStatus(error.message);}finally{button.disabled=false;}});
+$('#refreshOverview')?.addEventListener('click',async()=>{const button=$('#refreshOverview');button.disabled=true;try{await Promise.all([overview(),loadAudit(true),sessions()]);await loadUsers();await access();setStatus('Admin data refreshed.',true);}catch(error){setStatus(error.message);}finally{button.disabled=false;}});
 $('#userSearch')?.addEventListener('input',renderUsers);
 $('#auditSearch')?.addEventListener('input',renderAudit);
 $('#loadOlderAudit')?.addEventListener('click',()=>loadAudit(false));

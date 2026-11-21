@@ -4,16 +4,42 @@
 - Task: ORCH-001
 - Owner: Technical Lead
 - Branch: `chore/mosta-multi-agent-foundation`
-- Current head before this handoff update: `7c9e6fee359fcece350a05f1ea7b2f2709e6fb88`
 - Base: `main`
-- Status: current-state and task-queue snapshots reconciled with live PR status; ORCH-001 remains in progress.
-- PR #5 is MERGED. Do not describe it as OPEN or DRAFT and do not continue PR5-specific tasks as active work.
-- No merge or Production deployment was performed during this handoff.
+- Status: current-state and task-queue documentation reconciled with live PR state. This handoff update advances the branch; fetch the live head before the next change.
+- PR #5 is MERGED.
+- No PR was merged and no Production deployment or Production resource change was performed during this review.
 
-## Current engineering handoffs
-- PR #9 audit pagination: implementation head `0b131836334ac24624e880c134f3f0f0dc48e470`; CI runs 44932343231, 44932343250, and 44932343277 completed successfully. Deployment jobs were skipped. Preview/runtime verification and independent review remain outstanding.
-- PR #7 tool expansion: implementation head `a1eff15feea8f020b878a345c99bb8e3bbd95db1`; no CI run was returned for this exact SHA. PR remains Draft, based on `feat/mosta-platform-redesign`, and mergeable=false. Compare the full diff before considering a base-branch change.
-- PR #6 coordination: head `7c9e6fee359fcece350a05f1ea7b2f2709e6fb88`; Cloudflare Preview Build Trigger remains unresolved and requires an authorized Cloudflare maintainer.
+## Engineering handoffs
+
+### PR #9 — Admin audit pagination
+- Branch: `feat/mosta-admin-console-audit-pagination`
+- Verified SHA: `0b131836334ac24624e880c134f3f0f0dc48e470`
+- GitHub Actions: Lab Checks passed; Python job reports 42 pytest tests passed and 121 toolkit checks passed (22 informational notices); backend-security job reports 106 passed, 0 failed.
+- Specific audit tests passed: marked first-page fixture, distinct older event on next page, invalid/malformed cursor rejection, and rejection of `9007199254740992`.
+- Portfolio/platform workflow validation and security-tests passed; deployment jobs were skipped on PR events.
+- Previous review threads for cursor precision and the pagination boundary test were resolved after the fixes.
+- Remaining gate: independent review and safe Preview/runtime verification of the Admin Console. Keep Draft until then.
+
+### PR #7 — MOSTA Terminal / tool expansion
+- Branch: `feat/mosta-1000-cyber-terminal-tools`
+- Verified SHA: `a1eff15feea8f020b878a345c99bb8e3bbd95db1`
+- Installer change: no longer scans sibling labs' requirements or installs their packages globally; README explains per-lab dependency installation.
+- Cloudflare Preview Build and Deployment succeeded on this exact SHA; deployment ID `b125201d-7b39-437c-a784-dccda620cf44`; URL: `https://b125201d-mostafa-frg.frh7977.workers.dev`.
+- No GitHub Actions run was returned for this exact SHA. The Preview URL could not be independently fetched from this execution environment due DNS/network resolution failure.
+- PR remains Draft and mergeable=false. Base is `feat/mosta-platform-redesign`; comparison with `main` shows 120 commits ahead and 66 behind. Do not retarget blindly; inspect the full tree/diff and resolve ancestry first.
+
+### PR #6 — Multi-agent foundation
+- Branch: `chore/mosta-multi-agent-foundation`
+- Base: `main`
+- The CURRENT_STATE, TASK_QUEUE, and HANDOFF snapshots were refreshed. PR5-specific review/QA tasks are CANCELLED as obsolete, not marked DONE.
+- Cloudflare Preview Build Trigger issue remains unresolved: the failing build invoked `npx wrangler preview` from repository root while Wrangler config is `backend/wrangler.jsonc`. The backend config already has a `previews` block.
+- Proposed Build Trigger command: `npx wrangler preview --config backend/wrangler.jsonc`, subject to checking asset paths. This needs an authorized Cloudflare maintainer; no account settings were changed.
+
+## Next actions
+1. Obtain independent review and Preview/runtime evidence for PR #9.
+2. Run clean-Linux installer and wrapper tests for PR #7; resolve the base-branch divergence without broadening the PR unexpectedly.
+3. Have an authorized maintainer fix the PR #6 Cloudflare Build Trigger, then verify Preview health and assets.
+4. Finish agent adapter templates and keep task ownership/path boundaries explicit.
 
 ## Handoff template
 Copy this section for every agent transfer.

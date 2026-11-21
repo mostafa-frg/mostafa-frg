@@ -80,6 +80,10 @@ jobs:
         run: node --test portfolio/tests/regex-worker.test.mjs
       - name: Test every registered engineering tool and UI workflow regressions
         run: node --test portfolio/tests/platform-tools.test.mjs
+      - name: Test tool closure (known-answer tests for every tool)
+        run: |
+          node --test portfolio/tests/tool-closure.test.mjs
+          node --test portfolio/tests/tool-closure-b.test.mjs
       - name: Test terminal catalog data, commands and roadmap
         run: node --test portfolio/tests/terminal-tools.test.mjs
       - name: Audit HTML links, navigation and external links

@@ -24,11 +24,8 @@ external_aliases=(mnmap mnc mdig mtcpdump mtshark mwireshark mscapy msocat mtrac
 for name in "${external_aliases[@]}"; do
   ln -sfn "$BASE/mosta-external" "$BIN/$name"
 done
-while IFS= read -r req; do
-  [ -z "$req" ] && continue
-  printf '%s\n' "Installing Python dependencies from $req"
-  python3 -m pip install -r "$ROOT/$req"
-done < <(find "$ROOT" -mindepth 2 -maxdepth 2 -name requirements.txt -print | sed "s#$ROOT/##" | sort)
+printf '%s\n' "Python lab dependencies are intentionally not installed globally."
+printf '%s\n' "Install only the requirements for the specific lab you plan to use."
 for rc in "$HOME/.bashrc" "$HOME/.zshrc"; do
   [ -f "$rc" ] || continue
   line='export PATH="$HOME/.local/bin:$PATH"'

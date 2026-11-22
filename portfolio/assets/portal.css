@@ -351,3 +351,17 @@ body.portal[data-theme=dark]{
 @media(max-width:700px){.guest-access-note{align-items:flex-start;flex-wrap:wrap}.guest-access-note>a{margin-left:22px;white-space:normal}}
 
 .public-access-hint{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0 0;color:var(--muted);font:10px var(--mono);letter-spacing:.025em}.public-access-hint>span{color:var(--lime);font-size:9px}.public-access-hint a{color:var(--cyan);text-decoration:none}.public-access-hint a:hover{text-decoration:underline}
+
+/* Header fit (desktop and laptop widths): the centred link row used to overflow into the brand and the action buttons, and below ~1180px it
+   ran off-screen. Keep the row inside its box, drop the redundant tagline before it can collide, and wrap the links onto their own row
+   on narrow laptops/tablets (the hamburger menu still takes over at 850px and below). */
+@media(min-width:851px){
+ .portal .brand{letter-spacing:.1em;font-size:15px}
+ .portal .navlinks{justify-content:safe center;gap:0}
+ .portal .navlinks a{padding:10px 8px}
+}
+@media(min-width:851px) and (max-width:1500px){.portal .brand-sub{display:none}}
+@media(min-width:851px) and (max-width:1180px){
+ .portal .nav{flex-wrap:wrap;row-gap:2px;padding-top:8px;padding-bottom:6px}
+ .portal .navlinks{order:5;flex:1 1 100%;justify-content:center}
+}

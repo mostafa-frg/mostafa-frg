@@ -772,6 +772,7 @@ function withValidatedInputs(tool){
     if(input[key].length>limit)throw Error(label+' input is too long (maximum '+limit+' characters).');
     if(input[key].includes(String.fromCharCode(0)))throw Error(label+' input cannot contain NUL characters.');
    }
+   if(type==='number'&&input[key]!==undefined&&input[key]!==null&&String(input[key]).trim()!==''&&!Number.isFinite(Number(input[key])))throw Error(label+' must be a finite number.');
    if(type==='select'&&(!Array.isArray(options)||!options.includes(String(input[key]))))
     throw Error('Invalid option for '+label+'. Choose one of the listed values.');
   }

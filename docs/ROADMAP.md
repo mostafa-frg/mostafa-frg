@@ -66,7 +66,7 @@ Run from the repo root:
 - "Zero errors" cannot be guaranteed; the guarantee is that no tool ships without passing known-answer tests and the gate.
 
 ## Status (update every session)
-- Last updated: 2026-11-22 by Claude. Working branch: `platform/clean-v3` (179 tools; 123 frontend tests, 103 backend checks green;
+- Last updated: 2026-11-22 by Claude. Working branch: `platform/clean-v3` (179 tools; 125 frontend tests, 103 backend checks green;
   browser run of every new tool clean).
 - Batch 1 (10): x509-inspector, ssh-fingerprint, nmap-grepable-parser, suricata-eve-summary, zeek-conn-summary, sudoers-audit,
   passwd-shadow-audit, checksum-calc, luhn-check, yara-rule-lint.
@@ -83,6 +83,13 @@ Run from the repo root:
   real PEM private keys from cryptography incl. encrypted PKCS8/traditional/OpenSSH; output is masked). All mutation-checked.
   Not done: sshd-config-audit (sshd not available here to produce ground truth), robots-txt-audit (needs the RFC 9309
   longest-match examples), password-policy-audit (needs the NIST SP 800-63B-4 values read from the source).
+- Review 2026-11-22: (a) `tool-robustness.test.mjs` now runs every tool (current and future) against hostile inputs; it found one real bug
+  (non-finite numbers produced "NaN"), fixed generically in `withValidatedInputs`. (b) Header fit: the centred nav row overflowed into the
+  brand/buttons at every desktop width and ran off-screen between 851 and 1180px; fixed in `portal.css` (checked 390-1920px on index, tools, about).
+  (c) ChatGPT branches: `feat/mosta-1000-cyber-terminal-tools` is still broken (syntax error in platform.js line 239, ITER=600000 which
+  Cloudflare rejects, 66 commits behind main): do not merge. `feat/mosta-admin-console-audit-pagination` is healthy (62 frontend tests,
+  106 backend checks, based on current main). Test data that looks like a real secret must be generated at run time: GitHub push protection
+  blocks committed token-shaped strings and private keys.
 - Test standard going forward: derive expected values from an independent source, then mutate the tool to prove the test fails.
 - Decision: the catalog stays in one `platform.js` until about 400 tools; the split (Phase 1) is deferred because CI, tests and the
   deploy smoke check all read that file.

@@ -55,6 +55,28 @@ class CatalogValidationTests(unittest.TestCase):
         path.write_text("name,alias\nNmap,mnmap\n", encoding="utf-8")
         self.assertIn("header must be exactly: name,alias,platform,category,purpose", validate(path))
 
+    def test_rejects_rows_with_extra_csv_fields(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        path = Path(temp.name) / "extra.csv"
+        path.write_text(
+            "name,alias,platform,category,purpose\n"
+            "Nmap,mnmap,Kali,network,discovery,unexpected\n",
+            encoding="utf-8",
+        )
+        self.assertTrue(any("unexpected extra CSV fields" in item for item in validate(path)))
+
+    def test_rejects_malformed_csv_quoting(self):
+        temp = tempfile.TemporaryDirectory()
+        self.addCleanup(temp.cleanup)
+        path = Path(temp.name) / "malformed.csv"
+        path.write_text(
+            'name,alias,platform,category,purpose\n'
+            'Nmap,mnmap,Kali,network,"unterminated\n',
+            encoding="utf-8",
+        )
+        self.assertTrue(any("cannot read catalog" in item for item in validate(path)))
+
 
 if __name__ == "__main__":
     unittest.main()

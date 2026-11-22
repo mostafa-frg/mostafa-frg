@@ -164,16 +164,30 @@ jobs:
           grep -q "Mosta shell helpers loaded." /tmp/mosta-help.txt
           test -x cyber-labs/mosta-terminal/install.sh || chmod +x cyber-labs/mosta-terminal/install.sh
           tmp_home="$(mktemp -d)"
-          HOME="$tmp_home" bash cyber-labs/mosta-terminal/install.sh
+          fake_bin="$(mktemp -d)"
+          cat >"$fake_bin/python3" <<'PY'
+          #!/usr/bin/env bash
+          if [[ " $* " == *" -m pip "* ]]; then
+            printf '%s\\n' "$*" >>"$MOSTA_TEST_PIP_LOG"
+          fi
+          exit 0
+          PY
+          chmod +x "$fake_bin/python3"
+          export MOSTA_TEST_PIP_LOG="$RUNNER_TEMP/mosta-pip-install.log"
+          rm -f "$MOSTA_TEST_PIP_LOG"
+          HOME="$tmp_home" PATH="$fake_bin:$PATH" bash cyber-labs/mosta-terminal/install.sh
+          test ! -e "$MOSTA_TEST_PIP_LOG"
           export HOME="$tmp_home"
           export PATH="$HOME/.local/bin:$PATH"
           test -L "$HOME/.local/bin/mnet"
           test -L "$HOME/.local/bin/run-network-toolkit"
+          test -L "$HOME/.local/bin/mosta-index"
           mnet subnet 192.168.50.10/24 | grep -q "Network: 192.168.50.0"
           mosta | grep -q "mosta-doctor"
+          mosta-index list | grep -q "Nmap"
+          mosta-index search Tcpdump | grep -q "mtcpdump"
           mosta-doctor
-          fake_bin="$(mktemp -d)"
-          printf '%s\n' '#!/usr/bin/env bash' 'printf "fake nmap\\n"' >"$fake_bin/nmap"
+          printf '%s\\n' '#!/usr/bin/env bash' 'printf "fake nmap\\n"' >"$fake_bin/nmap"
           chmod +x "$fake_bin/nmap"
           ln -s "$PWD/cyber-labs/mosta-terminal/mosta-external" "$fake_bin/mnmap"
           MOSTA_BANNER=always PATH="$fake_bin:$PATH" "$fake_bin/mnmap" --version > /tmp/mosta-external-test.txt 2>&1

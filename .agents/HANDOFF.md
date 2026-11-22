@@ -20,10 +20,10 @@
 
 ### PR #7 — MOSTA Terminal / tool expansion
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Verified latest head: `50d2fb429b9869717f12332b1909319770880fce`
+- Verified latest head: `c8f225f45f73e509b0bfc676a31523317cd921a2`
 - Installer hardening: no longer scans sibling labs' requirements or installs their packages globally; README explains per-lab dependency installation.
 - CLI catalog validator hardening: `f59776e083bbcc061a05c8790f95bc96d2a7e6fc` enables strict CSV parsing and rejects extra row fields; `50d2fb429b9869717f12332b1909319770880fce` adds regression tests for extra columns and unterminated quoted fields.
-- Latest validator, test, catalog, and installer files were fetched from GitHub and inspected.
+- Latest validator, test, catalog, installer, frontend registry, backend registry, and platform test files were fetched from GitHub and inspected. Live audit confirmed 231 unique IDs in each frontend/backend catalog with exact set parity. The platform test's stale expected count/category totals (207) were corrected to the actual 231-tool inventory, and a frontend/backend parity regression test was added.
 - Dedicated workflow `.github/workflows/mosta-tool-index.yml` defines Python 3.10 and 3.12 matrix checks on push and pull_request. Available workflow/status tools returned no PR-triggered run and no combined status for the latest SHA; push-triggered run state remains unverified. No clean Linux test execution was performed.
 - Earlier Cloudflare Preview Build and Deployment succeeded on `a1eff15feea8f020b878a345c99bb8e3bbd95db1` (deployment `b125201d-7b39-437c-a784-dccda620cf44`); this predates the latest validator changes. The Preview URL could not be independently fetched from this execution environment.
 - PR remains Draft and mergeable=false. Base is `feat/mosta-platform-redesign`. Comparison: 122 commits ahead / 21 behind that base; 122 ahead / 66 behind `main`. The diff has 20 changed files, including 868 backend additions and 271 frontend additions. Do not retarget blindly; review file-level patches and shared ancestry first.
@@ -37,7 +37,7 @@
 - Proposed Build Trigger command: `npx wrangler preview --config backend/wrangler.jsonc`, subject to checking asset paths. This needs an authorized Cloudflare maintainer; no account settings were changed.
 
 ## Next actions
-1. PR #7: obtain exact-head CI and clean-Linux evidence; review the complete file-level diff and resolve base ancestry without broadening the PR unexpectedly.
+1. PR #7: obtain exact-head CI and clean-Linux evidence on `c8f225f45f73e509b0bfc676a31523317cd921a2`; review the complete file-level diff and resolve base ancestry without broadening the PR unexpectedly.
 2. PR #9: obtain independent review and Preview/runtime evidence.
 3. PR #6: an authorized maintainer must fix the Preview Build Trigger, then verify Preview health and assets.
 4. Keep ORCH-001 coordination records synchronized with live PR heads.

@@ -20,4 +20,7 @@
 - Added regression tests for extra CSV columns and unterminated quoted fields (`50d2fb429b9869717f12332b1909319770880fce`).
 - Fetched the updated files back from GitHub and inspected their contents. Exact-head CI and clean-Linux execution remain unverified; do not mark the task DONE.
 - Reconciled CURRENT_STATE, TASK_QUEUE, and HANDOFF to the latest PR #7 commit and recorded the CI evidence limitation.
+- Completed ORCH-002: added explicit copy/paste completion prompts to ChatGPT, Claude, and independent reviewer adapters; fetched all three files back and verified their contents. Task and handoff templates already provide the common structured evidence record.
+- Compared PR #7 against both its current base and `main`: 122 commits ahead / 21 behind `feat/mosta-platform-redesign`, and 122 ahead / 66 behind `main`. The 20-file diff includes substantial backend and frontend changes, so no base retarget was performed.
+- Confirmed the dedicated CLI index workflow has Python 3.10 and 3.12 jobs on push and pull_request. The available run/status actions returned no run/status for the latest SHA; exact-head CI remains UNKNOWN, not PASS.
 - No PR merge, Production deployment, or Cloudflare account-setting change was performed.

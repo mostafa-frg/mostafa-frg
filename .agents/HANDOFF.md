@@ -20,7 +20,7 @@
 
 ### PR #7 — MOSTA Terminal / tool expansion
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Verified latest head: `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`
+- Verified latest head: `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af`
 - Installer hardening: no longer scans sibling labs' requirements or installs their packages globally; README explains per-lab dependency installation.
 - CLI catalog validator hardening: `f59776e083bbcc061a05c8790f95bc96d2a7e6fc` enables strict CSV parsing and rejects extra row fields; `50d2fb429b9869717f12332b1909319770880fce` adds regression tests for extra columns and unterminated quoted fields.
 - Latest validator, test, catalog, installer, frontend registry, backend registry, and platform test files were fetched from GitHub and inspected. Live audit confirmed 231 unique IDs in each frontend/backend catalog with exact set parity. The platform test's stale expected count/category totals (207) were corrected to the actual 231-tool inventory, and a frontend/backend parity regression test was added. The CLI browser now validates the catalog through the shared strict validator before loading; extra-field and malformed-quoting regression tests were added.
@@ -37,7 +37,7 @@
 - Proposed Build Trigger command: `npx wrangler preview --config backend/wrangler.jsonc`, subject to checking asset paths. This needs an authorized Cloudflare maintainer; no account settings were changed.
 
 ## Next actions
-1. PR #7: obtain exact-head CI and clean-Linux evidence on `c8f225f45f73e509b0bfc676a31523317cd921a2`; review the complete file-level diff and resolve base ancestry without broadening the PR unexpectedly.
+1. PR #7: run the installer in a clean Linux environment and complete independent review on `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af`; CLI index CI is green on this exact head; review the complete file-level diff and resolve base ancestry without broadening the PR unexpectedly.
 2. PR #9: obtain independent review and Preview/runtime evidence.
 3. PR #6: an authorized maintainer must fix the Preview Build Trigger, then verify Preview health and assets.
 4. Keep ORCH-001 coordination records synchronized with live PR heads.

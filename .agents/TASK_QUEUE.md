@@ -48,7 +48,7 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest branch commit: `50d2fb429b9869717f12332b1909319770880fce`
+- Latest branch head: `c8f225f45f73e509b0bfc676a31523317cd921a2` (installer hardening was committed earlier).
 - Scope: `cyber-labs/mosta-terminal/install.sh`, `cyber-labs/mosta-terminal/README.md`
 - Required: test installer in a clean Linux environment; prove it does not install requirements from sibling labs; verify symlinks, PATH setup, and mosta-doctor behavior.
 - Blocker: PR targets `feat/mosta-platform-redesign`; comparison reports 122 commits ahead and 21 behind that base, and 122 ahead / 66 behind `main`. Do not retarget until the complete 20-file diff and shared ancestry are reviewed.

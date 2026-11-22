@@ -59,9 +59,9 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest commit: `50d2fb429b9869717f12332b1909319770880fce`
+- Latest branch head: `c8f225f45f73e509b0bfc676a31523317cd921a2`.
 - Scope: `cyber-labs/mosta-tool-index/validate_catalog.py`, `cyber-labs/mosta-tool-index/test_validate_catalog.py`
-- Changes: strict CSV parsing; reject rows with extra fields; regression tests for extra columns and unterminated quoted fields.
+- Changes: strict CSV parsing; reject rows with extra fields; regression tests for extra columns and unterminated quoted fields; corrected frontend tool-count/category assertions from stale 207 to audited 231; added frontend/backend registry ID parity regression.
 - Required: run validator against the checked-in 61-entry CSV; run all `test_*.py` tests on Python 3.10 and 3.12; capture exact-SHA CI evidence.
 - Workflow: `.github/workflows/mosta-tool-index.yml` defines Python 3.10/3.12 matrix checks on both push and pull_request for this branch. Current execution tools returned no PR-triggered run and no combined commit status for the latest SHA; push-triggered run state remains unverified.
 - Prohibited: claim tests passed without observed output; merge or deploy.

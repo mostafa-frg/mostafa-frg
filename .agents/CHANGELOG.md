@@ -24,3 +24,6 @@
 - Compared PR #7 against both its current base and `main`: 122 commits ahead / 21 behind `feat/mosta-platform-redesign`, and 122 ahead / 66 behind `main`. The 20-file diff includes substantial backend and frontend changes, so no base retarget was performed.
 - Confirmed the dedicated CLI index workflow has Python 3.10 and 3.12 jobs on push and pull_request. The available run/status actions returned no run/status for the latest SHA; exact-head CI remains UNKNOWN, not PASS.
 - No PR merge, Production deployment, or Cloudflare account-setting change was performed.
+
+- Hardened the local CLI index browser: `mosta_index.py` now invokes the shared strict CSV validator before displaying entries, rejecting malformed quoting, extra fields, duplicate aliases, and invalid catalog rows. Added browser-level regression tests for extra fields and malformed quoting. Commits: `31ab15ff47fbe45b9380b9ba7741e8a6b48be6e1` and `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`.
+- Reconciled the current PR #7 head to `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`. The checked-in CLI CSV has 61 data rows. Exact-head Actions results remain unverified.

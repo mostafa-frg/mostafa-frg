@@ -659,6 +659,62 @@ if(!apex.some(r=>r.type==='CAA'))add('INFO','no CAA record at the apex; any CA m
 const order={HIGH:0,MEDIUM:1,LOW:2,INFO:3};f.sort((a,b)=>order[/^\[(\w+)\]/.exec(a)[1]]-order[/^\[(\w+)\]/.exec(b)[1]]);
 const counts={};for(const r of recs)counts[r.type]=(counts[r.type]||0)+1;
 return rows([['Zone',base],['Records',recs.length],['By type',Object.entries(counts).map(x=>x[0]+' '+x[1]).join(', ')||'-'],['Findings',f.length]])+'\n\nRecords:\n'+recs.map(r=>r.owner+' '+r.ttl+' IN '+r.type+' '+r.data).join('\n')+'\n\nFindings:\n'+(f.join('\n')||'No findings from these checks.')+'\n\nStatic parse of the text you paste; no DNS queries are sent.';}}
+,
+{id:'cidr-aggregate',name:'CIDR Aggregator / Excluder',cat:'networking',symbol:'CA',desc:'Merge a mixed IPv4/IPv6 list of CIDRs and IPs into the smallest exact set of CIDR blocks, or subtract an exclusion list from it, for firewall allowlists and blocklists.',tags:'cidr aggregate summarize merge exclude subtract supernet allowlist blocklist ipv4 ipv6',fields:[['list','CIDRs / IPs (one per line or comma separated)','10.0.0.0/25\n10.0.0.128/25\n10.0.1.0/24\n192.168.1.5\n192.168.1.4\n2001:db8::/33\n2001:db8:8000::/33','textarea'],['exclude','Exclude these (optional - leave blank to just aggregate)','','textarea']],run:v=>{
+const parse=(tok)=>{const m=/^([^/\s]+)(?:\/(\d{1,3}))?$/.exec(tok);if(!m)throw Error('Invalid entry "'+tok.slice(0,40)+'".');const a=m[1];let ver,val;
+if(/^\d{1,3}(\.\d{1,3}){3}$/.test(a)){const p=a.split('.');if(p.some(x=>+x>255||(x.length>1&&x[0]==='0')))throw Error('Invalid IPv4 address "'+a+'".');ver=4;val=p.reduce((t,x)=>t*256n+BigInt(x),0n);}
+else if(a.includes(':')){if(!/^[0-9a-fA-F:]+$/.test(a)||/:::/.test(a)||(a.match(/::/g)||[]).length>1)throw Error('Invalid IPv6 address "'+a+'".');let [h,t]=a.includes('::')?a.split('::'):[a,null];const hp=h?h.split(':'):[],tp=t?t.split(':'):[];
+if(t===null&&hp.length!==8)throw Error('Invalid IPv6 address "'+a+'".');if(t!==null&&hp.length+tp.length>7)throw Error('Invalid IPv6 address "'+a+'".');
+const mid=t===null?[]:Array(8-hp.length-tp.length).fill('0');const all=[...hp,...mid,...tp];if(all.some(x=>!/^[0-9a-fA-F]{1,4}$/.test(x)))throw Error('Invalid IPv6 address "'+a+'".');ver=6;val=all.reduce((s,x)=>s*65536n+BigInt('0x'+x),0n);}
+else throw Error('Invalid IP address "'+a.slice(0,40)+'".');
+const bits=ver===4?32:128;const len=m[2]===undefined?bits:+m[2];if(len>bits)throw Error('Prefix /'+len+' is too long for IPv'+ver+'.');
+const size=1n<<BigInt(bits-len);const lo=val-(val%size);return{ver,lo,hi:lo+size-1n,bits};};
+const toks=(s)=>s.split(/[\s,;]+/).filter(Boolean);
+const merge=(arr)=>{const out=[];for(const x of arr.slice().sort((p,q)=>p.ver-q.ver||(p.lo<q.lo?-1:p.lo>q.lo?1:0))){const l=out[out.length-1];if(l&&l.ver===x.ver&&x.lo<=l.hi+1n){if(x.hi>l.hi)l.hi=x.hi;}else out.push({...x});}return out;};
+const sub=(a,b)=>{let cur=a;for(const e of b){const nx=[];for(const r of cur){if(e.ver!==r.ver||e.hi<r.lo||e.lo>r.hi){nx.push(r);continue;}if(e.lo>r.lo)nx.push({...r,hi:e.lo-1n});if(e.hi<r.hi)nx.push({...r,lo:e.hi+1n});}cur=nx;}return cur;};
+const cover=(r)=>{const o=[];let lo=r.lo;while(lo<=r.hi){let k=0n;while(k<BigInt(r.bits)&&lo%(1n<<(k+1n))===0n&&lo+(1n<<(k+1n))-1n<=r.hi)k++;o.push({ver:r.ver,lo,len:r.bits-Number(k)});lo+=1n<<k;}return o;};
+const s4=(n)=>[24n,16n,8n,0n].map(s=>String((n>>s)&255n)).join('.');
+const s6=(n)=>{const g=[];for(let i=7;i>=0;i--)g.push(Number((n>>BigInt(i*16))&0xffffn));let bs=-1,bl=0;for(let i=0;i<8;){if(g[i]===0){let j=i;while(j<8&&g[j]===0)j++;if(j-i>bl){bs=i;bl=j-i;}i=j;}else i++;}const h=g.map(x=>x.toString(16));if(bl<2)return h.join(':');return h.slice(0,bs).join(':')+'::'+h.slice(bs+bl).join(':');};
+const L=toks(v.list);if(!L.length)throw Error('Enter at least one CIDR or IP address.');if(L.length>5000)throw Error('Too many entries (maximum 5000).');
+const inp=L.map(parse);let res=merge(inp);const X=toks(v.exclude||'').map(parse);
+if(X.length)res=merge(sub(res,X));
+const out=[];for(const r of res)for(const c of cover(r))out.push((c.ver===4?s4(c.lo):s6(c.lo))+'/'+c.len);
+return rows([['Input entries',L.length],['Excluded entries',X.length],['Resulting blocks',out.length]])+'\n\n'+(out.join('\n')||'(empty: everything was excluded)')+'\n\nResult covers exactly the addresses in the list'+(X.length?' minus the exclusions':'')+'; host bits in input CIDRs are cleared.';}}
+,
+{id:'authorized-keys-audit',name:'authorized_keys Auditor',cat:'security',symbol:'AK',desc:'Parse an OpenSSH authorized_keys file: key type and size, options (from=, command=, restrict), duplicates, weak RSA/DSA keys and unrestricted keys. Reads text only; no login is attempted.',tags:'ssh authorized_keys openssh public key rsa dsa ed25519 ecdsa options restrict from command audit',fields:[['text','authorized_keys contents','ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAjMbYTNmrJkssdnBYkF3A0qTlBNZPTlofBHincbI58l admin@laptop\nrestrict,from="203.0.113.0/24",command="/usr/bin/backup" ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFeJ5DhXgDMzIoQJ++wmBrRj8hfxIcPPcJrFspI2f5Vb2GDGysLc8kwH3Sq+czA8ubK0tIFXL+JRh8ZY331CjZE= backup@host','textarea']],run:v=>{
+const lines=v.text.replace(/\r\n?/g,'\n').split('\n');const out=[];const f=[];const seen={};let keys=0;
+const rd=(b,o)=>{if(o+4>b.length)throw Error('truncated');const n=((b[o]<<24)|(b[o+1]<<16)|(b[o+2]<<8)|b[o+3])>>>0;if(o+4+n>b.length)throw Error('truncated');return[b.subarray(o+4,o+4+n),o+4+n];};
+const bitlen=(a)=>{let i=0;while(i<a.length&&a[i]===0)i++;if(i===a.length)return 0;return (a.length-i-1)*8+(32-Math.clz32(a[i]));};
+const known=/^(ssh-rsa|ssh-dss|ssh-ed25519|ecdsa-sha2-nistp(256|384|521)|sk-ssh-ed25519@openssh\.com|sk-ecdsa-sha2-nistp256@openssh\.com)$/;
+const toks=(s)=>{const t=[];let c='',q=false;for(const ch of s){if(ch==='"'){q=!q;c+=ch;}else if((ch===' '||ch==='\t')&&!q){if(c){t.push(c);c='';}}else c+=ch;}if(c)t.push(c);return t;};
+lines.forEach((raw,i)=>{const n=i+1;const ln=raw.trim();if(!ln||ln.startsWith('#'))return;
+const t=toks(ln);let oi=t.findIndex(x=>known.test(x));
+if(oi<0||oi>1||!t[oi+1]){f.push('[ERROR] line '+n+': no recognised key type (expected ssh-rsa, ssh-ed25519, ecdsa-sha2-nistp*, sk-*; ssh-dss) followed by base64 data.');return;}
+const opts=oi===1?t[0]:'';const type=t[oi],b64=t[oi+1],comment=t.slice(oi+2).join(' ');
+let blob;try{if(!/^[A-Za-z0-9+/]+={0,2}$/.test(b64)||b64.length%4)throw Error('bad');blob=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));}catch(e){f.push('[ERROR] line '+n+': key data is not valid base64.');return;}
+let bits,inner;
+try{let o=0,r;[r,o]=rd(blob,0);inner=new TextDecoder().decode(r);
+if(inner!==type){f.push('[ERROR] line '+n+': declared type '+type+' does not match the key blob ('+inner+').');return;}
+if(type==='ssh-rsa'){let e,nn;[e,o]=rd(blob,o);[nn,o]=rd(blob,o);bits=bitlen(nn);}
+else if(type==='ssh-dss'){let p;[p,o]=rd(blob,o);bits=bitlen(p);}
+else if(/^ecdsa/.test(type)){let c;[c,o]=rd(blob,o);const cn=new TextDecoder().decode(c);const want=type.replace('ecdsa-sha2-','');if(cn!==want){f.push('[ERROR] line '+n+': curve '+cn+' does not match '+type+'.');return;}bits=({nistp256:256,nistp384:384,nistp521:521})[cn];}
+else if(/ed25519/.test(type)){let k;[k,o]=rd(blob,o);if(k.length!==32){f.push('[ERROR] line '+n+': ed25519 public key must be 32 bytes (found '+k.length+').');return;}bits=256;}
+else if(/^sk-ecdsa/.test(type))bits=256;}
+catch(e){f.push('[ERROR] line '+n+': key blob is truncated or malformed.');return;}
+keys++;out.push('line '+n+': '+type+' '+bits+' bits'+(opts?' options='+opts:'')+(comment?' comment='+comment:''));
+if(type==='ssh-dss')f.push('[HIGH] line '+n+': DSA keys are disabled by default in OpenSSH since 7.0 and limited to 1024 bits; replace with ed25519.');
+if(type==='ssh-rsa'){if(bits<2048)f.push('[HIGH] line '+n+': RSA key is only '+bits+' bits; use at least 3072 (or ed25519).');else if(bits<3072)f.push('[INFO] line '+n+': RSA '+bits+' bits meets the 2048-bit minimum; 3072+ or ed25519 is preferred.');}
+const od=(opts.match(/(?:[^,"]|"[^"]*")+/g)||[]).map(x=>x.trim());const on=od.map(x=>x.split('=')[0].toLowerCase());
+const has=(k)=>on.includes(k);
+if(!opts)f.push('[INFO] line '+n+': no options: the key gives a full interactive shell, forwarding and agent access. Consider restrict plus from=/command=.');
+else{if(!has('restrict')&&!has('from')&&!has('command'))f.push('[INFO] line '+n+': options set but no restrict, from= or command=.');
+if(has('environment'))f.push('[MEDIUM] line '+n+': environment= can alter the session environment (only honoured when PermitUserEnvironment is on; avoid).');
+if(has('cert-authority'))f.push('[INFO] line '+n+': cert-authority: this key signs certificates that are then accepted for login.');
+for(const x of od)if(/^from=/i.test(x)&&/^from=("?)\*\1$/i.test(x))f.push('[MEDIUM] line '+n+': from="*" allows every source address.');}
+const k=b64;if(seen[k])f.push('[WARN] line '+n+': duplicate of the key on line '+seen[k]+'.');else seen[k]=n;});
+if(!keys&&!f.length)throw Error('No keys found in the text.');
+const order={ERROR:0,HIGH:1,MEDIUM:2,WARN:3,INFO:4};f.sort((a,b)=>order[/^\[(\w+)\]/.exec(a)[1]]-order[/^\[(\w+)\]/.exec(b)[1]]);
+return rows([['Keys parsed',keys],['Findings',f.length]])+'\n\nKeys:\n'+(out.join('\n')||'(none)')+'\n\nFindings:\n'+(f.join('\n')||'No findings from these checks.')+'\n\nFingerprints are not shown; use the SSH Fingerprint tool for that. Keys are only parsed, never used.';}}
 
 ];
 function rows(items){return items.map(x=>x[0]+': '+x[1]).join('\n');}

@@ -1234,6 +1234,20 @@ const TOOLS=[
     "group": "Networking",
     "mode": "browser",
     "description": "Parse a BIND-style zone file (origin, TTL, relative names, multi-line SOA, quoted TXT) into fully qualified records and flag CNAME conflicts, missing SOA/NS/SPF and risky wildcards or TTLs."
+  },
+  {
+    "id": "cidr-aggregate",
+    "name": "CIDR Aggregator / Excluder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Merge a mixed IPv4/IPv6 list of CIDRs and IPs into the smallest exact set of CIDR blocks, or subtract an exclusion list from it, for firewall allowlists and blocklists."
+  },
+  {
+    "id": "authorized-keys-audit",
+    "name": "authorized_keys Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Parse an OpenSSH authorized_keys file: key type and size, options (from=, command=, restrict), duplicates, weak RSA/DSA keys and unrestricted keys. Reads text only; no login is attempted."
   }
 ];
 

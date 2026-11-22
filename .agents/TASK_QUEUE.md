@@ -48,12 +48,13 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest branch head: `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af` (installer hardening was committed earlier).
+- Latest branch head: `68c4affd03d3d89ad2c3509a40b9d86247bbfd18` (installer hardening was committed earlier).
 - Scope: `cyber-labs/mosta-terminal/install.sh`, `cyber-labs/mosta-terminal/README.md`
-- Required: test installer in a clean Linux environment; prove it does not install requirements from sibling labs; verify symlinks, PATH setup, and mosta-doctor behavior.
+- Evidence: Lab Checks run `45015734097` passed on latest head `68c4aff...` under Ubuntu 26.04. It syntax-checked shell launchers, installed into a temporary HOME, asserted no global pip invocation, verified launcher symlinks, exercised `mosta-index list/search`, ran `mosta-doctor` (122 checks, 22 informational notices), and tested the installed `mnmap` wrapper against a fake executable.
+- Remaining: consider broader distro/shell compatibility; current CI is one clean Ubuntu 26.04 environment.
 - Blocker: PR targets `feat/mosta-platform-redesign`; comparison reports 122 commits ahead and 21 behind that base, and 122 ahead / 66 behind `main`. Do not retarget until the complete 20-file diff and shared ancestry are reviewed.
 - Prohibited: merge, Production deploy, destructive package installation on a user's machine.
-- Acceptance: clean-environment test evidence on exact latest SHA; no cross-lab dependency installation; base-branch decision documented.
+- Acceptance: one clean Ubuntu CI install path passed; no global pip install was invoked; base-branch decision and independent review remain open.
 
 ### PR7-INDEX-001 — Harden and verify CLI catalog CSV validation
 - Status: REVIEW
@@ -62,8 +63,8 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Latest branch head: `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af`.
 - Scope: `cyber-labs/mosta-tool-index/validate_catalog.py`, `cyber-labs/mosta-tool-index/test_validate_catalog.py`
 - Changes: strict CSV parsing; reject rows with extra fields; regression tests for extra columns and unterminated quoted fields; corrected frontend tool-count/category assertions from stale 207 to audited 231; added frontend/backend registry ID parity regression; `mosta_index.py` now uses the shared strict validator and rejects malformed/extra-field catalogs, with new regression tests.
-- Required: run validator against the checked-in 61-entry CSV; run all `test_*.py` tests on Python 3.10 and 3.12; capture exact-SHA CI evidence.
-- Workflow: `.github/workflows/mosta-tool-index.yml` defines Python 3.10/3.12 matrix checks on both push and pull_request for this branch. Exact-head push workflow run `45015060496` passed on `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af`: Python 3.10 and 3.12 both passed compilation, 61-row catalog validation, and all 14 unit tests. The previous run `44971167380` failed on a malformed test fixture; fixed in the latest commit. Installer clean-Linux validation remains outstanding.
+- Evidence: run `45015060496` passed the Python 3.10/3.12 matrix on `20f5fdd...`: validator compile, 61-row catalog validation, and all 14 CLI index unit tests. Latest Lab Checks `45015734097` also passed `mosta-index list/search` on `68c4aff...`.
+- Workflow: `.github/workflows/mosta-tool-index.yml` defines Python 3.10/3.12 matrix checks on both push and pull_request. Run `45015060496` passed both matrix jobs on `20f5fdd...` (61 catalog rows, 14 unit tests). Latest full Lab Checks run `45015734097` passed on `68c4aff...`, including the index CLI smoke tests. Previous fixture and CI harness failures were corrected before the successful run.
 - Prohibited: claim tests passed without observed output; merge or deploy.
 - Acceptance: both Python matrix jobs pass on the exact commit; 61 catalog entries validate; malformed-input tests pass.
 

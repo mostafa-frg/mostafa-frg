@@ -7,7 +7,7 @@
 - Default branch: `main`
 - PR #5: MERGED.
 - PR #6: OPEN, DRAFT; branch `chore/mosta-multi-agent-foundation`; base `main`; mergeable=true at last search snapshot.
-- PR #7: OPEN, DRAFT; branch `feat/mosta-1000-cyber-terminal-tools`; latest verified branch head: `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`; base `feat/mosta-platform-redesign`; mergeable=false at last recorded PR snapshot.
+- PR #7: OPEN, DRAFT; branch `feat/mosta-1000-cyber-terminal-tools`; latest verified branch head: `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af`; base `feat/mosta-platform-redesign`; mergeable=false at last recorded PR snapshot.
 - PR #9: OPEN, DRAFT; branch `feat/mosta-admin-console-audit-pagination`; verified head `0b131836334ac24624e880c134f3f0f0dc48e470`; base `main`; mergeable=true at last recorded PR snapshot.
 
 ## Recent implementation changes (not merged)
@@ -19,7 +19,7 @@
 ## CI and Preview evidence
 - PR #9 exact head `0b131836334ac24624e880c134f3f0f0dc48e470`: Lab Checks run `44932343231` completed successfully; backend-security and Python jobs passed. Portfolio workflow `44932343250` validation passed and deploy was skipped. Platform workflow `44932343277` validation and security-tests passed; deploy was skipped. Job-step summaries were fetched and showed successful completion.
 - PR #7 earlier reviewed head `a1eff15feea8f020b878a345c99bb8e3bbd95db1`: Cloudflare Preview Build and Deployment succeeded (deployment `b125201d-7b39-437c-a784-dccda620cf44`, URL `https://b125201d-mostafa-frg.frh7977.workers.dev`). That deployment predates the two CLI catalog validator commits and does not validate them.
-- PR #7 latest head `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`: corrected stale platform test expectations from 207 to 231 tools and added an explicit frontend/backend ID parity regression test. Live registry audit confirmed 231 unique frontend IDs and 231 unique backend IDs with exact set parity. Hardened `mosta_index.py` to run the shared strict CSV validator before browsing; added tests for extra fields and malformed quoting. The available workflow/status actions returned no PR-triggered run and no combined status for this head; push-triggered run state remains UNKNOWN. Exact-head GitHub Actions tests are NOT VERIFIED.
+- PR #7 latest head `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`: corrected stale platform test expectations from 207 to 231 tools and added an explicit frontend/backend ID parity regression test. Live registry audit confirmed 231 unique frontend IDs and 231 unique backend IDs with exact set parity. Hardened `mosta_index.py` to run the shared strict CSV validator before browsing; added tests for extra fields and malformed quoting. Exact-head push workflow run `45015060496` completed successfully on `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af`: both Python 3.10 and 3.12 jobs passed compilation, 61-row catalog validation, and all 14 unit tests. Earlier run `44971167380` on `c2b0805...` failed because the extra-fields fixture used escaped backslash-n text; the fixture was corrected in `20f5fdd...` and the subsequent run passed.
 - The PR #7 Preview URL could not be independently fetched from this execution environment due DNS/network resolution failure.
 - PR #6 Cloudflare Preview build for `912a89f62baa5e8b3767158bee267071d1b661ca` failed because `npx wrangler preview` was invoked from repository root without selecting `backend/wrangler.jsonc`. The backend config already contains a `previews` block. Proposed Build Trigger command: `npx wrangler preview --config backend/wrangler.jsonc`, or set root directory to `backend` only after validating asset paths. This requires an authorized Cloudflare maintainer; no account setting was changed.
 
@@ -31,7 +31,8 @@
 - Claude Code's local session and working tree are not visible; do not claim it has executed tasks without GitHub evidence.
 
 ## Required next actions
-1. PR #7: obtain exact-head CI evidence for `c2b0805...`, run the CLI index tests and installer in a clean Linux environment, and resolve base-branch divergence only after reviewing the complete diff.
+1. PR #7: run the installer in a clean Linux environment and complete the full PR7 review; CLI index matrix CI now passes on `20f5fdd...`, and resolve base-branch divergence only after reviewing the complete diff.
 2. PR #9: complete independent review and safe Preview/runtime verification before removing Draft.
 3. PR #6: have an authorized maintainer resolve the Preview Build Trigger, then verify Preview health and static assets.
 4. ORCH-002 agent adapters and templates are complete; continue maintaining coordination records against live repository state.
+

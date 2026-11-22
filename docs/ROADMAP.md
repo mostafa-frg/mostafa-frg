@@ -66,16 +66,22 @@ Run from the repo root:
 - "Zero errors" cannot be guaranteed; the guarantee is that no tool ships without passing known-answer tests and the gate.
 
 ## Status (update every session)
-- Last updated: 2026-11-21 by Claude. Working branch: `platform/clean-v3` (169 tools; 112 frontend tests, 103 backend checks green;
+- Last updated: 2026-11-22 by Claude. Working branch: `platform/clean-v3` (175 tools; 114 frontend tests, 103 backend checks green;
   browser run of every new tool clean).
 - Batch 1 (10): x509-inspector, ssh-fingerprint, nmap-grepable-parser, suricata-eve-summary, zeek-conn-summary, sudoers-audit,
   passwd-shadow-audit, checksum-calc, luhn-check, yara-rule-lint.
 - Batch 2 (9): sysmon-event-summary, windows-logon-summary, powershell-encoded-decoder, ioc-defang, ip-in-cidr-list,
   forensic-timestamps, file-signature-id, layered-decoder, auditd-execve-summary. Ground truth: Python (base64, datetime, ipaddress),
   the `file` command on real generated files, documented Sysmon/Security/auditd schemas; mutation-checked (5 deliberate bugs, all caught).
+- Batch 3 (6): cipher-suite-classifier (checked against all 158 suites of `openssl ciphers -stdname -v`, by OpenSSL and IANA name),
+  jwt-security-audit (tokens built independently in Python), hsts-check (RFC 6797 grammar, hstspreload.org rules), security-txt-check
+  (RFC 9116 rules read from the RFC; dates cross-checked with Python datetime), cors-config-audit, http-smuggling-lint (RFC 9112 framing;
+  body lengths vs Python). Mutation-checked; surviving mutants were closed with extra boundary tests or shown equivalent.
+  Not done: sshd-config-audit (sshd not available here to produce ground truth), dns-zone-parser, robots-txt-audit (needs the RFC 9309
+  longest-match examples), password-policy-audit (needs the NIST SP 800-63B-4 values read from the source).
 - Test standard going forward: derive expected values from an independent source, then mutate the tool to prove the test fails.
 - Decision: the catalog stays in one `platform.js` until about 400 tools; the split (Phase 1) is deferred because CI, tests and the
   deploy smoke check all read that file.
 - `main` last seen at 0b90b7c. Older `feat/*` and `fix/terminal-tools-*` branches are superseded; do not merge them.
-- Next action: Phase 2 batch 3 (TLS/web: CSP/CORS/cookie review expansions, HTTP request smuggling indicators, DNS records audit,
-  robots/security.txt checks, JWT algorithm audit, password policy auditor, SSH client/server config audit).
+- Next action: Phase 2 batch 4: finish the not-done items above (each needs a cited or locally produced ground truth first), then
+  more SOC/DFIR and Linux-hardening tools.

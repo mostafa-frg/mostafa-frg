@@ -471,6 +471,134 @@ const sens=Object.keys(p).filter(k=>/^(password|passwd|pwd|secret|api_?key|priva
 if(sens.length)add('MEDIUM','SENSITIVE_CLAIM','payload exposes '+sens.join(', ')+'; JWT payloads are only encoded, not encrypted.');
 const order={CRITICAL:0,HIGH:1,MEDIUM:2,LOW:3,INFO:4};f.sort((x,y)=>order[/^\[(\w+)\]/.exec(x)[1]]-order[/^\[(\w+)\]/.exec(y)[1]]);
 return rows([['Type','JWS (signed, 3 parts)'],['Header alg',alg===undefined?'(none)':String(alg)],['Claims',Object.keys(p).join(', ')||'(none)'],['Evaluated at (UTC)',new Date(now*1000).toISOString()],['Findings',f.length]])+'\n\n'+(f.join('\n')||'No findings from these checks.')+'\n\nThe signature is NOT verified. This audit only reads the token you pasted.';}}
+,
+{id:'hsts-check',name:'HSTS Header Checker',cat:'security',symbol:'HS',desc:'Parse a Strict-Transport-Security header per RFC 6797 and report validity, max-age strength, includeSubDomains and HSTS preload-list eligibility.',tags:'hsts strict transport security header preload max-age includesubdomains https',fields:[['header','Strict-Transport-Security header (or value)','Strict-Transport-Security: max-age=31536000; includeSubDomains; preload','textarea']],run:v=>{
+let s=v.header.trim().replace(/^strict-transport-security\s*:\s*/i,'');
+if(!s)throw Error('Paste the Strict-Transport-Security header.');
+if(/[\r\n]/.test(s))throw Error('Paste a single header value; multiple headers are ignored by browsers (only one is allowed).');
+const seen={};const f=[];let invalid=false;
+for(const part of s.split(';')){const d=part.trim();if(!d)continue;const m=/^([^=\s]+)\s*(?:=\s*(.*))?$/.exec(d);if(!m){f.push('[ERROR] malformed directive "'+d.slice(0,40)+'".');invalid=true;continue;}
+const n=m[1].toLowerCase();let val=m[2]===undefined?null:m[2].trim();if(val&&/^".*"$/.test(val))val=val.slice(1,-1);
+if(n in seen){f.push('[ERROR] directive "'+n+'" appears more than once; RFC 6797 requires browsers to ignore the whole header.');invalid=true;}else seen[n]=val;}
+let age=null;
+if(!('max-age' in seen)){f.push('[ERROR] max-age is required.');invalid=true;}
+else if(seen['max-age']===null||!/^\d+$/.test(seen['max-age'])){f.push('[ERROR] max-age must be a number of seconds (digits only).');invalid=true;}
+else age=Number(seen['max-age']);
+if('includesubdomains' in seen&&seen.includesubdomains!==null)f.push('[WARN] includeSubDomains takes no value.');
+if('preload' in seen&&seen.preload!==null)f.push('[WARN] preload takes no value.');
+const incl='includesubdomains' in seen,pre='preload' in seen;
+if(!invalid){
+if(age===0)f.push('[INFO] max-age=0 tells browsers to delete the HSTS policy for this host.');
+else{if(age<15552000)f.push('[WARN] max-age is under 180 days ('+Math.round(age/86400)+' days); a longer value (1 year, 31536000) is recommended.');
+if(!incl)f.push('[INFO] includeSubDomains is not set; subdomains are not protected.');}
+}
+for(const k of Object.keys(seen))if(!['max-age','includesubdomains','preload'].includes(k))f.push('[INFO] unknown directive "'+k+'" is ignored by browsers.');
+let elig='n/a (header invalid)';
+if(!invalid){const why=[];if(age<31536000)why.push('max-age must be at least 31536000');if(!incl)why.push('includeSubDomains is required');if(!pre)why.push('preload directive is required');
+elig=why.length?'No - '+why.join('; '):'Yes (meets the header requirements; the site must also redirect HTTP to HTTPS and be submitted at hstspreload.org)';}
+return rows([['Valid',invalid?'No':'Yes'],['max-age',age===null?'(missing/invalid)':age+' seconds ('+(age/86400).toFixed(1)+' days)'],['includeSubDomains',incl?'yes':'no'],['preload',pre?'yes':'no'],['Preload-list eligible',elig]])+'\n\nFindings:\n'+(f.join('\n')||'No findings from these checks.')+'\n\nBrowsers only honour HSTS received over HTTPS.';}},
+{id:'security-txt-check',name:'security.txt Validator (RFC 9116)',cat:'security',symbol:'ST',desc:'Validate a security.txt file against RFC 9116: required Contact and Expires, URI and https rules, single-use fields, date validity and expiry.',tags:'security.txt rfc9116 vulnerability disclosure contact expires well-known',fields:[['text','security.txt contents','# Our security policy\nContact: mailto:security@example.com\nContact: https://example.com/report\nExpires: 2027-06-30T23:59:59Z\nEncryption: https://example.com/pgp-key.txt\nPreferred-Languages: en, ar\nCanonical: https://example.com/.well-known/security.txt','textarea'],['now','Current time (ISO 8601, leave blank for now - optional)','','text']],run:v=>{
+let now;if(String(v.now||'').trim()){now=Date.parse(v.now.trim());if(isNaN(now))throw Error('Current time is not a valid ISO 8601 date.');}else now=Date.now();
+const lines=v.text.replace(/^﻿/,'').split(/\r\n|\n/);
+const f=[];const err=(m)=>f.push('[ERROR] '+m),warn=(m)=>f.push('[WARN] '+m),info=(m)=>f.push('[INFO] '+m);
+const fields={};let signed=false;
+lines.forEach((ln,i)=>{const n=i+1;
+if(/^-----BEGIN PGP SIGNED MESSAGE-----/.test(ln)){signed=true;return;}
+if(/^(-----BEGIN PGP SIGNATURE-----|-----END PGP SIGNATURE-----|Hash:\s)/.test(ln))return;
+if(ln.trim()===''||ln.startsWith('#'))return;
+const m=/^([A-Za-z][A-Za-z0-9-]*):[ \t]*(.*)$/.exec(ln);
+if(!m){err('line '+n+' is not "Field: value", a comment or blank: "'+ln.slice(0,50)+'"');return;}
+if(m[2].trim()==='')err('line '+n+': field "'+m[1]+'" has an empty value.');
+const k=m[1].toLowerCase();(fields[k]=fields[k]||[]).push({v:m[2].trim(),n});});
+const known=['acknowledgments','canonical','contact','encryption','expires','hiring','policy','preferred-languages'];
+const uri=(val)=>/^[A-Za-z][A-Za-z0-9+.-]*:[^\s]+$/.test(val);
+const webOk=(val,name,n)=>{if(/^https?:/i.test(val)&&!/^https:\/\//i.test(val))err('line '+n+': '+name+' web URI must begin with https://');};
+if(!fields.contact)err('Contact is required and missing.');
+else for(const c of fields.contact){if(/^[^\s@:]+@[^\s@:]+$/.test(c.v))err('line '+c.n+': an email address in Contact must use the mailto: scheme.');else if(!uri(c.v))err('line '+c.n+': Contact is not a valid URI ("'+c.v.slice(0,50)+'").');else webOk(c.v,'Contact',c.n);}
+if(!fields.expires)err('Expires is required and missing.');
+else{if(fields.expires.length>1)err('Expires must not appear more than once (found '+fields.expires.length+').');
+const e=fields.expires[0];const m=/^(\d{4})-(\d{2})-(\d{2})[Tt](\d{2}):(\d{2}):(\d{2})(?:\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/.exec(e.v);
+let t=NaN;if(m){const [Y,M,D,h,mi,s]=m.slice(1,7).map(Number);const chk=new Date(Date.UTC(Y,M-1,D,h,mi,s));if(chk.getUTCFullYear()===Y&&chk.getUTCMonth()===M-1&&chk.getUTCDate()===D&&h<24&&mi<60&&s<=59)t=Date.parse(e.v.replace(/^(\d{4}-\d{2}-\d{2})[Tt]/,'$1T').replace(/[z]$/,'Z'));}
+if(isNaN(t))err('line '+e.n+': Expires is not a valid RFC 3339 date-time ("'+e.v.slice(0,40)+'").');
+else if(t<=now)err('line '+e.n+': the file has expired ('+e.v+').');
+else if(t-now>366*86400000)warn('line '+e.n+': Expires is more than a year away; RFC 9116 recommends less than a year to avoid staleness.');}
+if(fields['preferred-languages']){if(fields['preferred-languages'].length>1)err('Preferred-Languages must not appear more than once.');}
+for(const e of fields.encryption||[]){if(/-----BEGIN PGP/.test(e.v))err('line '+e.n+': Encryption must be a URI, never the key itself.');else if(!uri(e.v))err('line '+e.n+': Encryption must be a URI pointing to the key.');else webOk(e.v,'Encryption',e.n);}
+for(const name of ['acknowledgments','canonical','hiring','policy'])for(const e of fields[name]||[]){if(!uri(e.v))err('line '+e.n+': '+name+' must be a URI.');else webOk(e.v,name,e.n);}
+for(const k of Object.keys(fields))if(!known.includes(k))info('unknown field "'+k+'" (line '+fields[k][0].n+') is allowed but ignored by researchers.');
+if(!signed)info('not digitally signed; RFC 9116 recommends signing with an OpenPGP cleartext signature.');
+if(!fields.canonical)info('no Canonical field; adding it helps researchers confirm where the file is meant to live.');
+const errors=f.filter(x=>x.startsWith('[ERROR]')).length;
+return rows([['Result',errors?'INVALID ('+errors+' error'+(errors>1?'s':'')+')':'VALID'],['Contact entries',(fields.contact||[]).length],['Signed',signed?'yes (signature not verified here)':'no']])+'\n\n'+(f.join('\n')||'No findings from these checks.')+'\n\nServe it at /.well-known/security.txt over HTTPS as text/plain; charset=utf-8.';}}
+,
+{id:'cors-config-audit',name:'CORS Configuration Audit',cat:'security',symbol:'CO',desc:'Audit Access-Control-* response headers against a request Origin for credentialed wildcards, reflected or null origins, missing Vary and risky methods.',tags:'cors access-control-allow-origin credentials origin reflection null vary preflight',fields:[['origin','Request Origin','https://app.example.com','text'],['headers','Response headers','Access-Control-Allow-Origin: https://app.example.com\nAccess-Control-Allow-Credentials: true\nAccess-Control-Allow-Methods: GET, POST, PUT, DELETE\nAccess-Control-Allow-Headers: Content-Type, Authorization\nAccess-Control-Max-Age: 86400','textarea']],run:v=>{
+const origin=v.origin.trim();
+const h={};for(const ln of v.headers.split(/\r?\n/)){const m=/^([A-Za-z0-9-]+)\s*:\s*(.*)$/.exec(ln.trim());if(m){const k=m[1].toLowerCase();h[k]=h[k]===undefined?m[2].trim():h[k]+', '+m[2].trim();}}
+const f=[];const add=(s,c,m)=>f.push('['+s+'] '+c+': '+m);
+const acao=h['access-control-allow-origin'];const cred=(h['access-control-allow-credentials']||'').toLowerCase()==='true';
+if(h['access-control-allow-credentials']!==undefined&&!cred)add('WARN','CREDENTIALS_VALUE','Access-Control-Allow-Credentials must be exactly "true" to take effect (found "'+h['access-control-allow-credentials']+'").');
+if(acao===undefined){add('INFO','NO_CORS','no Access-Control-Allow-Origin: cross-origin reads are blocked by browsers.');}
+else{
+if(acao.includes(','))add('HIGH','ACAO_MULTIPLE','Access-Control-Allow-Origin has several values ("'+acao.slice(0,80)+'"); browsers reject it. Only one origin or * is allowed.');
+else if(acao==='*'){if(cred)add('HIGH','WILDCARD_CREDENTIALS','* combined with Allow-Credentials: true is rejected by browsers; it signals a broken or origin-reflecting setup.');else add('INFO','WILDCARD','* allows any website to read responses; fine only for public, non-credentialed data.');}
+else if(acao==='null')add(cred?'CRITICAL':'HIGH','NULL_ORIGIN','Allow-Origin "null" trusts sandboxed iframes, data: URLs and local files, which any attacker page can create'+(cred?', and credentials are allowed.':'.'));
+else{
+if(origin&&acao===origin&&cred)add('INFO','ORIGIN_ECHO','the response allows the tested origin with credentials; confirm this origin is on a fixed allowlist.');
+if(/^http:\/\//i.test(acao))add('MEDIUM','HTTP_ORIGIN','allowed origin uses plain http: a network attacker can run script from it.');
+if(/\*/.test(acao))add('MEDIUM','PARTIAL_WILDCARD','"'+acao+'" contains * but only a bare * is valid.');
+if(origin&&acao!==origin)add('INFO','ORIGIN_MISMATCH','the tested origin "'+origin+'" does not match the allowed origin "'+acao+'"; browsers will block this request.');
+const vary=(h.vary||'').toLowerCase().split(',').map(x=>x.trim());
+if(!vary.includes('origin')&&!vary.includes('*'))add('MEDIUM','VARY_MISSING','a specific Allow-Origin without "Vary: Origin" can make caches serve one origin\'s response to another.');
+if(cred&&origin&&acao===origin&&/(^|\.)(localhost|127\.0\.0\.1)(:|$)/.test(origin.replace(/^https?:\/\//,'')))add('MEDIUM','LOCALHOST_CREDENTIALED','credentialed access is granted to a localhost origin.');
+}}
+const meth=(h['access-control-allow-methods']||'');
+if(/(^|,)\s*\*\s*(,|$)/.test(meth)&&cred)add('WARN','METHODS_WILDCARD','wildcard in Allow-Methods is treated literally when credentials are used.');
+const risky=['PUT','DELETE','PATCH'].filter(m=>new RegExp('(^|[ ,])'+m+'([ ,]|$)','i').test(meth));
+if(risky.length&&acao!==undefined&&acao!=='null'&&cred)add('LOW','STATE_CHANGING_METHODS',risky.join(', ')+' are allowed cross-origin with credentials; confirm CSRF protections.');
+if(/(^|,)\s*\*\s*(,|$)/.test(h['access-control-allow-headers']||'')&&cred)add('WARN','HEADERS_WILDCARD','wildcard in Allow-Headers is treated literally when credentials are used.');
+if(h['access-control-max-age']!==undefined){if(!/^\d+$/.test(h['access-control-max-age']))add('WARN','MAXAGE_INVALID','Access-Control-Max-Age must be a number of seconds.');else if(+h['access-control-max-age']>86400)add('INFO','MAXAGE_CAPPED','browsers cap Max-Age (Chrome 2 hours, Firefox 24 hours); '+h['access-control-max-age']+' is larger than any browser honours.');}
+const order={CRITICAL:0,HIGH:1,MEDIUM:2,LOW:3,WARN:3,INFO:4};f.sort((a,b)=>order[/^\[(\w+)\]/.exec(a)[1]]-order[/^\[(\w+)\]/.exec(b)[1]]);
+return rows([['Tested origin',origin||'(none)'],['Allow-Origin',acao===undefined?'(absent)':acao],['Allow-Credentials',cred?'true':'no'],['Findings',f.length]])+'\n\n'+(f.join('\n')||'No findings from these checks.')+'\n\nThis reads the headers you paste; it sends no requests.';}},
+{id:'http-smuggling-lint',name:'HTTP Request Smuggling Lint',cat:'security',symbol:'HL',desc:'Lint a raw HTTP/1.1 request you own for message-framing ambiguities (RFC 9112): Content-Length plus Transfer-Encoding, duplicates, obfuscated TE, bare LF, spacing before the colon.',tags:'http request smuggling desync content-length transfer-encoding chunked rfc9112 lint',fields:[['request','Raw HTTP request','POST /search HTTP/1.1\r\nHost: example.com\r\nContent-Length: 11\r\nTransfer-Encoding: chunked\r\n\r\nq=smuggling','textarea']],run:v=>{
+const raw=v.request;if(!raw.trim())throw Error('Paste a raw HTTP request.');
+const sep=/\r?\n\r?\n/.exec(raw);const headText=sep?raw.slice(0,sep.index):raw;const body=sep?raw.slice(sep.index+sep[0].length):'';
+const f=[];const add=(s,c,m)=>f.push('['+s+'] '+c+': '+m);
+if(/\n/.test(headText.replace(/\r\n/g,'')))add('MEDIUM','BARE_LF','header lines end with a bare LF instead of CRLF; parsers disagree on this (RFC 9112 allows it only as a lenient recipient behaviour).');
+const lines=headText.split(/\r?\n/);const start=lines.shift();
+const sm=/^([A-Z]+) (\S+) HTTP\/(\d\.\d)$/.exec(start);
+if(!sm)add('HIGH','REQUEST_LINE','request line is not "METHOD target HTTP/x.y".');
+const ver=sm?sm[3]:'';
+const hd=[];
+for(const ln of lines){if(/^[ \t]/.test(ln)){add('HIGH','OBS_FOLD','obsolete line folding (leading whitespace) on "'+ln.trim().slice(0,40)+'"; senders must not generate it and servers may reject or unfold it differently.');continue;}
+const m=/^([^:]*):(.*)$/.exec(ln);if(!m){add('HIGH','HEADER_SYNTAX','header line without a colon: "'+ln.slice(0,40)+'".');continue;}
+if(/\s$/.test(m[1]))add('HIGH','SPACE_BEFORE_COLON','whitespace between header name and colon in "'+m[1].trim()+'"; RFC 9112 requires a 400 response, lenient parsers may treat it as a different header.');
+if(/[^\x21-\x7e]/.test(m[1].trim()))add('HIGH','HEADER_NAME_CHARS','non-token characters in header name "'+m[1].trim().slice(0,30)+'".');
+hd.push({n:m[1].trim().toLowerCase(),v:m[2].trim(),raw:m[1].trim()});}
+const cl=hd.filter(x=>x.n==='content-length'),te=hd.filter(x=>x.n==='transfer-encoding');
+const teLike=hd.filter(x=>/^transfer[-_ ]?encoding$/.test(x.n.replace(/\s/g,''))&&x.n!=='transfer-encoding');
+for(const x of teLike)add('HIGH','TE_NAME_VARIANT','header "'+x.raw+'" resembles Transfer-Encoding; some servers honour it and others do not.');
+let clVal=null;
+if(cl.length>1){const vals=[...new Set(cl.map(x=>x.v))];add(vals.length>1?'CRITICAL':'MEDIUM','DUPLICATE_CL',vals.length>1?'multiple Content-Length headers with different values ('+vals.join(', ')+'): servers must reject this.':'multiple Content-Length headers with the same value; should be merged or rejected.');}
+for(const x of cl){if(!/^\d+$/.test(x.v)){add('HIGH','CL_INVALID','Content-Length "'+x.v.slice(0,30)+'" is not a plain non-negative integer (lists, signs and spaces are invalid).');}else if(clVal===null)clVal=Number(x.v);}
+let chunked=false;
+for(const x of te){const toks=x.v.split(',').map(t=>t.trim().toLowerCase());const last=toks[toks.length-1];
+if(last==='chunked'&&toks.length===1&&x.v===x.v.trim())chunked=true;
+else if(last==='chunked'){chunked=true;add('MEDIUM','TE_LIST','Transfer-Encoding lists several codings ("'+x.v+'"); chunked must be last and nested codings are a common desync source.');}
+else if(toks.includes('chunked'))add('HIGH','TE_CHUNKED_NOT_LAST','chunked is not the final transfer coding in "'+x.v.slice(0,40)+'"; RFC 9112 requires a server to reject this with 400, lenient ones may still de-chunk.');
+else if(/chunk/i.test(x.v))add('HIGH','TE_OBFUSCATED','Transfer-Encoding value "'+x.v.slice(0,40)+'" looks like chunked but is not exactly "chunked"; some servers accept it and others ignore it.');
+else add('MEDIUM','TE_NO_CHUNKED','Transfer-Encoding "'+x.v.slice(0,40)+'" does not end in chunked; a request must be framed by Content-Length instead.');}
+if(te.length>1)add('MEDIUM','DUPLICATE_TE','multiple Transfer-Encoding headers.');
+if(cl.length&&te.length)add('CRITICAL','CL_AND_TE','both Content-Length and Transfer-Encoding are present: front-end and back-end may frame the body differently (CL.TE / TE.CL smuggling). A server should reject it or drop Content-Length.');
+if(te.length&&ver==='1.0')add('MEDIUM','TE_IN_HTTP10','Transfer-Encoding in an HTTP/1.0 request; it must be ignored for 1.0 messages.');
+let bodyNote='';
+if(!te.length&&clVal!==null&&cl.length===1){const bl=new TextEncoder().encode(body).length;
+if(bl>clVal)add('HIGH','BODY_LONGER','body has '+bl+' bytes but Content-Length is '+clVal+': the extra '+(bl-clVal)+' bytes would be parsed as the start of the next request.');
+else if(bl<clVal)add('MEDIUM','BODY_SHORTER','body has '+bl+' bytes but Content-Length is '+clVal+': the server would wait for '+(clVal-bl)+' more bytes.');
+bodyNote=' (body '+bl+' bytes)';}
+if(chunked){const t=body.replace(/\r\n/g,'\n');if(!/(^|\n)0\n(\n|$)/.test(t)&&!/(^|\n)0\n[^\n]*\n\n$/.test(t))add('MEDIUM','CHUNK_TERMINATOR','chunked body has no terminating 0-length chunk.');if(/(^|\n)[0-9a-f]+;/i.test(t))add('LOW','CHUNK_EXTENSION','chunk extensions present; they are a known source of parser differences.');if(!/\r\n/.test(body)&&/\n/.test(body))add('MEDIUM','CHUNK_BARE_LF','chunk framing uses bare LF.');}
+if(!hd.some(x=>x.n==='host')&&ver==='1.1')add('MEDIUM','NO_HOST','HTTP/1.1 request without a Host header.');
+const order={CRITICAL:0,HIGH:1,MEDIUM:2,LOW:3};f.sort((a,b)=>order[/^\[(\w+)\]/.exec(a)[1]]-order[/^\[(\w+)\]/.exec(b)[1]]);
+return rows([['Request line',start||''],['Headers',hd.length],['Framing',(te.length?'Transfer-Encoding':cl.length?'Content-Length'+bodyNote:'none')],['Findings',f.length]])+'\n\n'+(f.join('\n')||'No findings from these checks.')+'\n\nStatic lint of text you paste; it sends nothing. Test only systems you own or are authorised to test.';}}
 
 ];
 function rows(items){return items.map(x=>x[0]+': '+x[1]).join('\n');}

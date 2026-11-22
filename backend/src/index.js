@@ -1185,6 +1185,48 @@ const TOOLS=[
     "group": "SOC & Incident Response",
     "mode": "browser",
     "description": "Rebuild commands from auditd EXECVE records and flag download-and-run, reverse shells, base64 decoding, world-writable chmod and shell piping."
+  },
+  {
+    "id": "cipher-suite-classifier",
+    "name": "TLS Cipher Suite Classifier",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Classify TLS cipher suites (OpenSSL or IANA names, one per line or colon separated) as recommended, legacy, weak or insecure, with forward secrecy and AEAD flags and the reason."
+  },
+  {
+    "id": "jwt-security-audit",
+    "name": "JWT Security Audit",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Audit a JWT you already hold for risky algorithm, header and claim settings (alg none, missing or ms exp, jku/jwk/kid abuse, long lifetime). Does not verify signatures or attack anything."
+  },
+  {
+    "id": "hsts-check",
+    "name": "HSTS Header Checker",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Parse a Strict-Transport-Security header per RFC 6797 and report validity, max-age strength, includeSubDomains and HSTS preload-list eligibility."
+  },
+  {
+    "id": "security-txt-check",
+    "name": "security.txt Validator (RFC 9116)",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Validate a security.txt file against RFC 9116: required Contact and Expires, URI and https rules, single-use fields, date validity and expiry."
+  },
+  {
+    "id": "cors-config-audit",
+    "name": "CORS Configuration Audit",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Audit Access-Control-* response headers against a request Origin for credentialed wildcards, reflected or null origins, missing Vary and risky methods."
+  },
+  {
+    "id": "http-smuggling-lint",
+    "name": "HTTP Request Smuggling Lint",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Lint a raw HTTP/1.1 request you own for message-framing ambiguities (RFC 9112): Content-Length plus Transfer-Encoding, duplicates, obfuscated TE, bare LF, spacing before the colon."
   }
 ];
 

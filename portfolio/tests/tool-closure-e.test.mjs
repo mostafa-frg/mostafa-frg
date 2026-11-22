@@ -95,3 +95,119 @@ test('jwt-security-audit boundaries: 24h lifetime and seconds/milliseconds thres
   assert.deepEqual(f({ exp: 2e11 }), ['EXP_MS']);
   assert.deepEqual(f({ exp: 9e10 }), []); // year ~4800 in seconds, still below the 1e11 millisecond heuristic
 });
+
+const WEB = JSON.parse(await readFile(new URL('./fixtures/web-python-fixtures.json', import.meta.url), 'utf8'));
+const NOW8 = '2026-11-21T08:00:00Z';
+const findings = (o) => [...o.matchAll(/^\[(\w+)\] (\w+)?:?/gm)].map(m => m[1] + (m[2] ? ' ' + m[2] : ''));
+
+test('hsts-check follows RFC 6797 grammar and the hstspreload.org requirements', () => {
+  const H = (s) => run('hsts-check', { header: s });
+  let o = H('Strict-Transport-Security: max-age=31536000; includeSubDomains; preload');
+  assert.match(o, /Valid: Yes/); assert.match(o, /Preload-list eligible: Yes/); assert.match(o, /No findings/);
+  assert.match(H('max-age=31535999; includeSubDomains; preload'), /Preload-list eligible: No - max-age must be at least 31536000/);
+  assert.match(H('max-age=31536000; preload'), /No - includeSubDomains is required/);
+  assert.match(H('max-age=31536000; includeSubDomains'), /No - preload directive is required/);
+  assert.match(H('MAX-AGE=600; INCLUDESUBDOMAINS'), /max-age: 600 seconds/); // names are case-insensitive
+  assert.match(H('max-age="31536000"'), /max-age: 31536000 seconds \(365\.0 days\)/); // quoted-string allowed
+  assert.match(H('max-age=600'), /under 180 days \(0 days\)/);
+  assert.match(H('max-age=15552000; includeSubDomains'), /^(?![\s\S]*under 180 days)/); // exactly 180 days is not flagged
+  assert.match(H('max-age=15551999; includeSubDomains'), /under 180 days/);
+  assert.match(H('max-age=0'), /deletes?|delete the HSTS policy/); assert.match(H('max-age=0'), /Valid: Yes/);
+  assert.match(H('max-age=1; max-age=2'), /Valid: No[\s\S]*more than once/);
+  assert.match(H('includeSubDomains'), /Valid: No[\s\S]*max-age is required/);
+  assert.match(H('max-age=abc'), /Valid: No[\s\S]*digits only/); assert.match(H('max-age=-5'), /Valid: No/); assert.match(H('max-age='), /Valid: No/);
+  assert.match(H('max-age=31536000; foo=bar'), /unknown directive "foo"/);
+  assert.match(H('max-age=31536000; includeSubDomains=1'), /takes no value/);
+  assert.throws(() => H('  '), /Paste/); assert.throws(() => H('max-age=1\nmax-age=2'), /single header/);
+});
+
+test('security-txt-check enforces RFC 9116 rules; dates agree with Python datetime', () => {
+  const T = (text, now = NOW8) => run('security-txt-check', { text, now });
+  const good = 'Contact: mailto:a@example.com\nExpires: 2027-06-30T23:59:59Z\n';
+  assert.match(T(good), /Result: VALID/);
+  assert.match(T('Expires: 2027-06-30T23:59:59Z'), /Contact is required and missing/);
+  assert.match(T('Contact: mailto:a@example.com'), /Expires is required and missing/);
+  assert.match(T(good + 'Expires: 2027-07-01T00:00:00Z'), /Expires must not appear more than once \(found 2\)/);
+  assert.match(T(good + 'Preferred-Languages: en\nPreferred-Languages: ar'), /Preferred-Languages must not appear more than once/);
+  assert.match(T('Contact: a@example.com\nExpires: 2027-06-30T23:59:59Z'), /must use the mailto: scheme/);
+  assert.match(T('Contact: http://example.com/r\nExpires: 2027-06-30T23:59:59Z'), /must begin with https:\/\//);
+  assert.match(T('Contact: tel:+20123456789\nExpires: 2027-06-30T23:59:59Z'), /Result: VALID/);
+  assert.match(T('Contact: not a uri\nExpires: 2027-06-30T23:59:59Z'), /not a valid URI/);
+  assert.match(T(good + 'Encryption: -----BEGIN PGP PUBLIC KEY BLOCK-----'), /never the key itself/);
+  assert.match(T(good + 'Policy: http://example.com/p'), /policy web URI must begin with https/);
+  assert.match(T(good + 'CONTACT: https://example.com/c'), /Contact entries: 2/); // names are case-insensitive
+  assert.match(T(good + 'X-Custom: 1'), /unknown field "x-custom".*allowed/);
+  assert.match(T(good + 'garbage line'), /line 3 is not "Field: value"/);
+  assert.match(T('# only a comment\n' + good), /Result: VALID/);
+  assert.match(T(good.replace('\n', '\r\n')), /Result: VALID/);
+  assert.match(T('-----BEGIN PGP SIGNED MESSAGE-----\nHash: SHA512\n\n' + good + '-----BEGIN PGP SIGNATURE-----\nabc\n-----END PGP SIGNATURE-----'), /Signed: yes/);
+  assert.match(T('Contact: mailto:a@example.com\nExpires: 2026-11-21T07:59:59Z'), /has expired/);
+  assert.match(T('Contact: mailto:a@example.com\nExpires: 2026-11-21T08:00:00Z'), /has expired/); // equal to now counts as expired
+  assert.match(T('Contact: mailto:a@example.com\nExpires: 2028-01-01T00:00:00Z'), /more than a year away/);
+  assert.match(T('Contact: mailto:a@example.com\nExpires: 2027-11-21T08:00:00Z'), /^(?![\s\S]*more than a year)/);
+  assert.match(T('Contact: mailto:a@example.com\nExpires: 2027-11-22T08:00:00Z'), /^(?![\s\S]*more than a year)/); // exactly 366 days ahead
+  assert.match(T('Contact: mailto:a@example.com\nExpires: 2027-11-22T08:00:01Z'), /more than a year away/);
+  for (const d of WEB.dates.filter(x => x.d && x.d !== '2027-06-30T23:59:60Z')) {
+    const o = T('Contact: mailto:a@example.com\nExpires: ' + d.d, '2000-01-01T00:00:00Z');
+    assert.equal(/not a valid RFC 3339/.test(o), !d.valid, 'date ' + d.d);
+  }
+  assert.throws(() => T(good, 'x'), /not a valid ISO/);
+});
+
+test('cors-config-audit flags credentialed wildcards, null and missing Vary', () => {
+  const C = (headers, origin = 'https://app.example.com') => findings(run('cors-config-audit', { origin, headers }));
+  assert.deepEqual(C('Access-Control-Allow-Origin: *\nAccess-Control-Allow-Credentials: true'), ['HIGH WILDCARD_CREDENTIALS']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: *'), ['INFO WILDCARD']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: null\nAccess-Control-Allow-Credentials: true', 'null'), ['CRITICAL NULL_ORIGIN']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: null'), ['HIGH NULL_ORIGIN']);
+  assert.deepEqual(C('Content-Type: text/html'), ['INFO NO_CORS']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com\nVary: Origin'), []);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com'), ['MEDIUM VARY_MISSING']);
+  assert.deepEqual(C('access-control-allow-origin: https://app.example.com\nvary: Accept-Encoding, ORIGIN'), []); // header names and Vary tokens case-insensitive
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com\nVary: *'), []);
+  assert.deepEqual(C('Access-Control-Allow-Origin: http://app.example.com\nVary: Origin', 'http://app.example.com'), ['MEDIUM HTTP_ORIGIN']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://a.example, https://b.example\nVary: Origin'), ['HIGH ACAO_MULTIPLE']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://*.example.com\nVary: Origin', 'https://x.example.com'), ['MEDIUM PARTIAL_WILDCARD', 'INFO ORIGIN_MISMATCH']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://other.example\nVary: Origin'), ['INFO ORIGIN_MISMATCH']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com\nVary: Origin\nAccess-Control-Allow-Credentials: yes'), ['WARN CREDENTIALS_VALUE']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com\nVary: Origin\nAccess-Control-Max-Age: 86401'), ['INFO MAXAGE_CAPPED']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com\nVary: Origin\nAccess-Control-Max-Age: 86400'), []);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com\nVary: Origin\nAccess-Control-Max-Age: soon'), ['WARN MAXAGE_INVALID']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com\nVary: Origin\nAccess-Control-Allow-Credentials: true\nAccess-Control-Allow-Methods: GET, PATCH'),
+    ['LOW STATE_CHANGING_METHODS', 'INFO ORIGIN_ECHO']);
+  assert.deepEqual(C('Access-Control-Allow-Origin: https://app.example.com\nVary: Origin\nAccess-Control-Allow-Methods: DELETE'), []); // no credentials -> not flagged
+});
+
+test('http-smuggling-lint finds RFC 9112 framing ambiguities; body length matches Python', () => {
+  const L = (req) => findings(run('http-smuggling-lint', { request: req }));
+  const CRLF = '\r\n';
+  const req = (hs, body = '') => 'POST / HTTP/1.1' + CRLF + 'Host: x' + CRLF + hs.map(h => h + CRLF).join('') + CRLF + body;
+  assert.deepEqual(L(req(['Content-Length: 3'], 'abc')), []);
+  assert.deepEqual(L(req(['Content-Length: 3', 'Transfer-Encoding: chunked'], '0' + CRLF + CRLF)), ['CRITICAL CL_AND_TE']);
+  assert.deepEqual(L(req(['Content-Length: 3', 'Content-Length: 4'], 'abcd')), ['CRITICAL DUPLICATE_CL']);
+  assert.deepEqual(L(req(['Content-Length: 3', 'Content-Length: 3'], 'abc')), ['MEDIUM DUPLICATE_CL']);
+  assert.deepEqual(L(req(['Transfer-Encoding: chunked'], '0' + CRLF + CRLF)), []);
+  assert.deepEqual(L(req(['Transfer-Encoding: xchunked'], '0' + CRLF + CRLF)), ['HIGH TE_OBFUSCATED']);
+  assert.deepEqual(L(req(['Transfer-Encoding: chunked, identity'], '0' + CRLF + CRLF)), ['HIGH TE_CHUNKED_NOT_LAST']);
+  assert.deepEqual(L(req(['Transfer-Encoding: gzip, chunked'], '0' + CRLF + CRLF)), ['MEDIUM TE_LIST']);
+  assert.deepEqual(L(req(['Transfer-Encoding: gzip'], 'x')), ['MEDIUM TE_NO_CHUNKED']);
+  assert.deepEqual(L(req(['Transfer-Encoding : chunked'], '0' + CRLF + CRLF)), ['HIGH SPACE_BEFORE_COLON']);
+  assert.deepEqual(L(req(['Content-Length : 3'], 'abc')), ['HIGH SPACE_BEFORE_COLON']);
+  assert.deepEqual(L(req(['Content-Length: +3'], 'abc')), ['HIGH CL_INVALID']);
+  assert.deepEqual(L(req(['Content-Length: 3, 3'], 'abc')), ['HIGH CL_INVALID']);
+  assert.deepEqual(L(req(['Content-Length: -1'], '')), ['HIGH CL_INVALID']);
+  assert.deepEqual(L(req(['Transfer_Encoding: chunked', 'Content-Length: 3'], 'abc')), ['HIGH TE_NAME_VARIANT']);
+  assert.deepEqual(L(req(['Content-Length: 5'], 'abc')), ['MEDIUM BODY_SHORTER']);
+  assert.deepEqual(L(req(['Content-Length: 2'], 'abc')), ['HIGH BODY_LONGER']);
+  assert.deepEqual(L(req(['Transfer-Encoding: chunked'], '5;ext=1' + CRLF + 'hello' + CRLF + '0' + CRLF + CRLF)), ['LOW CHUNK_EXTENSION']);
+  assert.deepEqual(L(req(['Transfer-Encoding: chunked'], '5' + CRLF + 'hello' + CRLF)), ['MEDIUM CHUNK_TERMINATOR']);
+  assert.deepEqual(L('GET / HTTP/1.1\nHost: x\n\n'), ['MEDIUM BARE_LF']);
+  assert.deepEqual(L('GET / HTTP/1.1\r\nHost: x\r\n folded\r\n\r\n'), ['HIGH OBS_FOLD']);
+  assert.deepEqual(L('GET / HTTP/1.1\r\nHost x\r\n\r\n'), ['HIGH HEADER_SYNTAX', 'MEDIUM NO_HOST']);
+  assert.deepEqual(L('GET / HTTP/1.1\r\nAccept: */*\r\n\r\n'), ['MEDIUM NO_HOST']);
+  assert.deepEqual(L('POST / HTTP/1.0\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n'), ['MEDIUM TE_IN_HTTP10']);
+  assert.deepEqual(L('nonsense\r\nHost: x\r\n\r\n'), ['HIGH REQUEST_LINE']);
+  for (const { b, n } of WEB.bodies) assert.deepEqual(L(req(['Content-Length: ' + n], b)), [], 'body ' + JSON.stringify(b));
+  for (const { b, n } of WEB.bodies.filter(x => x.n > 0)) assert.deepEqual(L(req(['Content-Length: ' + (n - 1)], b)), ['HIGH BODY_LONGER'], 'body+1 ' + JSON.stringify(b));
+  assert.throws(() => run('http-smuggling-lint', { request: '  ' }), /Paste a raw/);
+});

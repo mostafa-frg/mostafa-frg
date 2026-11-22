@@ -1227,6 +1227,13 @@ const TOOLS=[
     "group": "Cybersecurity",
     "mode": "browser",
     "description": "Lint a raw HTTP/1.1 request you own for message-framing ambiguities (RFC 9112): Content-Length plus Transfer-Encoding, duplicates, obfuscated TE, bare LF, spacing before the colon."
+  },
+  {
+    "id": "dns-zone-audit",
+    "name": "DNS Zone File Parser & Audit",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Parse a BIND-style zone file (origin, TTL, relative names, multi-line SOA, quoted TXT) into fully qualified records and flag CNAME conflicts, missing SOA/NS/SPF and risky wildcards or TTLs."
   }
 ];
 

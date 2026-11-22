@@ -599,6 +599,66 @@ if(chunked){const t=body.replace(/\r\n/g,'\n');if(!/(^|\n)0\n(\n|$)/.test(t)&&!/
 if(!hd.some(x=>x.n==='host')&&ver==='1.1')add('MEDIUM','NO_HOST','HTTP/1.1 request without a Host header.');
 const order={CRITICAL:0,HIGH:1,MEDIUM:2,LOW:3};f.sort((a,b)=>order[/^\[(\w+)\]/.exec(a)[1]]-order[/^\[(\w+)\]/.exec(b)[1]]);
 return rows([['Request line',start||''],['Headers',hd.length],['Framing',(te.length?'Transfer-Encoding':cl.length?'Content-Length'+bodyNote:'none')],['Findings',f.length]])+'\n\n'+(f.join('\n')||'No findings from these checks.')+'\n\nStatic lint of text you paste; it sends nothing. Test only systems you own or are authorised to test.';}}
+,
+{id:'dns-zone-audit',name:'DNS Zone File Parser & Audit',cat:'networking',symbol:'ZF',desc:'Parse a BIND-style zone file (origin, TTL, relative names, multi-line SOA, quoted TXT) into fully qualified records and flag CNAME conflicts, missing SOA/NS/SPF and risky wildcards or TTLs.',tags:'dns zone file bind soa ns mx cname txt caa srv audit records',fields:[['origin','Origin (zone name)','example.com','text'],['zone','Zone file','$TTL 3600\n@ IN SOA ns1.example.com. hostmaster.example.com. (\n  2026112201 ; serial\n  7200 3600 1209600 3600 )\n  IN NS ns1.example.com.\n  IN NS ns2.example.com.\n  IN MX 10 mail\n  IN TXT "v=spf1 mx -all"\nns1 IN A 192.0.2.1\nns2 IN A 192.0.2.2\nmail IN A 192.0.2.10\nwww 300 IN CNAME @\n@ IN CAA 0 issue "letsencrypt.org"','textarea']],run:v=>{
+let origin=v.origin.trim().toLowerCase();if(!/^[a-z0-9_]([a-z0-9_.-]*[a-z0-9_])?\.?$/.test(origin))throw Error('Origin must be a domain name such as example.com.');if(!origin.endsWith('.'))origin+='.';
+const base=origin;
+const units={s:1,m:60,h:3600,d:86400,w:604800};
+const ttlOf=(s)=>{const m=/^(?:(\d+)([smhdw]))+$|^\d+$/i.test(s)&&s;if(!m)return null;let t=0;if(/^\d+$/.test(s))return Number(s);for(const p of s.matchAll(/(\d+)([smhdw])/gi))t+=Number(p[1])*units[p[2].toLowerCase()];return t;};
+const entries=[];let cur='',q=false,depth=0,startWs=false,atStart=true;const text=v.zone.replace(/\r\n?/g,'\n')+'\n';
+for(let i=0;i<text.length;i++){const c=text[i];
+if(atStart){startWs=(c===' '||c==='\t');atStart=false;}
+if(q){cur+=c;if(c==='\\'){cur+=text[++i]||'';}else if(c==='"')q=false;continue;}
+if(c==='"'){q=true;cur+=c;continue;}
+if(c===';'){while(i<text.length&&text[i]!=='\n')i++;i--;continue;}
+if(c==='('){depth++;cur+=' ';continue;}
+if(c===')'){if(!depth)throw Error('Unbalanced ) in zone file.');depth--;cur+=' ';continue;}
+if(c==='\n'){if(depth){cur+=' ';continue;}if(cur.trim())entries.push({t:cur,ws:startWs});cur='';atStart=true;continue;}
+cur+=c;}
+if(q)throw Error('Unterminated quoted string in zone file.');if(depth)throw Error('Unbalanced ( in zone file.');
+const tokenize=(s)=>{const out=[];let t='',qq=false;for(let i=0;i<s.length;i++){const c=s[i];if(qq){t+=c;if(c==='\\'){t+=s[++i]||'';}else if(c==='"'){qq=false;}continue;}if(c==='"'){qq=true;t+=c;continue;}if(c===' '||c==='\t'){if(t){out.push(t);t='';}continue;}t+=c;}if(t)out.push(t);return out;};
+const abs=(n,o)=>{n=n.toLowerCase();if(n==='@')return o;return n.endsWith('.')?n:(n+'.'+o).replace(/^\.+/,'');};
+const types=['A','AAAA','CNAME','MX','NS','TXT','SOA','CAA','SRV','PTR'];
+let o=base,defTtl=null,lastOwner=null;const recs=[];
+for(const e of entries){const tk=tokenize(e.t);if(!tk.length)continue;
+if(tk[0]==='$ORIGIN'){if(!tk[1])throw Error('$ORIGIN needs a value.');o=abs(tk[1],o);continue;}
+if(tk[0]==='$TTL'){const t=ttlOf(tk[1]||'');if(t===null)throw Error('Invalid $TTL value "'+(tk[1]||'')+'".');defTtl=t;continue;}
+if(tk[0][0]==='$')throw Error('Unsupported directive '+tk[0]+'.');
+let owner;if(e.ws){if(lastOwner===null)throw Error('Record without an owner name before any owner is defined: '+e.t.trim().slice(0,40));owner=lastOwner;}else owner=abs(tk.shift(),o);
+lastOwner=owner;let ttl=null;
+while(tk.length){const a=tk[0];if(/^(IN|CH|HS)$/i.test(a)){tk.shift();continue;}const t=ttlOf(a);if(t!==null&&!types.includes(a.toUpperCase())){ttl=t;tk.shift();continue;}break;}
+const type=(tk.shift()||'').toUpperCase();if(!types.includes(type))throw Error('Unsupported or missing record type "'+type+'" in: '+e.t.trim().slice(0,50));
+if(ttl===null)ttl=defTtl;if(ttl===null)throw Error('No TTL for '+owner+' '+type+' (set $TTL or give one).');
+let r=tk;const nm=(x)=>abs(x,o);
+if(type==='A'){if(r.length!==1||!/^(\d{1,3})(\.\d{1,3}){3}$/.test(r[0])||r[0].split('.').some(x=>+x>255))throw Error('Invalid A record data for '+owner+'.');r=[r[0]];}
+else if(type==='AAAA'){if(r.length!==1||!/^[0-9a-fA-F:.]+$/.test(r[0])||!r[0].includes(':'))throw Error('Invalid AAAA record data for '+owner+'.');r=[r[0].toLowerCase()];}
+else if(type==='CNAME'||type==='NS'||type==='PTR'){if(r.length!==1)throw Error('Invalid '+type+' record data for '+owner+'.');r=[nm(r[0])];}
+else if(type==='MX'){if(r.length!==2||!/^\d+$/.test(r[0])||+r[0]>65535)throw Error('Invalid MX record data for '+owner+'.');r=[r[0],nm(r[1])];}
+else if(type==='SOA'){if(r.length!==7||r.slice(2).some(x=>ttlOf(x)===null))throw Error('Invalid SOA record data for '+owner+' (need mname rname serial refresh retry expire minimum).');r=[nm(r[0]),nm(r[1]),...r.slice(2).map(x=>String(ttlOf(x)))];}
+else if(type==='SRV'){if(r.length!==4||r.slice(0,3).some(x=>!/^\d+$/.test(x)))throw Error('Invalid SRV record data for '+owner+'.');r=[r[0],r[1],r[2],nm(r[3])];}
+else if(type==='CAA'){if(r.length<3||!/^\d+$/.test(r[0]))throw Error('Invalid CAA record data for '+owner+'.');r=[r[0],r[1].toLowerCase(),...r.slice(2)];}
+else if(type==='TXT'){if(!r.length)throw Error('Invalid TXT record data for '+owner+'.');r=r.map(x=>x[0]==='"'?x:'"'+x+'"');}
+recs.push({owner,ttl,type,data:r.join(' ')});}
+const f=[];const add=(s,m)=>f.push('['+s+'] '+m);
+const apex=recs.filter(r=>r.owner===base);
+const soa=recs.filter(r=>r.type==='SOA');
+if(!soa.length)add('HIGH','no SOA record in the zone.');else if(soa.length>1)add('HIGH',soa.length+' SOA records; a zone has exactly one.');
+else{if(soa[0].owner!==base)add('MEDIUM','SOA owner is '+soa[0].owner+', not the zone apex '+base+'.');const ser=soa[0].data.split(' ')[2];if(!/^\d{10}$/.test(ser))add('INFO','SOA serial '+ser+' is not in YYYYMMDDnn form (valid, just a convention).');}
+const apexNs=apex.filter(r=>r.type==='NS');
+if(apexNs.length<2)add('MEDIUM','apex has '+apexNs.length+' NS record(s); RFC 2182 recommends at least two on separate networks.');
+const byOwner={};for(const r of recs)(byOwner[r.owner]=byOwner[r.owner]||[]).push(r);
+for(const [n,l] of Object.entries(byOwner)){const cn=l.filter(r=>r.type==='CNAME');if(cn.length>1)add('HIGH',n+' has '+cn.length+' CNAME records.');if(cn.length&&l.some(r=>r.type!=='CNAME'))add('HIGH',n+' has a CNAME together with other record types ('+[...new Set(l.filter(r=>r.type!=='CNAME').map(r=>r.type))].join(', ')+'); a CNAME must be the only data at a name (RFC 1034/2181).');}
+const cnames=new Set(recs.filter(r=>r.type==='CNAME').map(r=>r.owner));
+for(const r of recs){if((r.type==='MX'&&cnames.has(r.data.split(' ')[1]))||(r.type==='NS'&&cnames.has(r.data)))add('HIGH',r.type+' record at '+r.owner+' points to '+(r.type==='MX'?r.data.split(' ')[1]:r.data)+', which is a CNAME (not allowed).');
+if(r.owner.startsWith('*.'))add('LOW','wildcard record '+r.owner+' '+r.type+' answers for every unnamed subdomain.');
+if(r.ttl<60&&r.type!=='SOA')add('INFO',r.owner+' '+r.type+' has TTL '+r.ttl+' (under 60 seconds).');
+if(r.ttl>604800)add('INFO',r.owner+' '+r.type+' has TTL '+r.ttl+' (over 7 days).');}
+const seen=new Set();for(const r of recs){const k=r.owner+'|'+r.type+'|'+r.data;if(seen.has(k))add('LOW','duplicate record '+r.owner+' '+r.type+' '+r.data+'.');seen.add(k);}
+if(!apex.some(r=>r.type==='TXT'&&/^"v=spf1[ "]/i.test(r.data)))add('LOW','no SPF TXT record at the apex (an explicit "v=spf1 -all" is recommended for domains that send no mail).');
+if(!apex.some(r=>r.type==='CAA'))add('INFO','no CAA record at the apex; any CA may issue certificates for this domain.');
+const order={HIGH:0,MEDIUM:1,LOW:2,INFO:3};f.sort((a,b)=>order[/^\[(\w+)\]/.exec(a)[1]]-order[/^\[(\w+)\]/.exec(b)[1]]);
+const counts={};for(const r of recs)counts[r.type]=(counts[r.type]||0)+1;
+return rows([['Zone',base],['Records',recs.length],['By type',Object.entries(counts).map(x=>x[0]+' '+x[1]).join(', ')||'-'],['Findings',f.length]])+'\n\nRecords:\n'+recs.map(r=>r.owner+' '+r.ttl+' IN '+r.type+' '+r.data).join('\n')+'\n\nFindings:\n'+(f.join('\n')||'No findings from these checks.')+'\n\nStatic parse of the text you paste; no DNS queries are sent.';}}
 
 ];
 function rows(items){return items.map(x=>x[0]+': '+x[1]).join('\n');}

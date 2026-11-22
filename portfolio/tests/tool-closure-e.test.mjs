@@ -211,3 +211,46 @@ test('http-smuggling-lint finds RFC 9112 framing ambiguities; body length matche
   for (const { b, n } of WEB.bodies.filter(x => x.n > 0)) assert.deepEqual(L(req(['Content-Length: ' + (n - 1)], b)), ['HIGH BODY_LONGER'], 'body+1 ' + JSON.stringify(b));
   assert.throws(() => run('http-smuggling-lint', { request: '  ' }), /Paste a raw/);
 });
+
+const ZONES = JSON.parse(await readFile(new URL('./fixtures/dnspython-zones.json', import.meta.url), 'utf8'));
+const zfind = (o) => [...o.matchAll(/^\[(\w+)\] (.*)$/gm)].map(m => m[1] + ' ' + m[2]);
+
+test('dns-zone-audit records match dnspython for every record of three zone files', () => {
+  for (const z of ZONES) {
+    const o = run('dns-zone-audit', { origin: z.origin, zone: z.zone });
+    const got = o.split('\nRecords:\n')[1].split('\n\nFindings:')[0].split('\n').map(l => l.toLowerCase().replace(/ (txt) /, ' $1 ')).sort();
+    assert.deepEqual(got, z.expected.map(l => l.toLowerCase()), z.origin);
+    assert.match(o, new RegExp('Records: ' + z.expected.length + '\\n'));
+  }
+});
+
+test('dns-zone-audit findings and errors', () => {
+  const Z = (zone, origin = 'example.com') => run('dns-zone-audit', { origin, zone });
+  const head = '$TTL 3600\n@ IN SOA ns1.example.com. h.example.com. 2026112201 7200 3600 1209600 3600\n@ IN NS ns1.example.com.\n@ IN NS ns2.example.com.\n@ TXT "v=spf1 -all"\n@ CAA 0 issue "ca.example"\n';
+  assert.match(Z(head), /Findings: 0/);
+  assert.deepEqual(zfind(Z(head + 'www CNAME @\nwww A 192.0.2.1')), ['HIGH www.example.com. has a CNAME together with other record types (A); a CNAME must be the only data at a name (RFC 1034/2181).']);
+  assert.match(Z(head + '@ CNAME other.example.net.'), /\[HIGH\] example\.com\. has a CNAME together with other record types/);
+  assert.match(Z(head + 'a CNAME x.example.net.\na CNAME y.example.net.'), /a\.example\.com\. has 2 CNAME records/);
+  assert.match(Z(head + 'alias CNAME t.example.net.\n@ MX 10 alias'), /MX record at example\.com\. points to alias\.example\.com\., which is a CNAME/);
+  assert.match(Z(head + 'alias CNAME t.example.net.\n@ NS alias'), /NS record at example\.com\. points to alias\.example\.com\., which is a CNAME/);
+  assert.match(Z(head.replace(/@ IN NS ns2[^\n]*\n/, '')), /apex has 1 NS record/);
+  assert.match(Z(head.replace(/@ IN SOA[^\n]*\n/, '')), /no SOA record/);
+  assert.match(Z(head.replace('2026112201', '5')), /SOA serial 5 is not in YYYYMMDDnn/);
+  assert.match(Z(head.replace('@ TXT "v=spf1 -all"\n', '')), /no SPF TXT record/);
+  assert.match(Z(head.replace('@ CAA 0 issue "ca.example"\n', '')), /no CAA record/);
+  assert.match(Z(head + '*.x A 192.0.2.5'), /wildcard record \*\.x\.example\.com\./);
+  assert.match(Z(head + 'q 30 A 192.0.2.5'), /TTL 30 \(under 60 seconds\)/);
+  assert.match(Z(head + 'q 604801 A 192.0.2.5'), /TTL 604801 \(over 7 days\)/);
+  assert.doesNotMatch(Z(head + 'q 604800 A 192.0.2.5'), /over 7 days/);
+  assert.doesNotMatch(Z(head + 'q 60 A 192.0.2.5'), /under 60/);
+  assert.match(Z(head + 'q A 192.0.2.5\nq A 192.0.2.5'), /duplicate record q\.example\.com\. A 192\.0\.2\.5/);
+  assert.throws(() => Z('@ IN A 192.0.2.1'), /No TTL/);
+  assert.throws(() => Z('$TTL 5\n@ A 300.1.1.1'), /Invalid A record/);
+  assert.throws(() => Z('$TTL 5\n@ A 192.0.2.256'), /Invalid A record/);
+  assert.throws(() => Z('$TTL 5\n@ FOO bar'), /Unsupported or missing record type "FOO"/);
+  assert.throws(() => Z('$TTL 5\n@ TXT "open'), /Unterminated quoted/);
+  assert.throws(() => Z('$TTL 5\n@ SOA a b ( 1 2 3'), /Unbalanced \(/);
+  assert.throws(() => Z('$TTL 5\n@ MX x y'), /Invalid MX/);
+  assert.throws(() => Z('$TTL abc'), /Invalid \$TTL/);
+  assert.throws(() => Z('$TTL 5\n@ A 1.1.1.1', 'bad domain!'), /Origin must be/);
+});

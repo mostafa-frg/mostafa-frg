@@ -278,8 +278,8 @@ jobs:
           curl -fsSL --max-redirs 5 "$SITE_ORIGIN/assets/platform.js" -o "$tmp/platform.js"
           node --check "$tmp/platform.js"
           tool_count="$(grep -oE "\\{id:'[a-z0-9-]+'" "$tmp/platform.js" | sort -u | wc -l)"
-          if [ "$tool_count" -lt 175 ]; then
-            echo "::error::Expected at least 175 unique tool definitions; found $tool_count."
+          if [ "$tool_count" -lt 176 ]; then
+            echo "::error::Expected at least 176 unique tool definitions; found $tool_count."
             exit 1
           fi
           grep -q "id:'subnet'" "$tmp/platform.js"
@@ -321,13 +321,13 @@ jobs:
           const data = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
           const allowed = new Set(['browser', 'browser-file', 'external', 'command']);
           const keys = 'description,group,id,mode,name';
-          if (data.authenticated !== false || data.role !== 'guest' || !Array.isArray(data.tools) || data.tools.length !== 175) {
-            throw new Error('Guest catalog response or expected 175-tool count is invalid.');
+          if (data.authenticated !== false || data.role !== 'guest' || !Array.isArray(data.tools) || data.tools.length !== 176) {
+            throw new Error('Guest catalog response or expected 176-tool count is invalid.');
           }
           if (!data.tools.every(tool => allowed.has(tool.mode) && Object.keys(tool).sort().join(',') === keys)) {
             throw new Error('Guest catalog contains an unsafe mode or unexpected metadata field.');
           }
-          console.log('Guest catalog passed: 175 tools, safe modes, metadata only.');
+          console.log('Guest catalog passed: 176 tools, safe modes, metadata only.');
           NODE
           for path in /api/tools /api/admin/users /api/admin/overview; do
             code="$(curl -sS -o "$tmp/protected" -w '%{http_code}' "$SITE_ORIGIN$path")"
@@ -343,4 +343,4 @@ jobs:
             exit 1
           fi
           echo "OK guest dashboard gate (HTTP 302)"
-          echo "Live platform, 175 client-side tool definitions, 175 public catalog tools, protected admin APIs, browser-tool handlers, regex worker, and security headers passed."
+          echo "Live platform, 176 client-side tool definitions, 176 public catalog tools, protected admin APIs, browser-tool handlers, regex worker, and security headers passed."

@@ -3,21 +3,22 @@
 from __future__ import annotations
 import argparse, csv, json, sys
 from pathlib import Path
+from validate_catalog import validate
 FIELDS = ("name", "alias", "platform", "category", "purpose")
 DEFAULT_CATALOG = Path(__file__).with_name("tools.csv")
 
 def load_catalog(path: Path) -> list[dict[str, str]]:
+    errors = validate(path)
+    if errors:
+        raise ValueError("Catalog validation failed: " + "; ".join(errors))
     with path.open("r", encoding="utf-8-sig", newline="") as stream:
-        reader = csv.DictReader(stream)
+        reader = csv.DictReader(stream, strict=True)
         if tuple(reader.fieldnames or ()) != FIELDS:
             raise ValueError("Unexpected catalog schema.")
-        rows = []
-        for row in reader:
-            item = {key: (row.get(key) or "").strip() for key in FIELDS}
-            if not all(item.values()):
-                raise ValueError("Catalog contains an incomplete entry.")
-            rows.append(item)
-        return rows
+        return [
+            {key: (row.get(key) or "").strip() for key in FIELDS}
+            for row in reader
+        ]
 
 def select(rows: list[dict[str, str]], query: str = "", category: str = "", platform: str = "") -> list[dict[str, str]]:
     q, cat, plat = query.casefold().strip(), category.casefold().strip(), platform.casefold().strip()

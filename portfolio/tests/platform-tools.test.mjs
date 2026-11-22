@@ -959,3 +959,17 @@ test('Compose, Kubernetes NetworkPolicy, Helm, GitHub branch protection and OS p
   assert.throws(()=>byId('github-branch-protection-audit').run({data:'not json'}),/valid branch protection JSON/);
   assert.throws(()=>byId('windows-powershell-execution-policy-audit').run({data:'No policy'}),/No recognized PowerShell execution policy rows/);
 });
+
+
+test('backend authorization catalog exactly matches the frontend registry', async () => {
+  const backendSource = await readFile(new URL('../../backend/src/index.js', import.meta.url), 'utf8');
+  const declaration = /const\\s+TOOLS\\s*=\\s*\\[/.exec(backendSource);
+  assert.ok(declaration, 'backend tool catalog exists');
+  const start = declaration.index + declaration[0].length;
+  const end = backendSource.indexOf('\\n];', start);
+  assert.ok(end > start, 'backend tool catalog closes cleanly');
+  const backendIds = [...backendSource.slice(start, end).matchAll(/"id"\\s*:\\s*"([a-z0-9-]+)"/g)].map(match => match[1]);
+  const frontendIds = tools.map(tool => tool.id);
+  assert.equal(new Set(backendIds).size, backendIds.length, 'backend tool IDs are unique');
+  assert.deepEqual([...backendIds].sort(), [...frontendIds].sort(), 'backend authorization IDs exactly match frontend tool IDs');
+});

@@ -1248,6 +1248,13 @@ const TOOLS=[
     "group": "Cybersecurity",
     "mode": "browser",
     "description": "Parse an OpenSSH authorized_keys file: key type and size, options (from=, command=, restrict), duplicates, weak RSA/DSA keys and unrestricted keys. Reads text only; no login is attempted."
+  },
+  {
+    "id": "secret-leak-scanner",
+    "name": "Secret Leak Scanner",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Scan pasted text, configs or logs for leaked credentials: private keys (and whether encrypted), AWS, GitHub, Slack, Stripe, Google and SendGrid tokens, JWTs, URL passwords. Findings are masked, never echoed in full."
   }
 ];
 

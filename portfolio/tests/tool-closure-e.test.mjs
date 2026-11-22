@@ -323,3 +323,76 @@ test('authorized-keys-audit options, duplicates, errors', () => {
   assert.match(akOut('ssh-ed25519 ' + be('ssh-ed25519', Buffer.alloc(32, 7)).toString('base64')), /ssh-ed25519 256 bits/);
   assert.throws(() => akOut('# nothing\n'), /No keys found/);
 });
+
+// Secret-shaped test data is generated at run time (seeded) so no token-like literal is committed; GitHub push protection rightly blocks those.
+const rng = (() => { let s = 20261122; return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let x = Math.imul(s ^ s >>> 15, 1 | s); x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x; return ((x ^ x >>> 14) >>> 0) / 4294967296; }; })();
+const AL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789', B32 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+const rs = (n, al = AL) => Array.from({ length: n }, () => al[Math.floor(rng() * al.length)]).join('');
+const pre = (...p) => p.join('');
+const TOK = { pos: {
+  aws: pre('AK', 'IA') + rs(16, B32), aws_asia: pre('AS', 'IA') + rs(16, B32), gh: pre('gh', 'p_') + rs(36), gh_oauth: pre('gh', 'o_') + rs(36),
+  ghpat: pre('github', '_pat_') + rs(82, AL + '_'), slack: pre('xo', 'xb-') + rs(11, '0123456789') + '-' + rs(24),
+  stripe: pre('sk', '_live_') + rs(24), stripe_r: pre('rk', '_live_') + rs(30), google: pre('AI', 'za') + rs(35, AL + '_-'),
+  sendgrid: pre('S', 'G.') + rs(22, AL + '_-') + '.' + rs(43, AL + '_-') },
+  neg: { aws_short: pre('AK', 'IA') + rs(15, B32), aws_lower: pre('ak', 'ia') + rs(16, B32), aws_bad_char: pre('AK', 'IA') + '1' + rs(15, B32),
+  gh_short: pre('gh', 'p_') + rs(35), gh_badprefix: pre('gh', 'x_') + rs(36), stripe_test: pre('sk', '_test_') + rs(24), stripe_short: pre('sk', '_live_') + rs(23),
+  google_short: pre('AI', 'za') + rs(34, AL + '_-'), sendgrid_bad: pre('S', 'G.') + rs(21, AL + '_-') + '.' + rs(43, AL + '_-'), slack_short: pre('xo', 'xb-123') } };
+const { generateKeyPairSync } = await import('node:crypto');
+const b64lines = (buf) => buf.toString('base64').match(/.{1,70}/g).join('\n');
+const osshBlob = (cipher) => { const s = (x) => { const b = Buffer.from(x); const l = Buffer.alloc(4); l.writeUInt32BE(b.length); return Buffer.concat([l, b]); };
+  return Buffer.concat([Buffer.from('openssh-key-v1\0'), s(cipher), s(cipher === 'none' ? 'none' : 'bcrypt'), s(''), Buffer.from([0, 0, 0, 1]), s('pub'), s('priv')]); };
+const wrap = (label, body) => '-----BEGIN ' + label + '-----\n' + body + '\n-----END ' + label + '-----\n';
+const rsaK = generateKeyPairSync('rsa', { modulusLength: 2048 }), ecK = generateKeyPairSync('ec', { namedCurve: 'prime256v1' });
+const PK = {
+  pkcs8_rsa: { pem: rsaK.privateKey.export({ type: 'pkcs8', format: 'pem' }), label: 'PRIVATE KEY', enc: false },
+  pkcs8_rsa_enc: { pem: rsaK.privateKey.export({ type: 'pkcs8', format: 'pem', cipher: 'aes-256-cbc', passphrase: 'pw' }), label: 'ENCRYPTED PRIVATE KEY', enc: true },
+  trad_rsa: { pem: rsaK.privateKey.export({ type: 'pkcs1', format: 'pem' }), label: 'RSA PRIVATE KEY', enc: false },
+  trad_rsa_enc: { pem: rsaK.privateKey.export({ type: 'pkcs1', format: 'pem', cipher: 'aes-256-cbc', passphrase: 'pw' }), label: 'RSA PRIVATE KEY', enc: true },
+  ec: { pem: ecK.privateKey.export({ type: 'sec1', format: 'pem' }), label: 'EC PRIVATE KEY', enc: false },
+  ossh_plain: { pem: wrap('OPENSSH PRIVATE KEY', b64lines(osshBlob('none'))), label: 'OPENSSH PRIVATE KEY', enc: false },
+  ossh_enc: { pem: wrap('OPENSSH PRIVATE KEY', b64lines(osshBlob('aes256-ctr'))), label: 'OPENSSH PRIVATE KEY', enc: true },
+};
+const sl = (text) => run('secret-leak-scanner', { text });
+const slKinds = (o) => [...o.matchAll(/^\[(\w+)\] line (\d+): (.*?)( \S+…\(\d+ chars\))?$/gm)].map(m => m[1] + '|' + m[2] + '|' + m[3]);
+
+test('secret-leak-scanner detects documented token formats, masks them, and rejects near-misses', () => {
+  const kinds = { aws: 'AWS access key ID', aws_asia: 'AWS access key ID', gh: 'GitHub token', gh_oauth: 'GitHub token', ghpat: 'GitHub fine-grained token',
+    slack: 'Slack token', stripe: 'Stripe live secret key', stripe_r: 'Stripe live secret key', google: 'Google API key', sendgrid: 'SendGrid API key' };
+  for (const [k, tok] of Object.entries(TOK.pos)) {
+    const o = sl('x = ' + tok + ' # end');
+    assert.deepEqual(slKinds(o), ['HIGH|1|' + kinds[k]], k);
+    assert.ok(!o.includes(tok), 'full secret must never be echoed: ' + k);
+    assert.ok(!o.includes(tok.slice(0, 12) + tok.slice(12, 16)), 'only a short prefix is shown: ' + k);
+    assert.match(o, new RegExp('\\(' + tok.length + ' chars\\)'), k);
+  }
+  for (const [k, tok] of Object.entries(TOK.neg)) assert.match(sl('x = ' + tok), /No secrets found/, 'near miss ' + k);
+  assert.match(sl('Tokens:\n' + Object.values(TOK.pos).join('\n')), /Findings: 10\n/);
+});
+
+test('secret-leak-scanner finds URL passwords, JWT, bearer, assignments and masks short values', () => {
+  const o = sl('db=postgres://app:hunter2hunter@db:5432/x\ncurl -H "Authorization: Bearer abcdefghijklmnopqrstuvwxyz012345"\nsecret: "s3cr3t-value-123"\npassword = "short"\nt=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.abc-DEF_123');
+  assert.deepEqual(slKinds(o), ['HIGH|1|password in URL', 'MEDIUM|2|Bearer token', 'MEDIUM|3|hard-coded credential', 'MEDIUM|5|JSON Web Token']);
+  assert.match(o, /password in URL hu…\(13 chars\)/); // under 20 characters: only 2 characters are shown
+  assert.doesNotMatch(o, /hunter2/);
+  assert.match(sl('x=Bearer ' + 'a'.repeat(20)), /Bearer token aaaa…\(20 chars\)/); // 20 or more: 4 characters
+  assert.match(sl('x=Bearer ' + 'a'.repeat(19)), /No secrets found/);
+  assert.match(sl('https://example.com/path'), /No secrets found/); // no credentials in a plain URL
+  assert.match(sl('password: ""'), /No secrets found/); assert.match(sl('password = "1234567"'), /No secrets found/); // under 8 characters
+  assert.match(sl('password = "12345678"'), /hard-coded credential/);
+  assert.match(sl('aws_access_key_id = AKIAIOSFODNN7EXAMPLE'), /AWS access key ID/); // AWS documentation example
+  assert.match(sl('line1\nline2\nAKIAIOSFODNN7EXAMPLE'), /line 3: AWS/);
+});
+
+test('secret-leak-scanner identifies real private keys and whether they are encrypted (generated at run time with node:crypto; OpenSSH blobs built per the openssh-key-v1 layout)', () => {
+  for (const [name, k] of Object.entries(PK)) {
+    const o = sl('# config\n' + k.pem);
+    const sev = k.enc ? 'MEDIUM' : 'CRITICAL';
+    assert.deepEqual(slKinds(o), [sev + '|2|private key (' + k.label + (k.enc ? ', passphrase-protected)' : ', NOT encrypted)')], name);
+    const body = k.pem.split('\n')[1]; assert.ok(!o.includes(body), 'key body is never echoed');
+  }
+  const two = sl(PK.pkcs8_rsa.pem + PK.ossh_enc.pem);
+  assert.equal([...two.matchAll(/private key/g)].length, 2);
+  assert.ok(two.indexOf('CRITICAL') < two.indexOf('MEDIUM'));
+  assert.match(sl('-----BEGIN PRIVATE KEY-----\nTRUNCATED'), /CRITICAL.*private key \(PRIVATE KEY, NOT encrypted\)/); // header without footer is still reported
+  assert.match(sl('-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----'), /No secrets found/);
+});

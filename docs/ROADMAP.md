@@ -66,7 +66,7 @@ Run from the repo root:
 - "Zero errors" cannot be guaranteed; the guarantee is that no tool ships without passing known-answer tests and the gate.
 
 ## Status (update every session)
-- Last updated: 2026-11-22 by Claude. Working branch: `platform/clean-v3` (178 tools; 120 frontend tests, 103 backend checks green;
+- Last updated: 2026-11-22 by Claude. Working branch: `platform/clean-v3` (179 tools; 123 frontend tests, 103 backend checks green;
   browser run of every new tool clean).
 - Batch 1 (10): x509-inspector, ssh-fingerprint, nmap-grepable-parser, suricata-eve-summary, zeek-conn-summary, sudoers-audit,
   passwd-shadow-audit, checksum-calc, luhn-check, yara-rule-lint.
@@ -77,9 +77,10 @@ Run from the repo root:
   jwt-security-audit (tokens built independently in Python), hsts-check (RFC 6797 grammar, hstspreload.org rules), security-txt-check
   (RFC 9116 rules read from the RFC; dates cross-checked with Python datetime), cors-config-audit, http-smuggling-lint (RFC 9112 framing;
   body lengths vs Python). Mutation-checked; surviving mutants were closed with extra boundary tests or shown equivalent.
-  Batch 4 (3 so far): dns-zone-audit (all 26 records of three zone files match dnspython), cidr-aggregate (310 cases incl. 300 seeded
+  Batch 4 (4 so far): dns-zone-audit (all 26 records of three zone files match dnspython), cidr-aggregate (310 cases incl. 300 seeded
   random ones equal Python ipaddress collapse/address_exclude, RFC 5952 output), authorized-keys-audit (real keys from Python cryptography,
-  hand-built blobs of exact odd bit lengths). All mutation-checked.
+  hand-built blobs of exact odd bit lengths), secret-leak-scanner (token formats from Python-generated samples plus near-miss negatives;
+  real PEM private keys from cryptography incl. encrypted PKCS8/traditional/OpenSSH; output is masked). All mutation-checked.
   Not done: sshd-config-audit (sshd not available here to produce ground truth), robots-txt-audit (needs the RFC 9309
   longest-match examples), password-policy-audit (needs the NIST SP 800-63B-4 values read from the source).
 - Test standard going forward: derive expected values from an independent source, then mutate the tool to prove the test fails.

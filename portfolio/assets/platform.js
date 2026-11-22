@@ -715,6 +715,32 @@ const k=b64;if(seen[k])f.push('[WARN] line '+n+': duplicate of the key on line '
 if(!keys&&!f.length)throw Error('No keys found in the text.');
 const order={ERROR:0,HIGH:1,MEDIUM:2,WARN:3,INFO:4};f.sort((a,b)=>order[/^\[(\w+)\]/.exec(a)[1]]-order[/^\[(\w+)\]/.exec(b)[1]]);
 return rows([['Keys parsed',keys],['Findings',f.length]])+'\n\nKeys:\n'+(out.join('\n')||'(none)')+'\n\nFindings:\n'+(f.join('\n')||'No findings from these checks.')+'\n\nFingerprints are not shown; use the SSH Fingerprint tool for that. Keys are only parsed, never used.';}}
+,
+{id:'secret-leak-scanner',name:'Secret Leak Scanner',cat:'security',symbol:'SL',desc:'Scan pasted text, configs or logs for leaked credentials: private keys (and whether encrypted), AWS, GitHub, Slack, Stripe, Google and SendGrid tokens, JWTs, URL passwords. Findings are masked, never echoed in full.',tags:'secret scanner leak credentials api key token private key aws github slack stripe jwt password git',fields:[['text','Text to scan','aws_access_key_id = AKIAIOSFODNN7EXAMPLE\ndb = postgres://app:S3cretPassw0rd@db.internal:5432/prod\nAuthorization: Bearer abcdefghijklmnopqrstuvwxyz0123456789\npassword = "correct-horse-battery"','textarea']],run:v=>{
+const text=v.text.replace(/\r\n?/g,'\n');const lines=text.split('\n');const f=[];
+const mask=(s)=>s.length<=8?'*'.repeat(s.length):s.slice(0,s.length>=20?4:2)+'…('+s.length+' chars)';
+const add=(sev,kind,n,val)=>f.push({sev,kind,n,val});
+const rules=[
+['HIGH','AWS access key ID',/\b(?:AKIA|ASIA|AGPA|AIDA|AROA|AIPA|ANPA|ANVA|ABIA|ACCA)[A-Z2-7]{16}\b/g],
+['HIGH','GitHub token',/\b(?:ghp|gho|ghu|ghs|ghr)_[A-Za-z0-9]{36}\b/g],
+['HIGH','GitHub fine-grained token',/\bgithub_pat_[A-Za-z0-9_]{82}\b/g],
+['HIGH','Slack token',/\bxox[baprs]-[A-Za-z0-9-]{10,}/g],
+['HIGH','Stripe live secret key',/\b[sr]k_live_[A-Za-z0-9]{24,}\b/g],
+['HIGH','Google API key',/\bAIza[0-9A-Za-z_-]{35}\b/g],
+['HIGH','SendGrid API key',/\bSG\.[A-Za-z0-9_-]{22}\.[A-Za-z0-9_-]{43}\b/g],
+['MEDIUM','JSON Web Token',/\beyJ[A-Za-z0-9_-]{5,}\.eyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]*/g],
+['MEDIUM','Bearer token',/\bBearer\s+([A-Za-z0-9._~+\/-]{20,}=*)/gi],
+['HIGH','password in URL',/\b[a-z][a-z0-9+.-]*:\/\/[^\s:@\/'"]+:([^\s@\/'"]{3,})@/gi],
+['MEDIUM','hard-coded credential',/\b(?:password|passwd|pwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token|client[_-]?secret)\b["']?\s*[:=]\s*["']([^"'\s]{8,})["']/gi]
+];
+lines.forEach((ln,i)=>{const n=i+1;for(const [sev,kind,re] of rules){re.lastIndex=0;let m;while((m=re.exec(ln))){const val=m[1]!==undefined?m[1]:m[0];add(sev,kind,n,val);}}});
+const blk=/-----BEGIN ((?:RSA |EC |DSA |OPENSSH |ENCRYPTED |PGP )?PRIVATE KEY(?: BLOCK)?)-----([\s\S]*?)(?:-----END \1-----|$)/g;let m;
+while((m=blk.exec(text))){const n=text.slice(0,m.index).split('\n').length;const label=m[1];const body=m[2];let enc=false;
+if(/^ENCRYPTED /.test(label)||/Proc-Type:\s*4,ENCRYPTED/.test(body))enc=true;
+else if(label==='OPENSSH PRIVATE KEY'){try{const b=atob(body.replace(/[^A-Za-z0-9+\/=]/g,''));const magic='openssh-key-v1\0';if(b.startsWith(magic)){const o=magic.length;const len=(b.charCodeAt(o)<<24|b.charCodeAt(o+1)<<16|b.charCodeAt(o+2)<<8|b.charCodeAt(o+3))>>>0;enc=b.slice(o+4,o+4+len)!=='none';}}catch(e){}}
+f.push({sev:enc?'MEDIUM':'CRITICAL',kind:'private key ('+label+(enc?', passphrase-protected':', NOT encrypted')+')',n,val:null});}
+const order={CRITICAL:0,HIGH:1,MEDIUM:2};f.sort((a,b)=>order[a.sev]-order[b.sev]||a.n-b.n);
+return rows([['Lines scanned',lines.length],['Findings',f.length]])+'\n\n'+(f.map(x=>'['+x.sev+'] line '+x.n+': '+x.kind+(x.val===null?'':' '+mask(x.val))).join('\n')||'No secrets found by these patterns.')+'\n\nPattern matching only: confirm each hit, then rotate (not just delete) anything real. Values are masked; nothing is sent anywhere.';}}
 
 ];
 function rows(items){return items.map(x=>x[0]+': '+x[1]).join('\n');}

@@ -164,6 +164,7 @@ jobs:
           grep -q "Mosta shell helpers loaded." /tmp/mosta-help.txt
           test -x cyber-labs/mosta-terminal/install.sh || chmod +x cyber-labs/mosta-terminal/install.sh
           tmp_home="$(mktemp -d)"
+          real_path="$PATH"
           fake_bin="$(mktemp -d)"
           cat >"$fake_bin/python3" <<'PY'
           #!/usr/bin/env bash
@@ -178,7 +179,7 @@ jobs:
           HOME="$tmp_home" PATH="$fake_bin:$PATH" bash cyber-labs/mosta-terminal/install.sh
           test ! -e "$MOSTA_TEST_PIP_LOG"
           export HOME="$tmp_home"
-          export PATH="$HOME/.local/bin:$PATH"
+          export PATH="$HOME/.local/bin:$real_path"
           test -L "$HOME/.local/bin/mnet"
           test -L "$HOME/.local/bin/run-network-toolkit"
           test -L "$HOME/.local/bin/mosta-index"

@@ -19,7 +19,7 @@
 ## CI and Preview evidence
 - PR #9 exact head `0b131836334ac24624e880c134f3f0f0dc48e470`: Lab Checks run `44932343231` completed successfully; backend-security and Python jobs passed. Portfolio workflow `44932343250` validation passed and deploy was skipped. Platform workflow `44932343277` validation and security-tests passed; deploy was skipped. Job-step summaries were fetched and showed successful completion.
 - PR #7 earlier reviewed head `a1eff15feea8f020b878a345c99bb8e3bbd95db1`: Cloudflare Preview Build and Deployment succeeded (deployment `b125201d-7b39-437c-a784-dccda620cf44`, URL `https://b125201d-mostafa-frg.frh7977.workers.dev`). That deployment predates the two CLI catalog validator commits and does not validate them.
-- PR #7 latest commit `50d2fb429b9869717f12332b1909319770880fce`: no PR-triggered workflow run or combined status was returned by the available commit workflow/status queries. The workflow-run wrapper filters to pull-request-triggered runs, so this does not prove that no push-triggered run exists. The newly added tests have not been executed in a clean Linux environment in this session.
+- PR #7 latest head `c8f225f45f73e509b0bfc676a31523317cd921a2`: corrected stale platform test expectations from 207 to 231 tools and added an explicit frontend/backend ID parity regression test. Live registry audit confirmed 231 unique frontend IDs and 231 unique backend IDs with exact set parity. The available workflow/status actions returned no PR-triggered run and no combined status for this head; push-triggered run state remains UNKNOWN. Exact-head GitHub Actions tests are NOT VERIFIED.
 - The PR #7 Preview URL could not be independently fetched from this execution environment due DNS/network resolution failure.
 - PR #6 Cloudflare Preview build for `912a89f62baa5e8b3767158bee267071d1b661ca` failed because `npx wrangler preview` was invoked from repository root without selecting `backend/wrangler.jsonc`. The backend config already contains a `previews` block. Proposed Build Trigger command: `npx wrangler preview --config backend/wrangler.jsonc`, or set root directory to `backend` only after validating asset paths. This requires an authorized Cloudflare maintainer; no account setting was changed.
 
@@ -31,7 +31,7 @@
 - Claude Code's local session and working tree are not visible; do not claim it has executed tasks without GitHub evidence.
 
 ## Required next actions
-1. PR #7: obtain exact-head CI evidence for `50d2fb4...`, run the CLI index tests and installer in a clean Linux environment, and resolve base-branch divergence only after reviewing the complete diff.
+1. PR #7: obtain exact-head CI evidence for `c8f225f...`, run the CLI index tests and installer in a clean Linux environment, and resolve base-branch divergence only after reviewing the complete diff.
 2. PR #9: complete independent review and safe Preview/runtime verification before removing Draft.
 3. PR #6: have an authorized maintainer resolve the Preview Build Trigger, then verify Preview health and static assets.
-4. Complete agent adapter templates and verify all handoff instructions against live repository state.
+4. ORCH-002 agent adapters and templates are complete; continue maintaining coordination records against live repository state.

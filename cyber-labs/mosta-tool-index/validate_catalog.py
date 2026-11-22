@@ -17,7 +17,7 @@ def validate(path: Path) -> list[str]:
     errors: list[str] = []
     try:
         with path.open("r", encoding="utf-8-sig", newline="") as stream:
-            reader = csv.DictReader(stream)
+            reader = csv.DictReader(stream, strict=True)
             if tuple(reader.fieldnames or ()) != REQUIRED:
                 return [f"header must be exactly: {','.join(REQUIRED)}"]
             seen_entries: set[tuple[str, str]] = set()
@@ -25,6 +25,8 @@ def validate(path: Path) -> list[str]:
             count = 0
             for line, row in enumerate(reader, start=2):
                 count += 1
+                if None in row:
+                    errors.append(f"line {line}: unexpected extra CSV fields")
                 values = {key: (row.get(key) or "").strip() for key in REQUIRED}
                 if any(not value for value in values.values()):
                     errors.append(f"line {line}: all fields are required")

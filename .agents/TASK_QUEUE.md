@@ -48,7 +48,7 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest branch head: `c8f225f45f73e509b0bfc676a31523317cd921a2` (installer hardening was committed earlier).
+- Latest branch head: `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb` (installer hardening was committed earlier).
 - Scope: `cyber-labs/mosta-terminal/install.sh`, `cyber-labs/mosta-terminal/README.md`
 - Required: test installer in a clean Linux environment; prove it does not install requirements from sibling labs; verify symlinks, PATH setup, and mosta-doctor behavior.
 - Blocker: PR targets `feat/mosta-platform-redesign`; comparison reports 122 commits ahead and 21 behind that base, and 122 ahead / 66 behind `main`. Do not retarget until the complete 20-file diff and shared ancestry are reviewed.
@@ -59,11 +59,11 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest branch head: `c8f225f45f73e509b0bfc676a31523317cd921a2`.
+- Latest branch head: `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`.
 - Scope: `cyber-labs/mosta-tool-index/validate_catalog.py`, `cyber-labs/mosta-tool-index/test_validate_catalog.py`
-- Changes: strict CSV parsing; reject rows with extra fields; regression tests for extra columns and unterminated quoted fields; corrected frontend tool-count/category assertions from stale 207 to audited 231; added frontend/backend registry ID parity regression.
+- Changes: strict CSV parsing; reject rows with extra fields; regression tests for extra columns and unterminated quoted fields; corrected frontend tool-count/category assertions from stale 207 to audited 231; added frontend/backend registry ID parity regression; `mosta_index.py` now uses the shared strict validator and rejects malformed/extra-field catalogs, with new regression tests.
 - Required: run validator against the checked-in 61-entry CSV; run all `test_*.py` tests on Python 3.10 and 3.12; capture exact-SHA CI evidence.
-- Workflow: `.github/workflows/mosta-tool-index.yml` defines Python 3.10/3.12 matrix checks on both push and pull_request for this branch. Current execution tools returned no PR-triggered run and no combined commit status for the latest SHA; push-triggered run state remains unverified.
+- Workflow: `.github/workflows/mosta-tool-index.yml` defines Python 3.10/3.12 matrix checks on both push and pull_request for this branch. Current execution tools returned no PR-triggered run and no combined commit status for latest head `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`; push-triggered run state remains unverified.
 - Prohibited: claim tests passed without observed output; merge or deploy.
 - Acceptance: both Python matrix jobs pass on the exact commit; 61 catalog entries validate; malformed-input tests pass.
 

@@ -5,9 +5,9 @@
 - Owner: Technical Lead
 - Branch: `chore/mosta-multi-agent-foundation`
 - Base: `main`
-- Status: coordination records reconciled with GitHub on 2026-11-22. This update creates new documentation commits; fetch the live PR #6 head before the next change.
+- Status: ORCH-002 is complete on the current coordination branch. Latest adapter commits: `86342dfc6d809c63195bbd1522e2ac070d722123`, `88d0ec153fe574b3b88a240239e060b6bbee6ada`, `7ea46aa205f750a9047712857ed51b7321a83b75`. Fetch live PR #6 head before any further change.
 - PR #5 is MERGED.
-- No PR was merged and no Production deployment or Production resource change was performed during this review.
+- No PR was merged and no Production deployment or Production resource change was performed.
 
 ## Engineering handoffs
 
@@ -20,27 +20,27 @@
 
 ### PR #7 — MOSTA Terminal / tool expansion
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest commit added in this session: `50d2fb429b9869717f12332b1909319770880fce`
+- Verified latest head: `50d2fb429b9869717f12332b1909319770880fce`
 - Installer hardening: no longer scans sibling labs' requirements or installs their packages globally; README explains per-lab dependency installation.
 - CLI catalog validator hardening: `f59776e083bbcc061a05c8790f95bc96d2a7e6fc` enables strict CSV parsing and rejects extra row fields; `50d2fb429b9869717f12332b1909319770880fce` adds regression tests for extra columns and unterminated quoted fields.
-- The latest validator and test files were fetched back from GitHub and inspected. Tests were added but were not executed in a clean Linux environment in this session.
-- No PR-triggered workflow run or combined status was returned for the latest SHA. The available workflow-run wrapper filters to PR-triggered runs, so push-triggered run state remains unverified.
+- Latest validator, test, catalog, and installer files were fetched from GitHub and inspected.
+- Dedicated workflow `.github/workflows/mosta-tool-index.yml` defines Python 3.10 and 3.12 matrix checks on push and pull_request. Available workflow/status tools returned no PR-triggered run and no combined status for the latest SHA; push-triggered run state remains unverified. No clean Linux test execution was performed.
 - Earlier Cloudflare Preview Build and Deployment succeeded on `a1eff15feea8f020b878a345c99bb8e3bbd95db1` (deployment `b125201d-7b39-437c-a784-dccda620cf44`); this predates the latest validator changes. The Preview URL could not be independently fetched from this execution environment.
-- PR remains Draft and mergeable=false. Base is `feat/mosta-platform-redesign`; earlier comparison with `main` showed 120 commits ahead and 66 behind. Do not retarget blindly; inspect the full diff and resolve ancestry first.
+- PR remains Draft and mergeable=false. Base is `feat/mosta-platform-redesign`. Comparison: 122 commits ahead / 21 behind that base; 122 ahead / 66 behind `main`. The diff has 20 changed files, including 868 backend additions and 271 frontend additions. Do not retarget blindly; review file-level patches and shared ancestry first.
 
 ### PR #6 — Multi-agent foundation
 - Branch: `chore/mosta-multi-agent-foundation`
 - Base: `main`
-- CURRENT_STATE, TASK_QUEUE, HANDOFF, DECISIONS, MASTER_CONTEXT, and CHANGELOG are coordination sources; keep their SHA references synchronized with live PR state.
+- ORCH-002 is DONE: ChatGPT, Claude, and reviewer adapters include startup and completion prompts; task/handoff templates standardize ownership, allowed paths, tests, CI, security findings, blockers, and next actions.
 - PR5-specific review/QA tasks are CANCELLED as obsolete, not marked DONE.
 - Cloudflare Preview Build Trigger issue remains unresolved: the failing build invoked `npx wrangler preview` from repository root while Wrangler config is `backend/wrangler.jsonc`. The backend config already has a `previews` block.
 - Proposed Build Trigger command: `npx wrangler preview --config backend/wrangler.jsonc`, subject to checking asset paths. This needs an authorized Cloudflare maintainer; no account settings were changed.
 
 ## Next actions
-1. Obtain exact-head CI and clean-Linux evidence for PR #7; resolve base-branch divergence without broadening the PR unexpectedly.
-2. Obtain independent review and Preview/runtime evidence for PR #9.
-3. Have an authorized maintainer fix the PR #6 Cloudflare Build Trigger, then verify Preview health and assets.
-4. Finish agent adapter templates and keep task ownership/path boundaries explicit.
+1. PR #7: obtain exact-head CI and clean-Linux evidence; review the complete file-level diff and resolve base ancestry without broadening the PR unexpectedly.
+2. PR #9: obtain independent review and Preview/runtime evidence.
+3. PR #6: an authorized maintainer must fix the Preview Build Trigger, then verify Preview health and assets.
+4. Keep ORCH-001 coordination records synchronized with live PR heads.
 
 ## Handoff template
 Copy this section for every agent transfer.

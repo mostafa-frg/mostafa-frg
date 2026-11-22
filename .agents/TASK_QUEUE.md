@@ -24,10 +24,12 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Do not infer that the release gates were satisfied.
 
 ### ORCH-002 — Define agent adapters and task templates
-- Status: READY
+- Status: DONE
 - Owner: Technical Lead
 - Scope: `.agents/agents/**`, `.agents/templates/**`
-- Acceptance: copy/paste startup and completion prompts for ChatGPT, Claude, and independent reviewer; standardized task/handoff record; no overlapping writable paths.
+- Evidence: ChatGPT, Claude, and independent reviewer adapters now contain copy/paste startup and completion instructions; task and handoff templates provide standardized ownership, allowed-path, test, CI, security, blocker, and next-action fields.
+- Commits: `86342dfc6d809c63195bbd1522e2ac070d722123`, `88d0ec153fe574b3b88a240239e060b6bbee6ada`, `7ea46aa205f750a9047712857ed51b7321a83b75`.
+- Verification: all three adapter files were fetched back from GitHub and inspected after writing. No merge or deployment.
 
 ## Active engineering and verification tasks
 
@@ -46,10 +48,10 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest branch commit added in this session: `50d2fb429b9869717f12332b1909319770880fce`
+- Latest branch commit: `50d2fb429b9869717f12332b1909319770880fce`
 - Scope: `cyber-labs/mosta-terminal/install.sh`, `cyber-labs/mosta-terminal/README.md`
 - Required: test installer in a clean Linux environment; prove it does not install requirements from sibling labs; verify symlinks, PATH setup, and mosta-doctor behavior.
-- Blocker: PR currently targets `feat/mosta-platform-redesign` and is not mergeable. Compare the complete diff before deciding whether to retarget to `main`.
+- Blocker: PR targets `feat/mosta-platform-redesign`; comparison reports 122 commits ahead and 21 behind that base, and 122 ahead / 66 behind `main`. Do not retarget until the complete 20-file diff and shared ancestry are reviewed.
 - Prohibited: merge, Production deploy, destructive package installation on a user's machine.
 - Acceptance: clean-environment test evidence on exact latest SHA; no cross-lab dependency installation; base-branch decision documented.
 
@@ -61,7 +63,7 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Scope: `cyber-labs/mosta-tool-index/validate_catalog.py`, `cyber-labs/mosta-tool-index/test_validate_catalog.py`
 - Changes: strict CSV parsing; reject rows with extra fields; regression tests for extra columns and unterminated quoted fields.
 - Required: run validator against the checked-in 61-entry CSV; run all `test_*.py` tests on Python 3.10 and 3.12; capture exact-SHA CI evidence.
-- Evidence limitation: the available workflow-run query returned no PR-triggered run for this SHA; it filters out push-triggered runs. No clean Linux execution was performed in this session.
+- Workflow: `.github/workflows/mosta-tool-index.yml` defines Python 3.10/3.12 matrix checks on both push and pull_request for this branch. Current execution tools returned no PR-triggered run and no combined commit status for the latest SHA; push-triggered run state remains unverified.
 - Prohibited: claim tests passed without observed output; merge or deploy.
 - Acceptance: both Python matrix jobs pass on the exact commit; 61 catalog entries validate; malformed-input tests pass.
 

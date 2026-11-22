@@ -169,7 +169,7 @@ jobs:
           cat >"$fake_bin/python3" <<'PY'
           #!/usr/bin/env bash
           if [[ " $* " == *" -m pip "* ]]; then
-            printf '%s\\n' "$*" >>"$MOSTA_TEST_PIP_LOG"
+            printf '%s\n' "$*" >>"$MOSTA_TEST_PIP_LOG"
           fi
           exit 0
           PY
@@ -188,7 +188,7 @@ jobs:
           mosta-index list | grep -q "Nmap"
           mosta-index search Tcpdump | grep -q "mtcpdump"
           mosta-doctor
-          printf '%s\\n' '#!/usr/bin/env bash' 'printf "fake nmap\\n"' >"$fake_bin/nmap"
+          printf '%s\n' '#!/usr/bin/env bash' 'printf "fake nmap\n"' >"$fake_bin/nmap"
           chmod +x "$fake_bin/nmap"
           test -L "$HOME/.local/bin/mnmap"
           PATH="$fake_bin:$HOME/.local/bin:$real_path" command -v nmap >/dev/null

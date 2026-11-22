@@ -33,3 +33,9 @@
 - Corrected the fixture to use actual CSV line breaks in commit `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af`.
 - Exact-head workflow run `45015060496` then completed successfully: Python 3.10 and 3.12 jobs both passed validator compilation, validation of all 61 catalog entries, and all 14 unit tests. This CI success does not validate the terminal installer or every web tool's runtime behavior.
 - PR #7 remains Draft and mergeable=false because of base-branch divergence. No retarget, merge, or deployment was performed.
+
+## 2026-11-22 — Clean Linux installer and full Lab Checks
+- Added an installer CI assertion that a clean install does not invoke global `python3 -m pip`, checks the installed `mosta-index` symlink and its `list/search` commands, and exercises the installed `mnmap` alias against a fake local executable.
+- CI harness debugging found two issues in the test itself: the fake Python path initially shadowed the real interpreter, and the fake Nmap fixture used an escaped newline in its shebang file. Both were corrected; the test now asserts the fake executable's unique output marker.
+- Final Lab Checks run `45015734097` passed on exact head `68c4affd03d3d89ad2c3509a40b9d86247bbfd18`: 42 pytest tests; 122 toolkit checks (22 informational notices); shell syntax; clean temporary-HOME install on Ubuntu 26.04; no global pip invocation; CLI index list/search; `mosta-doctor`; external alias dispatch; and 89/89 backend security tests. Local D1 migrations and Worker tests were isolated to the CI runner.
+- PR #7 remains Draft and mergeable=false due to base-branch divergence. No retarget, merge, Preview deployment, or Production deployment was performed.

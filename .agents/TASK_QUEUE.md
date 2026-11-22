@@ -38,19 +38,32 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Current implementation SHA: `0b131836334ac24624e880c134f3f0f0dc48e470`
 - Scope: `backend/src/index.js`, `backend/tests/api-security.mjs`
 - Required: verify safe-integer rejection, run backend security suite on exact SHA, inspect admin UI pagination and confirm no duplicate/omitted events across page boundaries.
+- Evidence: Lab Checks `44932343231`, portfolio `44932343250`, and platform `44932343277` succeeded on this SHA; deployment jobs were skipped.
 - Prohibited: merge, Production deploy, Production data/schema/secret changes.
-- Acceptance: all targeted tests pass on exact SHA; independent review finds no unresolved High/Critical issue.
+- Acceptance: all targeted tests pass on exact SHA; independent review finds no unresolved High/Critical issue; Preview/runtime verification complete.
 
 ### PR7-INSTALL-001 — Verify isolated MOSTA Terminal installation
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Current implementation SHA: `a1eff15feea8f020b878a345c99bb8e3bbd95db1`
+- Latest branch commit added in this session: `50d2fb429b9869717f12332b1909319770880fce`
 - Scope: `cyber-labs/mosta-terminal/install.sh`, `cyber-labs/mosta-terminal/README.md`
 - Required: test installer in a clean Linux environment; prove it does not install requirements from sibling labs; verify symlinks, PATH setup, and mosta-doctor behavior.
 - Blocker: PR currently targets `feat/mosta-platform-redesign` and is not mergeable. Compare the complete diff before deciding whether to retarget to `main`.
 - Prohibited: merge, Production deploy, destructive package installation on a user's machine.
-- Acceptance: clean-environment test evidence on exact SHA; no cross-lab dependency installation; base-branch decision documented.
+- Acceptance: clean-environment test evidence on exact latest SHA; no cross-lab dependency installation; base-branch decision documented.
+
+### PR7-INDEX-001 — Harden and verify CLI catalog CSV validation
+- Status: REVIEW
+- Owner: Independent Reviewer / QA Agent
+- Branch: `feat/mosta-1000-cyber-terminal-tools`
+- Latest commit: `50d2fb429b9869717f12332b1909319770880fce`
+- Scope: `cyber-labs/mosta-tool-index/validate_catalog.py`, `cyber-labs/mosta-tool-index/test_validate_catalog.py`
+- Changes: strict CSV parsing; reject rows with extra fields; regression tests for extra columns and unterminated quoted fields.
+- Required: run validator against the checked-in 61-entry CSV; run all `test_*.py` tests on Python 3.10 and 3.12; capture exact-SHA CI evidence.
+- Evidence limitation: the available workflow-run query returned no PR-triggered run for this SHA; it filters out push-triggered runs. No clean Linux execution was performed in this session.
+- Prohibited: claim tests passed without observed output; merge or deploy.
+- Acceptance: both Python matrix jobs pass on the exact commit; 61 catalog entries validate; malformed-input tests pass.
 
 ### PR6-PREVIEW-001 — Repair Preview build configuration
 - Status: BLOCKED

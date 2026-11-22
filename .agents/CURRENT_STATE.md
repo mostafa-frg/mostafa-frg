@@ -1,34 +1,37 @@
 # MOSTA Current State
 
-> Refreshed 2026-11-21 from GitHub and Cloudflare evidence. Point-in-time snapshot; fetch live PRs and branch heads before every new action.
+> Refreshed 2026-11-22 from GitHub evidence. Point-in-time snapshot; fetch live PRs and branch heads before every new action.
 
 ## Repository
 - Repository: `mostafa-frg/mostafa-frg`
 - Default branch: `main`
 - PR #5: MERGED.
-- PR #6: OPEN, DRAFT; branch `chore/mosta-multi-agent-foundation`; base `main`; mergeable=true at last fetch. This snapshot update itself advances the branch; fetch the live head before acting.
-- PR #7: OPEN, DRAFT; branch `feat/mosta-1000-cyber-terminal-tools`; head `a1eff15feea8f020b878a345c99bb8e3bbd95db1`; base `feat/mosta-platform-redesign`; mergeable=false at last fetch.
-- PR #9: OPEN, DRAFT; branch `feat/mosta-admin-console-audit-pagination`; head `0b131836334ac24624e880c134f3f0f0dc48e470`; base `main`; mergeable=true at last fetch.
+- PR #6: OPEN, DRAFT; branch `chore/mosta-multi-agent-foundation`; base `main`; mergeable=true at last search snapshot.
+- PR #7: OPEN, DRAFT; branch `feat/mosta-1000-cyber-terminal-tools`; latest commit added in this session: `50d2fb429b9869717f12332b1909319770880fce`; base `feat/mosta-platform-redesign`; mergeable=false at last recorded PR snapshot.
+- PR #9: OPEN, DRAFT; branch `feat/mosta-admin-console-audit-pagination`; verified head `0b131836334ac24624e880c134f3f0f0dc48e470`; base `main`; mergeable=true at last recorded PR snapshot.
 
 ## Recent implementation changes (not merged)
-- PR #7: installer no longer scans all of `cyber-labs` and installs unrelated Python requirements. README now instructs users to install only the selected lab's dependencies, preferably in a dedicated virtual environment.
-- PR #9: audit cursor validation rejects values outside JavaScript's safe integer range; API security tests cover `9007199254740992` and create a uniquely marked audit event to test the page boundary.
-- These changes were committed to their feature branches. They are not merged.
+- PR #7 installer: no longer scans sibling lab directories or installs their Python requirements globally. README directs users to install only the selected lab's requirements, preferably in a dedicated virtual environment.
+- PR #7 CLI catalog validator: commit `f59776e083bbcc061a05c8790f95bc96d2a7e6fc` enables strict CSV parsing and rejects rows with extra fields. Commit `50d2fb429b9869717f12332b1909319770880fce` adds regression tests for extra columns and unterminated quoted fields.
+- PR #9: audit cursor validation rejects values outside JavaScript's safe integer range; API security tests cover `9007199254740992` and a uniquely marked older audit event.
+- All changes above remain on feature branches and are not merged.
 
 ## CI and Preview evidence
-- PR #9 exact head `0b131836334ac24624e880c134f3f0f0dc48e470`: Lab Checks run `44932343231` completed success; portfolio workflow `44932343250` validation passed and deploy was skipped; platform workflow `44932343277` validation and security-tests passed and deploy was skipped. These are PR workflow results, not Production deployment.
-- PR #7 exact head `a1eff15feea8f020b878a345c99bb8e3bbd95db1`: no GitHub Actions workflow run was returned for this SHA at last check. However, Cloudflare Preview Build and Deployment succeeded for this exact SHA (deployment `b125201d-7b39-437c-a784-dccda620cf44`, URL `https://b125201d-mostafa-frg.frh7977.workers.dev`). The live URL could not be independently fetched from this execution environment due DNS/network resolution failure. Earlier Lab Checks success (`93e3a97...`) is stale and does not validate the current head.
-- PR #6 Cloudflare Preview build for `912a89f` failed because `npx wrangler preview` was invoked from repository root without selecting `backend/wrangler.jsonc`. The backend config already contains a `previews` block. Proposed Build Trigger command: `npx wrangler preview --config backend/wrangler.jsonc`, or set root directory to `backend` only after validating asset paths. This requires an authorized Cloudflare maintainer; no account setting was changed.
+- PR #9 exact head `0b131836334ac24624e880c134f3f0f0dc48e470`: Lab Checks run `44932343231` completed successfully; backend-security and Python jobs passed. Portfolio workflow `44932343250` validation passed and deploy was skipped. Platform workflow `44932343277` validation and security-tests passed; deploy was skipped. Job-step summaries were fetched and showed successful completion.
+- PR #7 earlier reviewed head `a1eff15feea8f020b878a345c99bb8e3bbd95db1`: Cloudflare Preview Build and Deployment succeeded (deployment `b125201d-7b39-437c-a784-dccda620cf44`, URL `https://b125201d-mostafa-frg.frh7977.workers.dev`). That deployment predates the two CLI catalog validator commits and does not validate them.
+- PR #7 latest commit `50d2fb429b9869717f12332b1909319770880fce`: no PR-triggered workflow run or combined status was returned by the available commit workflow/status queries. The workflow-run wrapper filters to pull-request-triggered runs, so this does not prove that no push-triggered run exists. The newly added tests have not been executed in a clean Linux environment in this session.
+- The PR #7 Preview URL could not be independently fetched from this execution environment due DNS/network resolution failure.
+- PR #6 Cloudflare Preview build for `912a89f62baa5e8b3767158bee267071d1b661ca` failed because `npx wrangler preview` was invoked from repository root without selecting `backend/wrangler.jsonc`. The backend config already contains a `previews` block. Proposed Build Trigger command: `npx wrangler preview --config backend/wrangler.jsonc`, or set root directory to `backend` only after validating asset paths. This requires an authorized Cloudflare maintainer; no account setting was changed.
 
 ## Coordination and security constraints
 - No PR was merged during this review.
-- No Production deployment or Production resource/data/schema/secret change was performed.
+- No Production deployment or Production resource/data/schema/secret change was performed in this review.
 - Do not change Cloudflare account configuration or deployment targets without explicit authorization.
 - Green CI is not an independent security approval.
 - Claude Code's local session and working tree are not visible; do not claim it has executed tasks without GitHub evidence.
 
 ## Required next actions
-1. Complete independent review and Preview/runtime verification for PR #9 before removing Draft.
-2. Run GitHub CI and clean-Linux installer validation for PR #7; Preview deployment succeeded, but runtime endpoint and installer behavior still need independent verification. Resolve base-branch divergence before considering merge readiness.
-3. Resolve PR #6 Cloudflare Build Trigger configuration with an authorized maintainer, then rerun Preview.
+1. PR #7: obtain exact-head CI evidence for `50d2fb4...`, run the CLI index tests and installer in a clean Linux environment, and resolve base-branch divergence only after reviewing the complete diff.
+2. PR #9: complete independent review and safe Preview/runtime verification before removing Draft.
+3. PR #6: have an authorized maintainer resolve the Preview Build Trigger, then verify Preview health and static assets.
 4. Complete agent adapter templates and verify all handoff instructions against live repository state.

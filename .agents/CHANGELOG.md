@@ -27,3 +27,9 @@
 
 - Hardened the local CLI index browser: `mosta_index.py` now invokes the shared strict CSV validator before displaying entries, rejecting malformed quoting, extra fields, duplicate aliases, and invalid catalog rows. Added browser-level regression tests for extra fields and malformed quoting. Commits: `31ab15ff47fbe45b9380b9ba7741e8a6b48be6e1` and `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`.
 - Reconciled the current PR #7 head to `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb`. The checked-in CLI CSV has 61 data rows. Exact-head Actions results remain unverified.
+
+## 2026-11-22 — Follow-up CI verification
+- GitHub Actions run `44971167380` on PR #7 head `c2b0805ce1c9b9554a5ccb3d50cc22af1e4808eb` exposed a malformed fixture in the newly added extra-fields test: the fixture wrote literal escaped newline text, causing the CSV header check to fail before the intended assertion.
+- Corrected the fixture to use actual CSV line breaks in commit `20f5fddc4ffbe772cd1f100f6169715b0ad7d3af`.
+- Exact-head workflow run `45015060496` then completed successfully: Python 3.10 and 3.12 jobs both passed validator compilation, validation of all 61 catalog entries, and all 14 unit tests. This CI success does not validate the terminal installer or every web tool's runtime behavior.
+- PR #7 remains Draft and mergeable=false because of base-branch divergence. No retarget, merge, or deployment was performed.

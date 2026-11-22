@@ -27,6 +27,24 @@ class MostaIndexTests(unittest.TestCase):
         import json
         output = render(select(load_catalog(self.path), query="nmap"), as_json=True)
         self.assertEqual(json.loads(output)[0]["alias"], "mnmap")
+    def test_rejects_extra_csv_fields(self):
+        self.path.write_text(
+            "name,alias,platform,category,purpose\\n"
+            "Nmap,mnmap,Kali,network,discovery,unexpected\\n",
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(ValueError, "unexpected extra CSV fields"):
+            load_catalog(self.path)
+
+    def test_rejects_malformed_csv_quoting(self):
+        self.path.write_text(
+            'name,alias,platform,category,purpose\\n'
+            'Nmap,mnmap,Kali,network,"unterminated\\n',
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(ValueError, "cannot read catalog"):
+            load_catalog(self.path)
+
     def test_rejects_incomplete_catalog_rows(self):
         self.path.write_text("name,alias,platform,category,purpose\nNmap,mnmap,Kali,network,\n", encoding="utf-8")
         with self.assertRaises(ValueError):

@@ -205,12 +205,12 @@ test('homepage search and quick-access deep links resolve to real tool workspace
 test('tool registry has unique IDs and eleven declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 207);
+  assert.equal(tools.length, 231);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
   );
-  const expected={networking:21,security:37,soc:30,linux:34,ubuntu:12,kali:28,bash:13,termux:15,developer:13,cloud:3,database:1};
+  const expected={networking:21,security:39,linux:35,developer:20,soc:36,bash:13,kali:28,ubuntu:13,cloud:10,database:1,termux:15};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -381,7 +381,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 207);
+  assert.equal(tools.length, 231);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');

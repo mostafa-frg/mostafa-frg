@@ -188,12 +188,12 @@ jobs:
           mosta-index list | grep -q "Nmap"
           mosta-index search Tcpdump | grep -q "mtcpdump"
           mosta-doctor
-          printf '%s\n' '#!/usr/bin/env bash' 'printf "fake nmap\n"' >"$fake_bin/nmap"
+          printf '%s\n' '#!/usr/bin/env bash' 'printf "MOSTA_FAKE_NMAP_OK\\n"' >"$fake_bin/nmap"
           chmod +x "$fake_bin/nmap"
           test -L "$HOME/.local/bin/mnmap"
           PATH="$fake_bin:$HOME/.local/bin:$real_path" command -v nmap >/dev/null
-          MOSTA_BANNER=always PATH="$fake_bin:$HOME/.local/bin:$real_path" "$HOME/.local/bin/mnmap" --version > /tmp/mosta-external-test.txt 2>&1
-          grep -q "Network & Security Toolkit" /tmp/mosta-external-test.txt
+          PATH="$fake_bin:$HOME/.local/bin:$real_path" "$HOME/.local/bin/mnmap" --version > /tmp/mosta-external-test.txt 2>&1
+          grep -q "MOSTA_FAKE_NMAP_OK" /tmp/mosta-external-test.txt
           rm -rf "$fake_bin" "$tmp_home"
 
       - name: Validate Docker Compose definitions

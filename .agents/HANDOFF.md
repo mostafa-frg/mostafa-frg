@@ -92,8 +92,8 @@ merge_performed: false
 A handoff is not complete until the receiving agent can identify the exact next action and reproduce the evidence from the referenced commit.
 
 ## PR #7 verification superseding earlier handoff status (2026-11-22)
-- Current PR #7 head: `68c4affd03d3d89ad2c3509a40b9d86247bbfd18`.
+- Current PR #7 head: `290d5fbb4b9d344b80ee1b59f4c764524993f60d`.
 - The earlier line above stating that exact-head CI and clean-Linux installer execution were unavailable is superseded by the evidence below.
 - CLI index matrix run `45015060496` passed on `20f5fdd...`: Python 3.10 and 3.12 both passed compilation, validation of the 61-row catalog, and all 14 CLI index unit tests.
-- Latest full Lab Checks run `45015734097` passed on exact head `68c4aff...`: 42 pytest tests; 122 toolkit checks (22 informational notices); shell syntax validation; Ubuntu 26.04 clean temporary-HOME installer; no global `python3 -m pip` invocation; `mosta-index list/search`; `mosta-doctor`; installed `mnmap` external-wrapper dispatch; and backend-security 89/89 tests. Worker and D1 operations ran locally in CI, not against Production.
-- Remaining gates: independent security review, PR base-branch reconciliation, and Preview/runtime verification. PR #7 remains Draft and mergeable=false. No retarget, merge, or deployment was performed.
+- Latest full Lab Checks run `45454764659` passed on exact head `290d5fbb4b9d344b80ee1b59f4c764524993f60d`: 42 pytest tests; 122 toolkit checks (22 informational notices); shell syntax; clean temporary-HOME installer; no global `python3 -m pip` invocation; `mosta-index list/search`; `mosta-doctor`; external alias dispatch; installer collision-preservation regression; Docker Compose checks; and backend-security 89/89. Worker and D1 operations ran locally in CI, not against Production.
+- Remaining gates: independent security review, resolve five overlapping paths against `feat/mosta-platform-redesign`, and Preview/runtime verification. PR #7 remains Draft and mergeable_state=dirty. PR #7 remains Draft and mergeable=false. No retarget, merge, or deployment was performed.

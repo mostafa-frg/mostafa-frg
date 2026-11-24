@@ -53,3 +53,15 @@ Last updated: 2026-11-20
 4. Expand terminal catalog with verified upstream package metadata, installation checks and platform-specific guidance for Kali and Termux.
 5. Continue until 1,000 distinct new tools meet the implemented + tested acceptance gates.
 6. Keep PR #7 Draft until the full target and review criteria are met; do not merge or deploy without explicit approval.
+
+## Latest quality gate repair — 2026-11-24
+
+- Current PR #7 head: `21af036bbcf5cf92bc5c63786c5ba20e7c788025`.
+- Added Node.js 22 setup and an explicit `node --test portfolio/tests/platform-tools.test.mjs` step to Lab Checks. Before this change, the workflow did not execute the browser-tool JavaScript regression suite.
+- The newly enabled suite exposed a pre-existing malformed insertion in `portfolio/assets/platform.js`: helper/UI code had been inserted inside the tool registry and the Dockerfile analyzer definition was truncated. Restored the registry boundary, removed the misplaced duplicate block, and completed the Dockerfile analyzer.
+- Fixed the Kubernetes image auditor to recognize normal YAML list entries such as `- image: example/app:latest`.
+- Fixed the frontend/backend registry parity test's regular expressions and added frontend ID uniqueness, Dockerfile hardening, and digest-pinned Kubernetes image regression cases.
+- Lab Checks run [45456457042](https://github.com/mostafa-frg/mostafa-frg/actions/runs/45456457042) passed the JavaScript suite (65/65) and the Python job continued through the remaining stages; this run was on the immediately preceding frontend-fix head `5adb407...`.
+- Latest-head run [45456615337](https://github.com/mostafa-frg/mostafa-frg/actions/runs/45456615337) has the JavaScript regression step PASSED. Full Python and backend-security jobs are still IN PROGRESS at the time of this update; do not mark the complete Lab Checks gate as passed until both finish successfully.
+- Browser registry remains 231 unique tools; backend authorization catalog remains 231 with exact ID parity. The separate upstream CLI catalog remains 61 entries.
+- PR #7 remains Draft and non-mergeable against `feat/mosta-platform-redesign`. No base retarget, merge, or Production deployment was performed.

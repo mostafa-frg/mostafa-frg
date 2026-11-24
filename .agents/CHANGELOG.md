@@ -39,3 +39,9 @@
 - CI harness debugging found two issues in the test itself: the fake Python path initially shadowed the real interpreter, and the fake Nmap fixture used an escaped newline in its shebang file. Both were corrected; the test now asserts the fake executable's unique output marker.
 - Final Lab Checks run `45015734097` passed on exact head `68c4affd03d3d89ad2c3509a40b9d86247bbfd18`: 42 pytest tests; 122 toolkit checks (22 informational notices); shell syntax; clean temporary-HOME install on Ubuntu 26.04; no global pip invocation; CLI index list/search; `mosta-doctor`; external alias dispatch; and 89/89 backend security tests. Local D1 migrations and Worker tests were isolated to the CI runner.
 - PR #7 remains Draft and mergeable=false due to base-branch divergence. No retarget, merge, Preview deployment, or Production deployment was performed.
+
+## 2026-11-24 — Installer collision protection and exact-head CI
+- Hardened `cyber-labs/mosta-terminal/install.sh`: it now preflights 133 launcher/alias destinations and refuses to replace unrelated files or symlinks under `~/.local/bin`; existing symlinks are accepted only when they resolve to the intended source.
+- Added a collision-preservation CI regression with a sentinel `mnmap` file and a no-partial-install assertion. An initial test fixture used an over-escaped newline and failed; the fixture was corrected in commit `290d5fbb4b9d344b80ee1b59f4c764524993f60d`.
+- Exact-head Lab Checks run `45454764659` passed: 42 pytest tests, 122 toolkit checks (22 informational notices), installer safety and dispatch tests, Docker Compose validation, and backend security 89/89.
+- PR #7 remains Draft and mergeable_state=dirty because of five overlapping paths with `feat/mosta-platform-redesign`. No retarget, merge, Preview deployment, or Production deployment was performed.

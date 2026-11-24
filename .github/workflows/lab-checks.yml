@@ -194,7 +194,19 @@ jobs:
           PATH="$fake_bin:$HOME/.local/bin:$real_path" command -v nmap >/dev/null
           PATH="$fake_bin:$HOME/.local/bin:$real_path" "$HOME/.local/bin/mnmap" --version > /tmp/mosta-external-test.txt 2>&1
           grep -q "MOSTA_FAKE_NMAP_OK" /tmp/mosta-external-test.txt
-          rm -rf "$fake_bin" "$tmp_home"
+
+          # An unrelated existing command must never be removed or replaced.
+          collision_home="$(mktemp -d)"
+          mkdir -p "$collision_home/.local/bin"
+          printf '%s\\n' 'keep-existing-command' >"$collision_home/.local/bin/mnmap"
+          if HOME="$collision_home" bash cyber-labs/mosta-terminal/install.sh >/tmp/mosta-collision-test.txt 2>&1; then
+            echo "::error::Installer unexpectedly replaced an existing user command."
+            exit 1
+          fi
+          grep -q "refusing to replace existing file" /tmp/mosta-collision-test.txt
+          test "$(cat "$collision_home/.local/bin/mnmap")" = "keep-existing-command"
+          test ! -e "$collision_home/.local/bin/mnet"
+          rm -rf "$collision_home" "$fake_bin" "$tmp_home"
 
       - name: Validate Docker Compose definitions
         run: |

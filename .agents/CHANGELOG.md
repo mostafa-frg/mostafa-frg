@@ -44,7 +44,7 @@
 - Hardened `cyber-labs/mosta-terminal/install.sh`: it now preflights 133 launcher/alias destinations and refuses to replace unrelated files or symlinks under `~/.local/bin`; existing symlinks are accepted only when they resolve to the intended source.
 - Added a collision-preservation CI regression with a sentinel `mnmap` file and a no-partial-install assertion. An initial test fixture used an over-escaped newline and failed; the fixture was corrected in commit `290d5fbb4b9d344b80ee1b59f4c764524993f60d`.
 - Exact-head Lab Checks run `45454764659` passed: 42 pytest tests, 122 toolkit checks (22 informational notices), installer safety and dispatch tests, Docker Compose validation, and backend security 89/89.
-- PR #7 remains Draft and mergeable_state=dirty because of six overlapping paths with `feat/mosta-platform-redesign`. No retarget, merge, Preview deployment, or Production deployment was performed.
+- PR #7 remains Draft and mergeable_state=dirty. Fresh ancestry comparison shows 146 ahead / 21 behind its base and six paths with overlapping changes; no retarget or merge was performed. No retarget, merge, Preview deployment, or Production deployment was performed.
 
 
 ## 2026-11-24 — Frontend regression gate enabled and repaired

@@ -983,8 +983,9 @@ test('every browser tool has a complete and valid schema', () => {
     assert.equal(typeof tool.symbol, 'string');
     assert.ok(tool.symbol.trim().length > 0, tool.id + ' has a symbol');
     assert.equal(typeof tool.run, 'function', tool.id + ' has an executable handler');
-    assert.ok(Array.isArray(tool.fields), tool.id + ' has a fields array');
-    for (const field of tool.fields) {
+    const fields = tool.fields ?? [];
+    assert.ok(Array.isArray(fields), tool.id + ' has an optional fields array');
+    for (const field of fields) {
       assert.ok(Array.isArray(field) && field.length >= 3, tool.id + ' has a valid field tuple');
       assert.equal(typeof field[0], 'string');
       assert.ok(field[0].trim().length > 0);

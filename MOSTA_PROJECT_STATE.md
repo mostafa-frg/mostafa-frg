@@ -71,3 +71,15 @@ Last updated: 2026-11-20
 
 - Latest exact-head Lab Checks run [45491020405](https://github.com/mostafa-frg/mostafa-frg/actions/runs/45491020405) passed on `2cb447999799acf2ae195e2304d53df6b5470464`: Node.js regression suite **66/66**, pytest **42/42**, backend API security **89/89**, 122 toolkit checks with 22 informational notices; Python compilation, offline network/PCAP/HTTP/Flask, terminal installer and Docker Compose validations all passed. The new test checks every registered browser tool for a valid stable ID, name, description, category, symbol, handler and optional input schema.
 - The first schema-test attempt exposed that `public-ip` is a no-input tool; the test was corrected to allow an omitted `fields` array for input-free tools. The corrected exact-head CI run passed.
+
+
+## Integration and compatibility review — 2026-11-25
+
+- Compared the expansion branch against the current base branch. It is **153 commits ahead / 21 behind** `feat/mosta-platform-redesign`; the merge base is `ea69dd09976a6a49dcdb9511eac4b2861fd33043`. Six paths have changes on both sides: the two portfolio/lab workflows, `backend/src/index.js`, terminal README, installer, and `mosta-index`.
+- Reviewed the base-only changes on those paths. Kept the expansion's collision-safe installer and CSV-backed Python index; retained the base branch's Termux installation documentation while correcting the README so the desktop installer does not globally install unrelated lab requirements.
+- Corrected a critical runtime compatibility regression: restored `ITER=100000` in `backend/src/index.js`, matching the later production-safe Cloudflare Workers PBKDF2 hotfix on the base branch. The feature branch's prior `600000` value exceeded the documented Workers WebCrypto ceiling. Commit: `98d2aee5ddf60648e93f4631f2a95bfde156552f`.
+- Hardened the terminal catalog CI smoke check against SIGPIPE and added an explicit regression check that searching for a missing catalog entry exits with status 1.
+- Exact-head Lab Checks run [45505897428](https://github.com/mostafa-frg/mostafa-frg/actions/runs/45505897428) passed on source/workflow head `805e4f04e56b1d561adfba982705dadf6667ac3b`: Node.js regression tests **66/66**, pytest **42/42**, backend API security **89/89**, and **122** toolkit checks with **22 informational notices**. Python compilation, offline network/PCAP/HTTP/Flask checks, installer collision-preservation tests, CLI index list/search/empty-search checks, and Docker Compose validation passed.
+- Optional upstream executables absent from the CI runner remain informational and are not claimed as installed or functionally tested.
+- The PR remains Draft and non-mergeable; the six overlapping paths have been reviewed and their safe content choices recorded, but no retarget, merge, Preview deployment, Production deployment, D1 migration, or Cloudflare account change was performed.
+- Inventory remains **231** distinct browser tools, **124** new additions toward the 1,000-tool target, and a separate **61-entry** CLI catalog. These are not 200,000 tools.

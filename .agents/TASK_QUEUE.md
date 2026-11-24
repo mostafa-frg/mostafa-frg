@@ -48,7 +48,7 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest branch head: `68c4affd03d3d89ad2c3509a40b9d86247bbfd18` (installer hardening was committed earlier).
+- Latest branch head: `290d5fbb4b9d344b80ee1b59f4c764524993f60d` (installer hardening was committed earlier).
 - Scope: `cyber-labs/mosta-terminal/install.sh`, `cyber-labs/mosta-terminal/README.md`
 - Evidence: Lab Checks run `45015734097` passed on latest head `68c4aff...` under Ubuntu 26.04. It syntax-checked shell launchers, installed into a temporary HOME, asserted no global pip invocation, verified launcher symlinks, exercised `mosta-index list/search`, ran `mosta-doctor` (122 checks, 22 informational notices), and tested the installed `mnmap` wrapper against a fake executable.
 - Remaining: consider broader distro/shell compatibility; current CI is one clean Ubuntu 26.04 environment.
@@ -60,7 +60,7 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Status: REVIEW
 - Owner: Independent Reviewer / QA Agent
 - Branch: `feat/mosta-1000-cyber-terminal-tools`
-- Latest branch head: `68c4affd03d3d89ad2c3509a40b9d86247bbfd18`.
+- Latest branch head: `290d5fbb4b9d344b80ee1b59f4c764524993f60d`.
 - Scope: `cyber-labs/mosta-tool-index/validate_catalog.py`, `cyber-labs/mosta-tool-index/test_validate_catalog.py`
 - Changes: strict CSV parsing; reject rows with extra fields; regression tests for extra columns and unterminated quoted fields; corrected frontend tool-count/category assertions from stale 207 to audited 231; added frontend/backend registry ID parity regression; `mosta_index.py` now uses the shared strict validator and rejects malformed/extra-field catalogs, with new regression tests.
 - Evidence: run `45015060496` passed the Python 3.10/3.12 matrix on `20f5fdd...`: validator compile, 61-row catalog validation, and all 14 CLI index unit tests. Latest Lab Checks `45015734097` also passed `mosta-index list/search` on `68c4aff...`.

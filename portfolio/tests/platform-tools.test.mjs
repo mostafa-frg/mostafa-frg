@@ -970,6 +970,7 @@ test('backend authorization catalog exactly matches the frontend registry', asyn
   assert.ok(end > start, 'backend tool catalog closes cleanly');
   const backendIds = [...backendSource.slice(start, end).matchAll(/"id"\s*:\s*"([a-z0-9-]+)"/g)].map(match => match[1]);
   const frontendIds = tools.map(tool => tool.id);
+  assert.equal(new Set(frontendIds).size, frontendIds.length, 'frontend tool IDs are unique');
   assert.equal(new Set(backendIds).size, backendIds.length, 'backend tool IDs are unique');
   assert.deepEqual([...backendIds].sort(), [...frontendIds].sort(), 'backend authorization IDs exactly match frontend tool IDs');
 });

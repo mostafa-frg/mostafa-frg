@@ -939,13 +939,13 @@ test('public homepage does not run the authenticated tool bootstrap', () => {
 
 
 test('Docker, Kubernetes, SSH and Dependabot analyzers detect representative hardening gaps', () => {
-  const dockerAudit=byId('dockerfile-hardening-audit').run({data:'FROM node:latest\\nADD https://example.invalid/app.tar.gz /tmp/a\\nEXPOSE 2375'});
+  const dockerAudit=byId('dockerfile-hardening-audit').run({data:'FROM node:latest\nADD https://example.invalid/app.tar.gz /tmp/a\nEXPOSE 2375'});
   assert.match(dockerAudit,/mutable or unpinned/i);
   assert.match(dockerAudit,/remote content/i);
   assert.match(dockerAudit,/2375/);
   assert.match(dockerAudit,/no USER/i);
-  assert.match(byId('dockerfile-hardening-audit').run({data:'FROM scratch\\nCOPY app /app\\nUSER 10001'}),/No high-risk Dockerfile patterns/);
-  assert.match(byId('kubernetes-image-policy-audit').run({data:'containers:\\n- name: app\\n  image: example/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}),/immutable SHA-256 digests/);
+  assert.match(byId('dockerfile-hardening-audit').run({data:'FROM scratch\nCOPY app /app\nUSER 10001'}),/No high-risk Dockerfile patterns/);
+  assert.match(byId('kubernetes-image-policy-audit').run({data:'containers:\n- name: app\n  image: example/app@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'}),/immutable SHA-256 digests/);
   assert.match(byId('kubernetes-pod-security-audit').run({data:'kind: Pod\nspec:\n  hostNetwork: true\n  containers:\n  - securityContext:\n      privileged: true\n      runAsUser: 0'}),/privileged|UID 0|host network/i);
   assert.match(byId('kubernetes-rbac-wildcard-audit').run({data:'kind: ClusterRoleBinding\nroleRef:\n  name: cluster-admin\nsubjects:\n- kind: Group\n  name: system:masters\n---\nkind: ClusterRole\nrules:\n- verbs: ["*"]\n  resources: ["*"]\n  apiGroups: ["*"]'}),/cluster-admin|wildcard|system:masters/i);
   assert.match(byId('ssh-client-config-hardening-audit').run({data:'Host *\n StrictHostKeyChecking no\n UserKnownHostsFile /dev/null\n ForwardAgent yes'}),/host-key verification is disabled|known-host persistence is disabled|agent forwarding/i);

@@ -84,3 +84,17 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Do not mark tasks DONE without exact-SHA evidence and acceptance.
 - Any new task must state owner, branch, allowed paths, prohibited actions, acceptance criteria, and test plan.
 - PR state and CI evidence must be refreshed before each handoff.
+
+
+### PR7-JS-CI-001 — Enable and repair frontend regression gate
+- Status: DONE (code validation complete; later docs-only commits)
+- Owner: ChatGPT implementation / GitHub Actions QA
+- Branch: `feat/mosta-1000-cyber-terminal-tools`
+- Code-validation SHA: `21af036bbcf5cf92bc5c63786c5ba20e7c788025`
+- Scope: `.github/workflows/lab-checks.yml`, `portfolio/assets/platform.js`, `portfolio/tests/platform-tools.test.mjs`
+- Changes: added Node.js 22 and explicit `node --test`; restored malformed frontend registry structure; completed Dockerfile hardening analyzer; fixed Kubernetes YAML list image parsing; corrected registry parity regex and added uniqueness/Dockerfile/digest tests.
+- Evidence: Lab Checks run `45456615337` passed both jobs: JavaScript 65/65, pytest 42/42, and backend-security 89/89; Python compile and all configured smoke steps passed.
+- Later top-level documentation-only PR #7 commits: `ebe1bcb...`, `b7ac46f...`, `b1d2ff...`.
+- Prohibited: merge, retarget, Preview/Production deployment, or claim 1,000/200,000 tools exist.
+- Remaining release gates: independent security review, resolve PR base overlap, and verify Preview/runtime behavior.
+

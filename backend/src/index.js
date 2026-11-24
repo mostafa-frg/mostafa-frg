@@ -1,4 +1,6 @@
-const COOKIE="__Host-mosta_session",SESSION=604800,ITER=600000,LOGIN_PAIR_LIMIT=5,LOGIN_IP_LIMIT=20,BOOT_LIMIT=5,WINDOW=900,MAX_BODY=16384,MAX_SESSIONS=10;
+// Cloudflare Workers WebCrypto supports PBKDF2 iteration counts up to 100,000.
+// Keep this ceiling aligned with the login hash-upgrade path; verify before raising it.
+const COOKIE="__Host-mosta_session",SESSION=604800,ITER=100000,LOGIN_PAIR_LIMIT=5,LOGIN_IP_LIMIT=20,BOOT_LIMIT=5,WINDOW=900,MAX_BODY=16384,MAX_SESSIONS=10;
 class HttpError extends Error{constructor(status,message){super(message);this.status=status;}}
 const TOOLS=[
   {

@@ -54,3 +54,11 @@
 - Fixed Kubernetes image parsing for list-form YAML declarations, repaired frontend/backend parity matchers, and added frontend uniqueness, Dockerfile, and digest-pinned image regression cases.
 - Lab Checks run `45456615337` passed on code-validation SHA `21af036bbcf5cf92bc5c63786c5ba20e7c788025`: JavaScript 65/65, pytest 42/42, backend security 89/89, Python compile and all configured smoke steps succeeded.
 - Current PR #7 head after state-document updates: `b1d2ff06213943a7fae756731be774ce6474f081`. PR remains Draft; no merge, retarget, Preview, or Production deployment.
+
+
+## 2026-11-24 — Full registry schema regression
+
+- Added a schema-level test over all 231 frontend tools: stable ID format, nonempty metadata, category membership, executable handler, and optional input-field structure. The test allows tools with no input fields.
+- First run exposed `public-ip` as a legitimate input-free tool; updated the test accordingly. The corrected exact-head run [45491020405](https://github.com/mostafa-frg/mostafa-frg/actions/runs/45491020405) passed: JS 66/66, pytest 42/42, backend security 89/89, 122 toolkit checks / 22 informational notices, and configured smoke steps.
+- Tested source SHA: `2cb447999799acf2ae195e2304d53df6b5470464`; latest PR head after documentation-only update: `13fad07b502e366be601a9b40d1dd33e79439546`.
+- PR #7 remains Draft and dirty/non-mergeable (146 ahead / 21 behind base). No retarget, merge, Preview, or Production deployment.

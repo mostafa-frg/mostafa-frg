@@ -45,3 +45,12 @@
 - Added a collision-preservation CI regression with a sentinel `mnmap` file and a no-partial-install assertion. An initial test fixture used an over-escaped newline and failed; the fixture was corrected in commit `290d5fbb4b9d344b80ee1b59f4c764524993f60d`.
 - Exact-head Lab Checks run `45454764659` passed: 42 pytest tests, 122 toolkit checks (22 informational notices), installer safety and dispatch tests, Docker Compose validation, and backend security 89/89.
 - PR #7 remains Draft and mergeable_state=dirty because of six overlapping paths with `feat/mosta-platform-redesign`. No retarget, merge, Preview deployment, or Production deployment was performed.
+
+
+## 2026-11-24 — Frontend regression gate enabled and repaired
+
+- Added Node.js 22 setup and an explicit `node --test portfolio/tests/platform-tools.test.mjs` step to PR #7 Lab Checks. The previous workflow did not execute this JavaScript regression suite.
+- The newly enabled suite exposed a malformed block inside `portfolio/assets/platform.js` and an incomplete Dockerfile analyzer. Restored the registry boundary, removed the misplaced helper/UI block, and completed the Dockerfile analyzer.
+- Fixed Kubernetes image parsing for list-form YAML declarations, repaired frontend/backend parity matchers, and added frontend uniqueness, Dockerfile, and digest-pinned image regression cases.
+- Lab Checks run `45456615337` passed on code-validation SHA `21af036bbcf5cf92bc5c63786c5ba20e7c788025`: JavaScript 65/65, pytest 42/42, backend security 89/89, Python compile and all configured smoke steps succeeded.
+- Current PR #7 head after state-document updates: `b1d2ff06213943a7fae756731be774ce6474f081`. PR remains Draft; no merge, retarget, Preview, or Production deployment.

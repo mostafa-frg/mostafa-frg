@@ -52,7 +52,7 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Scope: `cyber-labs/mosta-terminal/install.sh`, `cyber-labs/mosta-terminal/README.md`
 - Evidence: Lab Checks run `45015734097` passed on latest head `68c4aff...` under Ubuntu 26.04. It syntax-checked shell launchers, installed into a temporary HOME, asserted no global pip invocation, verified launcher symlinks, exercised `mosta-index list/search`, ran `mosta-doctor` (122 checks, 22 informational notices), and tested the installed `mnmap` wrapper against a fake executable.
 - Remaining: consider broader distro/shell compatibility; current CI is one clean Ubuntu 26.04 environment.
-- Blocker: PR targets `feat/mosta-platform-redesign`; comparison reports 122 commits ahead and 21 behind that base, and 122 ahead / 66 behind `main`. Do not retarget until the complete 20-file diff and shared ancestry are reviewed.
+- Blocker: PR targets `feat/mosta-platform-redesign`; fresh comparison reports 146 commits ahead and 21 behind that base, and 146 ahead / 66 behind `main`. Six paths overlap with changes on the base branch. Do not retarget until the complete diff and shared ancestry are reviewed.
 - Prohibited: merge, Production deploy, destructive package installation on a user's machine.
 - Acceptance: one clean Ubuntu CI install path passed; no global pip install was invoked; base-branch decision and independent review remain open.
 

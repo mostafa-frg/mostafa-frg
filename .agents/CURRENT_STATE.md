@@ -46,3 +46,11 @@
 - Full Lab Checks run [45456615337](https://github.com/mostafa-frg/mostafa-frg/actions/runs/45456615337) passed on code-validation head `21af036...`: JavaScript 65/65, pytest 42/42, Python compile and all offline network/PCAP/HTTP/Flask/terminal installer/Docker Compose smoke steps passed, and backend-security passed 89/89 against isolated local D1.
 - PR #7 remains OPEN/DRAFT and mergeable_state=dirty against `feat/mosta-platform-redesign`. Fresh comparison (2026-11-24): 146 commits ahead / 21 behind `feat/mosta-platform-redesign`, and 146 ahead / 66 behind `main`. Six paths have overlapping changes and require deliberate review: `.github/workflows/deploy-portfolio.yml`, `.github/workflows/lab-checks.yml`, `backend/src/index.js`, `cyber-labs/mosta-terminal/README.md`, `cyber-labs/mosta-terminal/install.sh`, and `cyber-labs/mosta-terminal/mosta-index`.
 - No merge, base retarget, Preview deployment, or Production deployment was performed. Preview/runtime verification and independent security review remain open.
+
+
+## PR #7 exact-head schema gate — 2026-11-24
+
+- Latest source-test head: `2cb447999799acf2ae195e2304d53df6b5470464`; current PR head after documentation-only state refresh: `13fad07b502e366be601a9b40d1dd33e79439546`.
+- Added a structural schema regression across all 231 browser tools. It validates stable IDs, nonempty names/descriptions/symbols, known categories, executable handlers, and valid optional field tuples; no-input tools are permitted to omit `fields`.
+- Exact-head Lab Checks run [45491020405](https://github.com/mostafa-frg/mostafa-frg/actions/runs/45491020405) passed: JavaScript 66/66, pytest 42/42, backend-security 89/89, toolkit 122 checks / 22 informational notices, plus Python compilation and all configured network/PCAP/HTTP/Flask/installer/Compose smoke steps.
+- PR #7 remains Draft and `mergeable_state=dirty`, 146 ahead / 21 behind current `feat/mosta-platform-redesign`. No retarget, merge, Preview deployment, or Production deployment. 200,000 tools are not present; current inventory remains 231 browser tools (124 additions) plus a separate 61-entry CLI catalog.

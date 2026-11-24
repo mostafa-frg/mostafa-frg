@@ -24,6 +24,21 @@ The installer creates links under ~/.local/bin and adds that directory to existi
 
     mosta-doctor
     mosta
+    mosta-index list
+    mosta-index search tcpdump
+
+## External tool index
+
+`mosta-index list` displays the external command aliases, their upstream executable names, and their purpose. `mosta-index search <term>` searches aliases, upstream names, and descriptions. The index is informational: it does not install third-party packages or execute commands. The current index browser reads the repository's validated local CSV catalog and never executes a selected upstream tool.
+
+## Termux compatibility
+
+The Linux Desktop installer above is not intended for Android/Termux. For Termux, use the separate legacy installer:
+
+    cd cyber-labs/mosta-terminal
+    bash mosta-external-install.sh
+
+It installs a limited set of native Termux packages and creates aliases for supported commands. Termux package availability varies by device and repository state. Root-only and hardware-dependent wireless features are not promised by this installer. Add ~/.local/bin to PATH if it is not already present, then verify aliases with `command -v mnmap` and `command -v mtcpdump`.
 
 ## Repository lab commands
 
@@ -34,6 +49,7 @@ The installer creates links under ~/.local/bin and adds that directory to existi
     mconf
     mroute
     mtriage
+    mtool
     mfim
     mdet
     mlog
@@ -59,7 +75,7 @@ The installer creates links under ~/.local/bin and adds that directory to existi
     mscan
     mauto
 
-Run `mosta` for the full command index. Use `mosta-index list` or `mosta-index search <term>` to browse the upstream CLI catalog, and `mosta-doctor` to inspect installed dependencies. The index browser reads local CSV data and never executes a selected upstream tool.
+Run mosta for the full command index and mosta-doctor to inspect installed dependencies.
 
 ## Native Linux commands
 

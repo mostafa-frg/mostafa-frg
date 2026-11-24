@@ -198,7 +198,7 @@ jobs:
           # An unrelated existing command must never be removed or replaced.
           collision_home="$(mktemp -d)"
           mkdir -p "$collision_home/.local/bin"
-          printf '%s\\n' 'keep-existing-command' >"$collision_home/.local/bin/mnmap"
+          printf '%s\n' 'keep-existing-command' >"$collision_home/.local/bin/mnmap"
           if HOME="$collision_home" bash cyber-labs/mosta-terminal/install.sh >/tmp/mosta-collision-test.txt 2>&1; then
             echo "::error::Installer unexpectedly replaced an existing user command."
             exit 1

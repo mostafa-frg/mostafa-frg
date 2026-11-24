@@ -193,7 +193,13 @@ jobs:
           mnet subnet 192.168.50.10/24 | grep -q "Network: 192.168.50.0"
           mosta | grep -q "mosta-doctor"
           mosta-index list | grep "Nmap" >/dev/null
-          mosta-index search Tcpdump | grep -q "mtcpdump"
+          mosta-index search Tcpdump | grep "mtcpdump" >/dev/null
+          if mosta-index search __mosta_missing_catalog_entry__; then
+            echo "::error::mosta-index should return non-zero for an empty search."
+            exit 1
+          else
+            test "$?" -eq 1
+          fi
           mosta-doctor
           printf '%s\n' '#!/usr/bin/env bash' 'printf "MOSTA_FAKE_NMAP_OK\\n"' >"$fake_bin/nmap"
           chmod +x "$fake_bin/nmap"

@@ -23,6 +23,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Run portfolio JavaScript regression tests
+        run: node --test portfolio/tests/platform-tools.test.mjs
+
       - name: Install lab dependencies
         run: |
           python -m pip install --upgrade pip

@@ -98,3 +98,14 @@ Statuses: `READY`, `IN_PROGRESS`, `BLOCKED`, `REVIEW`, `DONE`, `CANCELLED`.
 - Prohibited: merge, retarget, Preview/Production deployment, or claim 1,000/200,000 tools exist.
 - Remaining release gates: independent security review, resolve PR base overlap, and verify Preview/runtime behavior.
 
+
+
+### PR7-SCHEMA-001 — Validate every browser tool definition
+- Status: DONE (exact-head CI passed)
+- Owner: ChatGPT implementation / GitHub Actions QA
+- Branch: `feat/mosta-1000-cyber-terminal-tools`
+- Code SHA: `2cb447999799acf2ae195e2304d53df6b5470464`
+- Scope: `portfolio/tests/platform-tools.test.mjs`
+- Acceptance: all 231 registry entries have safe stable IDs, nonempty name/description/symbol, known category, executable handler, and valid optional input schema; input-free tools are supported.
+- Evidence: Lab Checks run `45491020405` passed JavaScript 66/66, pytest 42/42, backend-security 89/89, 122 toolkit checks / 22 informational notices, and configured smoke checks.
+- Remaining PR #7 release gates: independent security review, resolve dirty base ancestry (146 ahead / 21 behind), and verify current Preview/runtime behavior. No merge or deployment.

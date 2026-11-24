@@ -967,6 +967,34 @@ test('Compose, Kubernetes NetworkPolicy, Helm, GitHub branch protection and OS p
 });
 
 
+test('every browser tool has a complete and valid schema', () => {
+  const allowedCategories = new Set([
+    'networking', 'security', 'soc', 'linux', 'ubuntu', 'kali',
+    'bash', 'termux', 'developer', 'cloud', 'database'
+  ]);
+  assert.ok(tools.length > 0, 'tool registry is not empty');
+  for (const tool of tools) {
+    assert.match(tool.id, /^[a-z0-9-]+$/, 'tool ID uses a safe stable format');
+    assert.equal(typeof tool.name, 'string');
+    assert.ok(tool.name.trim().length > 0, tool.id + ' has a name');
+    assert.equal(typeof tool.desc, 'string');
+    assert.ok(tool.desc.trim().length > 0, tool.id + ' has a description');
+    assert.ok(allowedCategories.has(tool.cat), tool.id + ' has a known category');
+    assert.equal(typeof tool.symbol, 'string');
+    assert.ok(tool.symbol.trim().length > 0, tool.id + ' has a symbol');
+    assert.equal(typeof tool.run, 'function', tool.id + ' has an executable handler');
+    assert.ok(Array.isArray(tool.fields), tool.id + ' has a fields array');
+    for (const field of tool.fields) {
+      assert.ok(Array.isArray(field) && field.length >= 3, tool.id + ' has a valid field tuple');
+      assert.equal(typeof field[0], 'string');
+      assert.ok(field[0].trim().length > 0);
+      assert.equal(typeof field[1], 'string');
+      assert.ok(field[1].trim().length > 0);
+      assert.equal(typeof field[2], 'string');
+    }
+  }
+});
+
 test('backend authorization catalog exactly matches the frontend registry', async () => {
   const backendSource = await readFile(new URL('../../backend/src/index.js', import.meta.url), 'utf8');
   const declaration = /const\s+TOOLS\s*=\s*\[/.exec(backendSource);

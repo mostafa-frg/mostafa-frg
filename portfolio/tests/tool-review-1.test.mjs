@@ -84,6 +84,6 @@ test('http-status and signals match Python http.HTTPStatus / signal; case conver
   for (const [name, num] of Object.entries(F.sig)) { const a = String(sg.run({ query: name })); assert.equal(val(a, 'Number'), String(num), name); assert.equal(val(a, 'Signal'), name); const b = String(sg.run({ query: String(num) })); assert.equal(val(b, 'Signal'), name, String(num)); assert.equal(val(String(sg.run({ query: name.slice(3).toLowerCase() })), 'Signal'), name); }
   assert.match(String(sg.run({ query: '63' })), /No match/);
   const cs = tools.find(x => x.id === 'case');
-  assert.equal(cs.run({ text: 'café au lait', mode: 'snake' }), 'café_au_lait'); assert.equal(cs.run({ text: 'fooBarBaz', mode: 'kebab' }), 'foo-bar-baz');
+  assert.equal(cs.run({ text: 'café au lait', mode: 'snake' }), 'café_au_lait'); assert.equal(cs.run({ text: 'fooBarBaz', mode: 'kebab' }), 'foo-bar-baz'); assert.equal(cs.run({ text: 'caféBar', mode: 'kebab' }), 'café-bar'); assert.equal(cs.run({ text: 'naïveÜber', mode: 'snake' }), 'naïve_über');
   assert.equal(cs.run({ text: 'naïve ÜBER', mode: 'kebab' }), 'naïve-über'); assert.equal(cs.run({ text: 'HTTPServer2Go', mode: 'snake' }), 'httpserver2_go');
 });

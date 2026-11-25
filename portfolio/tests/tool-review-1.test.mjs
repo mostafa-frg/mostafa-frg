@@ -67,3 +67,11 @@ test('command builders emit syntactically valid commands (ufw, journalctl)', () 
   const j = run('kali-journalctl-builder', { priority: 'all' }); assert.doesNotMatch(j, / -p /);
   assert.match(run('kali-journalctl-builder', { priority: 'err' }), / -p err /);
 });
+test('kali-tcpdump-filter joins primitives with and and rejects ports for icmp/arp', () => {
+  const t = tools.find(x => x.id === 'kali-tcpdump-filter'); const d = { protocol: 'tcp', host: '192.0.2.10', port: '443', direction: 'any' };
+  assert.match(t.run(d), /'tcp and host 192\.0\.2\.10 and port 443'/);
+  assert.match(t.run({ ...d, direction: 'src', protocol: 'udp', port: '' }), /'udp and src host 192\.0\.2\.10'/);
+  assert.match(t.run({ ...d, host: '' , protocol: 'ip6' }), /'ip6 and port 443'/);
+  assert.throws(() => t.run({ ...d, protocol: 'arp' }), /Port filters only apply/);
+  assert.match(t.run({ ...d, protocol: 'arp', port: '' }), /'arp and host 192\.0\.2\.10'/);
+});

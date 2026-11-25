@@ -75,3 +75,15 @@ test('kali-tcpdump-filter joins primitives with and and rejects ports for icmp/a
   assert.throws(() => t.run({ ...d, protocol: 'arp' }), /Port filters only apply/);
   assert.match(t.run({ ...d, protocol: 'arp', port: '' }), /'arp and host 192\.0\.2\.10'/);
 });
+test('http-status and signals match Python http.HTTPStatus / signal; case conversion keeps non-ASCII letters', () => {
+  const F = load('review1-ref-tables-python.json');
+  const hs = tools.find(x => x.id === 'http-status');
+  for (const [code, phrase] of Object.entries(F.http)) { const o = String(hs.run({ code })); assert.equal(val(o, 'Meaning'), phrase, code); assert.equal(val(o, 'Class'), ['Informational', 'Success', 'Redirection', 'Client error', 'Server error'][Math.floor(code / 100) - 1]); }
+  assert.match(String(hs.run({ code: '299' })), /Unassigned/); assert.throws(() => hs.run({ code: '99' })); assert.throws(() => hs.run({ code: '600' }));
+  const sg = tools.find(x => x.id === 'signals');
+  for (const [name, num] of Object.entries(F.sig)) { const a = String(sg.run({ query: name })); assert.equal(val(a, 'Number'), String(num), name); assert.equal(val(a, 'Signal'), name); const b = String(sg.run({ query: String(num) })); assert.equal(val(b, 'Signal'), name, String(num)); assert.equal(val(String(sg.run({ query: name.slice(3).toLowerCase() })), 'Signal'), name); }
+  assert.match(String(sg.run({ query: '63' })), /No match/);
+  const cs = tools.find(x => x.id === 'case');
+  assert.equal(cs.run({ text: 'café au lait', mode: 'snake' }), 'café_au_lait'); assert.equal(cs.run({ text: 'fooBarBaz', mode: 'kebab' }), 'foo-bar-baz');
+  assert.equal(cs.run({ text: 'naïve ÜBER', mode: 'kebab' }), 'naïve-über'); assert.equal(cs.run({ text: 'HTTPServer2Go', mode: 'snake' }), 'httpserver2_go');
+});

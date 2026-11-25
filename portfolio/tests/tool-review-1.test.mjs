@@ -60,3 +60,10 @@ test('json, csv-json, jwt match Python (650 cases); csv keeps blank-valued rows;
   assert.deepEqual(JSON.parse(csv.run({ csv: 'a\n""\nx\n\n' })), [{ a: '' }, { a: 'x' }]); // quoted empty kept, blank line skipped
 });
 test('ipv6-subnet accepts /0 and /128', () => { const t = tools.find(x => x.id === 'ipv6-subnet'); assert.match(t.run({ addr: '2001:db8::1', prefix: '0' }), /Network: ::\/0/); assert.match(t.run({ addr: '2001:db8::1', prefix: '128' }), /Network: 2001:db8::1\/128/); assert.throws(() => t.run({ addr: '::1', prefix: '129' })); });
+test('command builders emit syntactically valid commands (ufw, journalctl)', () => {
+  const run = (id, v) => { const t = tools.find(x => x.id === id); const d = {}; for (const f of t.fields) d[f[0]] = f[2]; return String(t.run({ ...d, ...v })); };
+  assert.match(run('ufw-builder', { port: '443', proto: 'tcp', src: '' }), /^sudo ufw allow 443\/tcp\n/);
+  assert.match(run('ufw-builder', { action: 'deny', port: '53', proto: 'udp', src: '10.0.0.0/8' }), /^sudo ufw deny from 10\.0\.0\.0\/8 to any port 53 proto udp\n/);
+  const j = run('kali-journalctl-builder', { priority: 'all' }); assert.doesNotMatch(j, / -p /);
+  assert.match(run('kali-journalctl-builder', { priority: 'err' }), / -p err /);
+});

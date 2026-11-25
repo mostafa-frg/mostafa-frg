@@ -283,7 +283,7 @@ test('optional fields work when left blank, and are not marked required in the f
   }
   assert.match(await run('nmap-builder', { target: '10.0.0.1', scan: 'TCP connect scan', ports: '', timing: 'T3', save: 'no' }), /^nmap -sT -T3 10\.0\.0\.1/);
   assert.match(await run('journalctl-builder', { unit: '', since: 'today', prio: 'all' }), /^journalctl --since today --no-pager/);
-  assert.match(await run('ufw-builder', { action: 'allow', port: '443', proto: 'tcp', src: '' }), /^sudo ufw allow port 443 proto tcp/);
+  assert.match(await run('ufw-builder', { action: 'allow', port: '443', proto: 'tcp', src: '' }), /^sudo ufw allow 443\/tcp/);
   assert.match(await run('wireshark-filter', { proto: 'dns', host: '', port: '' }), /Display filter:\ndns\n/);
   assert.match(source, /el\.step='any'/, 'number inputs must accept decimals (tcp-throughput loss 0.1, transfer-time 2.5 GB)');
   assert.match(source, /el\.required=\(type==='file'\|\|\(type!=='textarea'&&type!=='number'\)\)&&!\/optional\|blank\/i\.test\(label\)/);

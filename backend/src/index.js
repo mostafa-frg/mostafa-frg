@@ -751,11 +751,529 @@ const TOOLS=[
     "group": "Database Engineering",
     "mode": "browser",
     "description": "Review SQL migration text for unbounded writes, destructive DDL and transaction-boundary issues without database access."
+  },
+  {
+    "id": "base-convert",
+    "name": "Number Base Converter",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Convert integers between binary, octal, decimal and hexadecimal (arbitrary size)."
+  },
+  {
+    "id": "text-hex",
+    "name": "Text ⇄ Hex Converter",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Convert UTF-8 text to hexadecimal bytes and decode hex back to text."
+  },
+  {
+    "id": "color",
+    "name": "Color Converter",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Convert HEX colors to RGB and HSL values for CSS and design work."
+  },
+  {
+    "id": "transfer-time",
+    "name": "File Transfer Time Estimator",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Estimate transfer time from file size and link speed (ideal, ignores protocol overhead)."
+  },
+  {
+    "id": "bdp",
+    "name": "Bandwidth-Delay Product",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Compute the TCP window needed to fill a link of given bandwidth and RTT."
+  },
+  {
+    "id": "mtu-mss",
+    "name": "MTU / MSS Calculator",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Derive TCP MSS from MTU for IPv4 or IPv6 (no extra encapsulation)."
+  },
+  {
+    "id": "entropy",
+    "name": "Shannon Entropy Calculator",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Measure per-character Shannon entropy of a string (a rough randomness indicator, not a password verdict)."
+  },
+  {
+    "id": "hash-id",
+    "name": "Hash Type Identifier",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Guess likely hash algorithms from length and format (heuristic only)."
+  },
+  {
+    "id": "umask",
+    "name": "umask Calculator",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Show the default file and directory permissions that a given umask produces."
+  },
+  {
+    "id": "http-status",
+    "name": "HTTP Status Code Reference",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Look up the meaning and class of common HTTP status codes quickly."
+  },
+  {
+    "id": "nmap-builder",
+    "name": "Nmap Command Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Build a safe, validated Nmap command line from scan type, ports and timing. It only builds text and never scans."
+  },
+  {
+    "id": "nmap-parser",
+    "name": "Nmap Output Parser",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Paste normal-format Nmap output and get a summary of hosts and open ports, services and versions."
+  },
+  {
+    "id": "wireshark-filter",
+    "name": "Wireshark Filter Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Generate a Wireshark display filter and the matching BPF capture filter from protocol, host and port."
+  },
+  {
+    "id": "tshark-builder",
+    "name": "tshark Capture Command Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Build a validated tshark capture command with interface, BPF filter, packet count and output file."
+  },
+  {
+    "id": "kali-reference",
+    "name": "Kali Linux Tool Reference",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Search common Kali and Linux networking tools by name or purpose and see a typical safe example command."
+  },
+  {
+    "id": "osint-domain",
+    "name": "OSINT Domain Search Helper",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Generate search-engine operators and public-source links to review the exposure of a domain you own or manage."
+  },
+  {
+    "id": "email-header",
+    "name": "Email Header Analyzer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Paste raw email headers to see the Received hops, SPF/DKIM/DMARC results and sender mismatches."
+  },
+  {
+    "id": "tcpdump-analyzer",
+    "name": "tcpdump Output Analyzer",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Paste tcpdump text output to rank top sources, destinations, destination ports and TCP flag usage."
+  },
+  {
+    "id": "socket-analyzer",
+    "name": "ss / Listening Ports Analyzer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Paste \"ss -tulpn\" output to list listening services and flag sensitive ports exposed on all interfaces."
+  },
+  {
+    "id": "lynis-parser",
+    "name": "Lynis Report Summarizer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Summarize a Lynis report: hardening index plus the warnings and suggestions it found."
+  },
+  {
+    "id": "tls-output-analyzer",
+    "name": "TLS / openssl Output Analyzer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Analyze \"openssl s_client\" output for protocol version, cipher strength, verification errors and certificate expiry."
+  },
+  {
+    "id": "vlsm",
+    "name": "VLSM Subnet Planner",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Allocate variable-length subnets from a parent network, largest first, from a list of required host counts."
+  },
+  {
+    "id": "ipv6-subnet",
+    "name": "IPv6 Subnet Calculator",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Calculate the network, first and last address, total addresses and /64 count for an IPv6 prefix."
+  },
+  {
+    "id": "cvss",
+    "name": "CVSS v3.1 Base Score Calculator",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Compute the CVSS v3.1 base score and severity from a vector string, following the FIRST specification."
+  },
+  {
+    "id": "spf-dmarc",
+    "name": "SPF / DMARC Record Analyzer",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Analyze an SPF or DMARC TXT record for policy strength, DNS lookup limits and common misconfigurations."
+  },
+  {
+    "id": "ufw-builder",
+    "name": "UFW Firewall Rule Builder",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Build a validated ufw rule for a port, protocol and optional source, with a lockout warning for SSH."
+  },
+  {
+    "id": "ssh-keygen",
+    "name": "ssh-keygen Command Builder",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Build a hardened ssh-keygen command (Ed25519, RSA 4096 or ECDSA) with safe file name and comment validation."
+  },
+  {
+    "id": "route-summary",
+    "name": "Route Summarization (Supernet)",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Find the smallest single CIDR that covers a list of IPv4 networks and report how many extra addresses it also covers."
+  },
+  {
+    "id": "tcp-throughput",
+    "name": "TCP Throughput Estimator (Mathis)",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Estimate the upper bound of TCP throughput from MSS, round-trip time and packet loss using the Mathis equation."
+  },
+  {
+    "id": "bandwidth-convert",
+    "name": "Bandwidth Unit Converter",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Convert between bit-based and byte-based link speeds (decimal units), e.g. Mbit/s to MB/s."
+  },
+  {
+    "id": "tcpdump-builder",
+    "name": "tcpdump Command Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Build a validated tcpdump command to print, write or read packets, with a BPF filter and packet limit."
+  },
+  {
+    "id": "dig-builder",
+    "name": "dig Command Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Build a validated dig command for a record type, resolver and output mode (short, trace or DNSSEC)."
+  },
+  {
+    "id": "ttl-guess",
+    "name": "TTL / Hop Count Estimator",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Estimate the initial TTL, likely OS family and hop count from a received TTL value (heuristic only)."
+  },
+  {
+    "id": "attack-reference",
+    "name": "MITRE ATT&CK Technique Lookup",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Look up common MITRE ATT&CK technique IDs by ID, name or tactic, with a short detection idea."
+  },
+  {
+    "id": "journalctl-builder",
+    "name": "journalctl Command Builder",
+    "group": "Linux",
+    "mode": "browser",
+    "description": "Build a validated journalctl command to filter systemd logs by unit, time range and priority."
+  },
+  {
+    "id": "crc32",
+    "name": "CRC-32 Checksum",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Compute the standard CRC-32 (IEEE 802.3, as used by zip, gzip and PNG) of text or hex bytes."
+  },
+  {
+    "id": "multi-hash",
+    "name": "Multi-Algorithm Text Hash",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Hash text with MD5, SHA-1, SHA-256, SHA-384 and SHA-512 at once, for checksum comparison and legacy systems."
+  },
+  {
+    "id": "base32",
+    "name": "Base32 Encoder / Decoder",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Encode text to RFC 4648 Base32 (as used for TOTP secrets) or decode Base32 back to text."
+  },
+  {
+    "id": "otp",
+    "name": "TOTP / HOTP Code Calculator",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Compute RFC 6238 TOTP or RFC 4226 HOTP one-time codes locally from a Base32 secret, for testing and verification."
+  },
+  {
+    "id": "eui64",
+    "name": "IPv6 EUI-64 Address Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Derive the EUI-64 interface identifier and SLAAC address from a MAC address and /64 prefix."
+  },
+  {
+    "id": "inet-checksum",
+    "name": "Internet Checksum (RFC 1071)",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Compute the 16-bit ones-complement Internet checksum used by IPv4, ICMP, TCP and UDP from hex bytes."
+  },
+  {
+    "id": "wol-packet",
+    "name": "Wake-on-LAN Magic Packet Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Build the Wake-on-LAN magic packet (6 x FF plus the MAC 16 times) and ready-to-use send commands."
+  },
+  {
+    "id": "mac-format",
+    "name": "MAC Address Formatter",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Convert a MAC address between colon, hyphen, Cisco dotted and plain formats and read its multicast and local bits."
+  },
+  {
+    "id": "x509-inspector",
+    "name": "X.509 Certificate Inspector (PEM)",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Parse a PEM certificate locally: subject, issuer, validity, SANs, key type and size, signature algorithm, SHA-256 fingerprint, plus expiry and weakness findings."
+  },
+  {
+    "id": "ssh-fingerprint",
+    "name": "SSH Public Key Fingerprint",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Compute SHA256 and legacy MD5 fingerprints for authorized_keys / .pub lines and flag weak key types and sizes."
+  },
+  {
+    "id": "nmap-grepable-parser",
+    "name": "Nmap Grepable (-oG) Parser",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Summarize Nmap grepable output: hosts up, open ports and services, and exposed high-risk services."
+  },
+  {
+    "id": "suricata-eve-summary",
+    "name": "Suricata EVE Alert Summary",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Suricata eve.json alert lines: top signatures, severities, categories and source/destination pairs."
+  },
+  {
+    "id": "zeek-conn-summary",
+    "name": "Zeek conn.log Summary",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize a Zeek TSV conn.log: top talkers by bytes, services, connection states, long connections and scan-like sources."
+  },
+  {
+    "id": "sudoers-audit",
+    "name": "sudoers Rule Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review sudoers text for NOPASSWD ALL, shell-escape binaries, wildcards, !authenticate and dangerous Defaults."
+  },
+  {
+    "id": "passwd-shadow-audit",
+    "name": "passwd / shadow Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Check /etc/passwd (and optional shadow) for extra UID 0 accounts, empty passwords, weak hash types and system accounts with login shells."
+  },
+  {
+    "id": "checksum-calc",
+    "name": "CRC and Adler Checksum Calculator",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Compute CRC-32, CRC-32C, CRC-16 (ARC and CCITT-FALSE), CRC-8 and Adler-32 for text or hex bytes; check values match the standard catalogue."
+  },
+  {
+    "id": "luhn-check",
+    "name": "Luhn Checksum Validator",
+    "group": "Developer",
+    "mode": "browser",
+    "description": "Validate numbers with the Luhn algorithm, compute the check digit for a payload and identify the card network by prefix. Digits are masked in the output."
+  },
+  {
+    "id": "yara-rule-lint",
+    "name": "YARA Rule Linter",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Static review of YARA rules: duplicate names, missing conditions, undefined or unused strings, very short strings and missing metadata. Does not replace compiling with yara."
+  },
+  {
+    "id": "sysmon-event-summary",
+    "name": "Sysmon Event Summary & Triage",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Sysmon XML events and flag encoded PowerShell, LOLBin abuse, Office child processes, LSASS access, remote threads and Run-key persistence."
+  },
+  {
+    "id": "windows-logon-summary",
+    "name": "Windows Logon Event Summary (4624/4625)",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Summarize Security log XML: failed/successful logons by user and IP, brute-force and password-spraying patterns, success after failures, audit log cleared and account changes."
+  },
+  {
+    "id": "powershell-encoded-decoder",
+    "name": "PowerShell -EncodedCommand Decoder",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Decode PowerShell -EncodedCommand payloads (Base64 of UTF-16LE) and list suspicious keywords and URLs, defanged. Decoding only; nothing is executed."
+  },
+  {
+    "id": "ioc-defang",
+    "name": "IOC Defang / Refang",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Defang URLs, IPv4 addresses, emails and common domains for safe sharing (hxxps://evil[.]com) or refang them for lookups."
+  },
+  {
+    "id": "ip-in-cidr-list",
+    "name": "IP Matcher (IPv4/IPv6 CIDR list)",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Check which IP addresses fall inside a list of CIDR blocks or single IPs, for blocklist, allowlist and scope checks. IPv4 and IPv6."
+  },
+  {
+    "id": "forensic-timestamps",
+    "name": "Forensic Timestamp Converter",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Convert Unix, Windows FILETIME, WebKit/Chrome, macOS absolute and .NET tick values to UTC (and an ISO date back to all formats) with plausibility marks."
+  },
+  {
+    "id": "file-signature-id",
+    "name": "File Signature (Magic Bytes) Identifier",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Identify a file type from its first bytes (hex): PE, ELF, Mach-O, PDF, Office/OLE, ZIP, gzip, 7z, RAR, PNG, JPEG, GIF, SQLite, PCAP, LNK, scripts and more."
+  },
+  {
+    "id": "layered-decoder",
+    "name": "Layered Decoder (Base64 / Hex / URL)",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Peel nested encodings automatically (Base64, hex, URL percent-encoding) and show every layer, to unwrap obfuscated payloads safely. Decoding only; nothing is executed."
+  },
+  {
+    "id": "auditd-execve-summary",
+    "name": "auditd EXECVE Command Summary",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Rebuild commands from auditd EXECVE records and flag download-and-run, reverse shells, base64 decoding, world-writable chmod and shell piping."
+  },
+  {
+    "id": "cipher-suite-classifier",
+    "name": "TLS Cipher Suite Classifier",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Classify TLS cipher suites (OpenSSL or IANA names, one per line or colon separated) as recommended, legacy, weak or insecure, with forward secrecy and AEAD flags and the reason."
+  },
+  {
+    "id": "jwt-security-audit",
+    "name": "JWT Security Audit",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Audit a JWT you already hold for risky algorithm, header and claim settings (alg none, missing or ms exp, jku/jwk/kid abuse, long lifetime). Does not verify signatures or attack anything."
+  },
+  {
+    "id": "hsts-check",
+    "name": "HSTS Header Checker",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Parse a Strict-Transport-Security header per RFC 6797 and report validity, max-age strength, includeSubDomains and HSTS preload-list eligibility."
+  },
+  {
+    "id": "security-txt-check",
+    "name": "security.txt Validator (RFC 9116)",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Validate a security.txt file against RFC 9116: required Contact and Expires, URI and https rules, single-use fields, date validity and expiry."
+  },
+  {
+    "id": "cors-config-audit",
+    "name": "CORS Configuration Audit",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Audit Access-Control-* response headers against a request Origin for credentialed wildcards, reflected or null origins, missing Vary and risky methods."
+  },
+  {
+    "id": "http-smuggling-lint",
+    "name": "HTTP Request Smuggling Lint",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Lint a raw HTTP/1.1 request you own for message-framing ambiguities (RFC 9112): Content-Length plus Transfer-Encoding, duplicates, obfuscated TE, bare LF, spacing before the colon."
+  },
+  {
+    "id": "dns-zone-audit",
+    "name": "DNS Zone File Parser & Audit",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Parse a BIND-style zone file (origin, TTL, relative names, multi-line SOA, quoted TXT) into fully qualified records and flag CNAME conflicts, missing SOA/NS/SPF and risky wildcards or TTLs."
+  },
+  {
+    "id": "cidr-aggregate",
+    "name": "CIDR Aggregator / Excluder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Merge a mixed IPv4/IPv6 list of CIDRs and IPs into the smallest exact set of CIDR blocks, or subtract an exclusion list from it, for firewall allowlists and blocklists."
+  },
+  {
+    "id": "authorized-keys-audit",
+    "name": "authorized_keys Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Parse an OpenSSH authorized_keys file: key type and size, options (from=, command=, restrict), duplicates, weak RSA/DSA keys and unrestricted keys. Reads text only; no login is attempted."
+  },
+  {
+    "id": "secret-leak-scanner",
+    "name": "Secret Leak Scanner",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Scan pasted text, configs or logs for leaked credentials: private keys (and whether encrypted), AWS, GitHub, Slack, Stripe, Google and SendGrid tokens, JWTs, URL passwords. Findings are masked, never echoed in full."
+  },
+  {
+    "id": "ipv6-classifier",
+    "name": "IPv6 Address Classifier",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Expand, compress (RFC 5952) and classify an IPv6 address: loopback, link-local, unique-local, multicast scope, IPv4-mapped, NAT64, 6to4, Teredo, documentation, global; show ip6.arpa name and EUI-64 MAC hint."
+  },
+  {
+    "id": "ptr-name",
+    "name": "Reverse DNS (PTR) Name Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Convert an IPv4 or IPv6 address to its in-addr.arpa / ip6.arpa PTR name, or a PTR name back to the address."
   }
 ];
 
 const json=(d,s=200,h={})=>new Response(JSON.stringify(d),{status:s,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store",...h}});
-const fail=(m,s=400)=>json({error:m},s),b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replaceAll("+","-").replaceAll("/","_").replaceAll("=",""),unb64=s=>Uint8Array.from(atob(s.replaceAll("-","+").replaceAll("_","/")),c=>c.charCodeAt(0)),rand=n=>crypto.getRandomValues(new Uint8Array(n));
+const fail=(m,s=400,h={})=>json({error:m},s,h),b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))).replaceAll("+","-").replaceAll("/","_").replaceAll("=",""),unb64=s=>Uint8Array.from(atob(s.replaceAll("-","+").replaceAll("_","/")),c=>c.charCodeAt(0)),rand=n=>crypto.getRandomValues(new Uint8Array(n));
 const hash=async s=>b64(await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)));
 async function passHash(password,salt=rand(16),iter=ITER){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(password),"PBKDF2",false,["deriveBits"]);return{salt:b64(salt),hash:b64(await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt,iterations:iter},k,256))};}
 async function passOK(p,s,h,iter=100000){const a=unb64((await passHash(p,unb64(s),iter)).hash),b=unb64(h);let d=a.length^b.length;for(let i=0;i<Math.min(a.length,b.length);i++)d|=a[i]^b[i];return d===0;}
@@ -769,7 +1287,7 @@ const newSession=async(env,userId,now)=>{const raw=b64(rand(32));await env.DB.pr
 async function tokenOK(given,expected){const x=unb64(await hash(String(given||"").trim())),y=unb64(await hash(String(expected).trim()));let d=0;for(let i=0;i<x.length;i++)d|=x[i]^y[i];return d===0;}
 function cookie(req){for(const p of (req.headers.get("Cookie")||"").split(";")){const x=p.trim().split("=");if(x[0]===COOKIE)return x.slice(1).join("=");}return null;}
 const setCookie=v=>COOKIE+"="+v+"; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age="+SESSION,clearCookie=()=>COOKIE+"=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0";
-function sameOrigin(req){try{return new URL(req.headers.get("Origin")||"").origin===new URL(req.url).origin;}catch{return false;}}
+function sameOrigin(req){const sf=req.headers.get("Sec-Fetch-Site");if(sf&&sf!=="same-origin"&&sf!=="none")return false;try{return new URL(req.headers.get("Origin")||"").origin===new URL(req.url).origin;}catch{return false;}}
 async function body(req){
 const declared=req.headers.get("content-length");
 if(declared!==null){if(!/^\d+$/.test(declared))throw new HttpError(400,"Invalid Content-Length.");if(Number(declared)>MAX_BODY)throw new HttpError(413,"Request body too large.");}
@@ -798,10 +1316,10 @@ async function api(req,env){
 const u=new URL(req.url),p=u.pathname,m=req.method;
 if(p==="/api/health"&&m==="GET"){try{await env.DB.prepare("SELECT password_iter FROM users LIMIT 0").all();await env.DB.prepare("SELECT id FROM auth_attempts LIMIT 0").all();await env.DB.prepare("SELECT token_hash FROM sessions LIMIT 0").all();await env.DB.prepare("SELECT user_id,tool_id,enabled FROM user_tool_access LIMIT 0").all();if(typeof env.IP_HASH_SECRET!=="string"||env.IP_HASH_SECRET.length<32)return json({ok:false,service:"MOSTA API",database:"ok",security:"misconfigured"},503);return json({ok:true,service:"MOSTA API",version:"1.0.0",database:"ok",security:"ok"});}catch{return json({ok:false,service:"MOSTA API",database:"unavailable"},503);}}
 if(p==="/api/auth/setup-status"&&m==="GET"){const c=await env.DB.prepare("SELECT COUNT(*) n FROM users WHERE role='admin'").first();return json({setupRequired:c.n===0,bootstrapEnabled:!!env.ADMIN_BOOTSTRAP_TOKEN});}
-if(p==="/api/auth/bootstrap"&&m==="POST"){if(!sameOrigin(req))return fail("Cross-origin request rejected.",403);if(!env.ADMIN_BOOTSTRAP_TOKEN)return fail("Bootstrap is not configured.",503);const c=await env.DB.prepare("SELECT COUNT(*) n FROM users WHERE role='admin'").first();if(c.n)return fail("Initial admin is already configured.",409);const ipHash=await ipId(req,env),now=Math.floor(Date.now()/1000),d=await body(req),name=String(d.username||"").trim().toLowerCase(),pw=String(d.password||""),reserve=await reservePairAttempt(env,"__bootstrap",ipHash,now,BOOT_LIMIT);if(!reserve)return fail("Too many setup attempts. Try again later.",429);if(!await tokenOK(d.bootstrapToken,env.ADMIN_BOOTSTRAP_TOKEN))return fail("Invalid bootstrap token.",403);await env.DB.prepare("DELETE FROM auth_attempts WHERE id=?").bind(reserve.id).run();if(!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(name))return fail("Invalid username.");{const bad=weakPassword(pw,name);if(bad)return fail(bad);}const h=await passHash(pw),id=crypto.randomUUID();try{await env.DB.prepare("INSERT INTO users(id,username,password_salt,password_hash,password_iter,role,active,created_at) VALUES(?,?,?,?,?, 'admin',1,?)").bind(id,name,h.salt,h.hash,ITER,Math.floor(Date.now()/1000)).run();}catch{return fail("Admin setup failed; username may exist.",409);}await audit(env,id,"admin.bootstrap");return json({ok:true,message:"Admin created. Sign in now."},201);}
+if(p==="/api/auth/bootstrap"&&m==="POST"){if(!sameOrigin(req))return fail("Cross-origin request rejected.",403);if(!env.ADMIN_BOOTSTRAP_TOKEN)return fail("Bootstrap is not configured.",503);const c=await env.DB.prepare("SELECT COUNT(*) n FROM users WHERE role='admin'").first();if(c.n)return fail("Initial admin is already configured.",409);const ipHash=await ipId(req,env),now=Math.floor(Date.now()/1000),d=await body(req),name=String(d.username||"").trim().toLowerCase(),pw=String(d.password||""),reserve=await reservePairAttempt(env,"__bootstrap",ipHash,now,BOOT_LIMIT);if(!reserve)return fail("Too many setup attempts. Try again later.",429,{"retry-after":"900"});if(!await tokenOK(d.bootstrapToken,env.ADMIN_BOOTSTRAP_TOKEN))return fail("Invalid bootstrap token.",403);await env.DB.prepare("DELETE FROM auth_attempts WHERE id=?").bind(reserve.id).run();if(!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(name))return fail("Invalid username.");{const bad=weakPassword(pw,name);if(bad)return fail(bad);}const h=await passHash(pw),id=crypto.randomUUID();try{await env.DB.prepare("INSERT INTO users(id,username,password_salt,password_hash,password_iter,role,active,created_at) VALUES(?,?,?,?,?, 'admin',1,?)").bind(id,name,h.salt,h.hash,ITER,Math.floor(Date.now()/1000)).run();}catch{return fail("Admin setup failed; username may exist.",409);}await audit(env,id,"admin.bootstrap");return json({ok:true,message:"Admin created. Sign in now."},201);}
 if(p==="/api/auth/login"&&m==="POST"){if(!sameOrigin(req))return fail("Cross-origin request rejected.",403);const d=await body(req),name=String(d.username||"").trim().toLowerCase().slice(0,64),pw=String(d.password||"");if(!name||pw.length>128)return fail("Invalid username or password.",401);const ipHash=await ipId(req,env),now=Math.floor(Date.now()/1000);
 await env.DB.prepare("DELETE FROM auth_attempts WHERE attempted_at<?").bind(now-86400).run();
-const reserve=await reserveLoginAttempt(env,name,ipHash,now);if(!reserve)return fail("Too many sign-in attempts. Try again in 15 minutes.",429);
+const reserve=await reserveLoginAttempt(env,name,ipHash,now);if(!reserve)return fail("Too many sign-in attempts. Try again in 15 minutes.",429,{"retry-after":"900"});
 const user=await env.DB.prepare("SELECT * FROM users WHERE username=?").bind(name).first(),usable=!!(user&&user.active),cred=usable?{salt:user.password_salt,hash:user.password_hash,iter:user.password_iter||100000}:await dummy(),good=await passOK(pw,cred.salt,cred.hash,cred.iter),ok=usable&&good;
 if(!ok){if(user&&cred.iter<ITER)await passHash(pw,rand(16),ITER-cred.iter);await audit(env,user?user.id:null,"auth.login_failed",name+" ip:"+ipHash.slice(0,8));return fail("Invalid username or password.",401);}
 if(cred.iter<ITER){const upgraded=await passHash(pw);await env.DB.prepare("UPDATE users SET password_salt=?,password_hash=?,password_iter=? WHERE id=?").bind(upgraded.salt,upgraded.hash,ITER,user.id).run();}
@@ -812,7 +1330,7 @@ if(p==="/api/public/tools"&&m==="GET"){const publicModes=new Set(["browser","bro
 const user=await current(req,env);if(!user)return fail("Authentication required.",401);if(m!=="GET"&&!sameOrigin(req))return fail("Cross-origin request rejected.",403);
 if(p==="/api/auth/me"&&m==="GET")return json({user:{id:user.id,username:user.username,role:user.role}});
 if(p==="/api/auth/change-password"&&m==="POST"){const d=await body(req),cur=String(d.currentPassword||""),nw=String(d.newPassword||""),ipHash=await ipId(req,env),now=Math.floor(Date.now()/1000),key="__pw:"+user.id;
-const reserve=await reservePairAttempt(env,key,ipHash,now,LOGIN_PAIR_LIMIT);if(!reserve)return fail("Too many attempts. Try again in 15 minutes.",429);
+const reserve=await reservePairAttempt(env,key,ipHash,now,LOGIN_PAIR_LIMIT);if(!reserve)return fail("Too many attempts. Try again in 15 minutes.",429,{"retry-after":"900"});
 const row=await env.DB.prepare("SELECT password_salt,password_hash,password_iter FROM users WHERE id=?").bind(user.id).first();
 if(cur.length>128||!await passOK(cur,row.password_salt,row.password_hash,row.password_iter||100000)){await audit(env,user.id,"auth.password_change_failed");return fail("Current password is incorrect.",403);}
 const bad=weakPassword(nw,user.username);if(bad){await env.DB.prepare("DELETE FROM auth_attempts WHERE id=?").bind(reserve.id).run();return fail(bad);}if(nw===cur){await env.DB.prepare("DELETE FROM auth_attempts WHERE id=?").bind(reserve.id).run();return fail("New password must differ from the current password.");}await env.DB.prepare("DELETE FROM auth_attempts WHERE id=?").bind(reserve.id).run();

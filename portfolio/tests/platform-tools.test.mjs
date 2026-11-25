@@ -143,6 +143,7 @@ test('all registered tools execute a valid representative input', async () => {
       if (type==='file') values[key]=samples.file;
       else if (defaultValue!==undefined&&defaultValue!=='') values[key]=defaultValue;
       else if (type==='select') values[key]=options?.[0]??'';
+      else if (/optional|blank/i.test(field[1])) values[key]='';
       else if (Object.hasOwn(samples,key)) values[key]=samples[key];
       else if (key==='domain') values[key]='example.com';
       else if (key==='text'||key==='message') values[key]='MOSTA test input';
@@ -205,12 +206,12 @@ test('homepage search and quick-access deep links resolve to real tool workspace
 test('tool registry has unique IDs and ten declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 107);
+  assert.equal(tools.length, 181);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','ubuntu'].sort(),
   );
-  const expected={networking:17,security:15,soc:5,linux:17,ubuntu:12,kali:14,bash:13,developer:11,cloud:2,database:1};
+  const expected={networking:40,security:42,soc:17,linux:21,ubuntu:12,kali:14,bash:13,developer:19,cloud:2,database:1};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -381,7 +382,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 107);
+  assert.equal(tools.length, 181);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -740,4 +741,101 @@ test('public homepage does not run the authenticated tool bootstrap', () => {
   assert.match(source, /if\s*\(grid\)\s*initializeAuthorizedTools\(\)/);
   assert.match(source, /else\s*\{\s*const counts=\{all:tools\.length/);
   assert.match(source, /\$\$\('\[data-home-count\]'\)\.forEach/);
+});
+
+test('converter and calculator tools added in platform-v2 return correct results', async () => {
+  const r = (id, v) => byId(id).run(v);
+  assert.match(await r('base-convert', { value: 'ff', from: '16' }), /Decimal: 255/);
+  await assert.rejects(async () => r('base-convert', { value: '12z', from: '10' }));
+  assert.equal(await r('text-hex', { text: 'Hi', mode: 'text to hex' }), '48 69');
+  assert.equal(await r('text-hex', { text: '48 69', mode: 'hex to text' }), 'Hi');
+  assert.match(await r('color', { hex: '#0ea5e9' }), /rgb\(14, 165, 233\)/);
+  assert.match(await r('transfer-time', { size: '10', mbps: '100' }), /13m 20s/);
+  assert.match(await r('bdp', { mbps: '1000', rtt: '40' }), /5000000/);
+  assert.match(await r('mtu-mss', { mtu: '1500', ver: 'IPv4' }), /TCP MSS: 1460/);
+  assert.match(await r('entropy', { text: 'aabb' }), /1\.000/);
+  assert.match(await r('hash-id', { hash: '5d41402abc4b2a76b9719d911017c592' }), /MD5/);
+  assert.match(await r('umask', { umask: '022' }), /0644/);
+  assert.match(await r('http-status', { code: '404' }), /Not Found/);
+});
+
+test('Nmap, Wireshark, Termux, Kali and OSINT helper tools validate input and build output', async () => {
+  const r = (id, v) => byId(id).run(v);
+  const d = Object.fromEntries(byId('nmap-builder').fields.map(f => [f[0], f[2]]));
+  assert.match(await r('nmap-builder', d), /^nmap -sn -T3 -oN scan\.txt 192\.168\.1\.0\/24/);
+  assert.throws(() => byId('nmap-builder').run({ ...d, target: 'x; rm -rf /' }), /Target/);
+  assert.throws(() => byId('nmap-builder').run({ ...d, target: '-iL /etc/passwd' }), /Target/);
+  assert.throws(() => byId('nmap-builder').run({ ...d, ports: '1;2' }), /Ports/);
+  const np = byId('nmap-parser').fields[0][2];
+  assert.match(await r('nmap-parser', { out: np }), /Open: 2/);
+  assert.match(await r('wireshark-filter', { proto: 'tcp', host: '192.168.1.10', port: '443' }), /ip\.addr == 192\.168\.1\.10 && tcp\.port == 443/);
+  assert.throws(() => byId('wireshark-filter').run({ proto: 'dns', host: '', port: '53' }), /Port applies/);
+  assert.match(await r('tshark-builder', { iface: 'eth0', filter: 'tcp port 443', count: '10', file: 'a.pcapng' }), /tshark -i eth0 -f "tcp port 443" -c 10 -w a\.pcapng/);
+  assert.throws(() => byId('tshark-builder').run({ iface: 'eth0', filter: 'a"; id', count: '10', file: 'a.pcapng' }), /Filter/);
+  assert.throws(() => byId('tshark-builder').run({ iface: 'eth0', filter: '', count: '10', file: '../x.pcapng' }), /Output/);
+  assert.match(await r('kali-reference', { q: 'packet' }), /wireshark/);
+  assert.match(await r('osint-domain', { domain: 'example.com' }), /site:example\.com/);
+  const eh = await r('email-header', { h: byId('email-header').fields[0][2] });
+  assert.match(eh, /Reply-To domain differs/);
+  assert.match(eh, /dkim=fail/);
+});
+
+test('security-output analyzers and Termux guides parse samples correctly', async () => {
+  const d = id => byId(id).fields[0][2];
+  const r = (id, v) => byId(id).run(v);
+  const tc = await r('tcpdump-analyzer', { out: d('tcpdump-analyzer') });
+  assert.match(tc, /Packets parsed: 3/); assert.match(tc, /192\.168\.1\.5  \(2\)/); assert.match(tc, /\b443  \(1\)/);
+  assert.throws(() => byId('tcpdump-analyzer').run({ out: 'nothing' }), /No/);
+  const ss = await r('socket-analyzer', { out: d('socket-analyzer') });
+  assert.match(ss, /MySQL exposed/); assert.match(ss, /sensitive exposed: 1/); assert.doesNotMatch(ss, /631.*exposed/);
+  const ly = await r('lynis-parser', { out: d('lynis-parser') });
+  assert.match(ly, /Hardening index: 62/); assert.match(ly, /Warnings: 1/); assert.match(ly, /Suggestions: 2/);
+  assert.match(await r('tls-output-analyzer', { out: d('tls-output-analyzer') }), /Findings: none/);
+  const bad = await r('tls-output-analyzer', { out: 'Protocol version: TLSv1\nCiphersuite: RC4-MD5\nVerification error: certificate has expired\nnotAfter=Jan  1 00:00:00 2020 GMT' });
+  assert.match(bad, /Deprecated protocol/); assert.match(bad, /Weak cipher/); assert.match(bad, /expired/);
+});
+
+test('professional calculators: VLSM, IPv6, CVSS 3.1, SPF/DMARC, ufw, ssh-keygen', async () => {
+  const r = (id, v) => byId(id).run(v);
+  const vl = await r('vlsm', { base: '192.168.10.0/24', hosts: '2,100,20,50' });
+  assert.match(vl, /100 hosts -> 192\.168\.10\.0\/25/); assert.match(vl, /50 hosts -> 192\.168\.10\.128\/26/);
+  assert.match(vl, /20 hosts -> 192\.168\.10\.192\/27/); assert.match(vl, /2 hosts -> 192\.168\.10\.224\/30/);
+  assert.throws(() => byId('vlsm').run({ base: '192.168.10.0/24', hosts: '200,100' }), /too small/);
+  const v6 = await r('ipv6-subnet', { addr: '2001:db8::1', prefix: '32' });
+  assert.match(v6, /Network: 2001:db8::\/32/); assert.match(v6, /4294967296/);
+  assert.throws(() => byId('ipv6-subnet').run({ addr: '2001:::1', prefix: '32' }), /valid IPv6/);
+  const cv = (vec) => r('cvss', { vec });
+  assert.match(await cv('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H'), /Base score: 9\.8/);
+  assert.match(await cv('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H'), /Base score: 10\.0/);
+  assert.match(await cv('CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H'), /Base score: 7\.8/);
+  assert.match(await cv('CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:C/C:L/I:L/A:N'), /Base score: 6\.1/);
+  assert.match(await cv('CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N'), /Severity: None/);
+  assert.throws(() => byId('cvss').run({ vec: 'CVSS:3.1/AV:N' }), /Missing/);
+  assert.match(await r('spf-dmarc', { type: 'SPF', rec: 'v=spf1 +all' }), /dangerous/);
+  assert.match(await r('spf-dmarc', { type: 'DMARC', rec: 'v=DMARC1; p=none' }), /monitor-only/);
+  assert.match(await r('ufw-builder', { action: 'allow', port: '22', proto: 'tcp', src: '192.168.1.0/24' }), /ufw allow from 192\.168\.1\.0\/24 to any port 22 proto tcp/);
+  assert.throws(() => byId('ufw-builder').run({ action: 'allow', port: '22', proto: 'tcp', src: '1.2.3.4; rm' }), /IPv4/);
+  assert.match(await r('ssh-keygen', { type: 'ed25519', comment: 'a@b', file: 'k' }), /ssh-keygen -t ed25519 -a 100 -C "a@b" -f ~\/\.ssh\/k/);
+  assert.throws(() => byId('ssh-keygen').run({ type: 'ed25519', comment: 'x"; id', file: 'k' }), /Comment/);
+});
+
+test('route summary, throughput, converters, command builders, TTL and ATT&CK lookup', async () => {
+  const r = (id, v) => byId(id).run(v);
+  const rs = await r('route-summary', { nets: '192.168.0.0/24\n192.168.1.0/24\n192.168.2.0/24\n192.168.3.0/24' });
+  assert.match(rs, /Summary route: 192\.168\.0\.0\/22/); assert.match(rs, /Exact summary: yes/);
+  const rs2 = await r('route-summary', { nets: '10.0.0.0/24, 10.0.2.0/24' });
+  assert.match(rs2, /10\.0\.0\.0\/22/); assert.match(rs2, /Extra addresses: 512/);
+  assert.match(await r('tcp-throughput', { mss: '1460', rtt: '50', loss: '0.1' }), /9\.01 Mbit\/s/);
+  assert.throws(() => byId('tcp-throughput').run({ mss: '1460', rtt: '50', loss: '0' }), /loss/);
+  assert.match(await r('bandwidth-convert', { value: '100', unit: 'Mbit/s' }), /MB\/s: 12\.5/);
+  assert.match(await r('tcpdump-builder', { iface: 'eth0', filter: 'port 53', count: '10', mode: 'write pcap file', file: 'a.pcap' }), /^sudo tcpdump -i eth0 -nn -c 10 -w a\.pcap 'port 53'/);
+  assert.throws(() => byId('tcpdump-builder').run({ iface: 'eth0', filter: "x'; id", count: '1', mode: 'print to screen', file: 'a.pcap' }), /Filter/);
+  assert.equal(await r('dig-builder', { name: 'example.com', type: 'MX', server: '1.1.1.1', mode: 'short answer' }), 'dig @1.1.1.1 example.com MX +short');
+  assert.throws(() => byId('dig-builder').run({ name: 'a.com; id', type: 'A', server: 'system default', mode: 'short answer' }), /domain/);
+  const tt = await r('ttl-guess', { ttl: '117' });
+  assert.match(tt, /Likely initial TTL: 128/); assert.match(tt, /Estimated hops: 11/);
+  assert.match(await r('attack-reference', { q: 'T1110' }), /Brute Force/);
+  assert.match(await r('attack-reference', { q: 'lateral' }), /T1021/);
+  assert.match(await r('journalctl-builder', { unit: 'ssh.service', since: '1 hour ago', prio: 'err' }), /journalctl -u ssh\.service --since "1 hour ago" -p err --no-pager/);
+  assert.throws(() => byId('journalctl-builder').run({ unit: 'a; rm', since: 'today', prio: 'all' }), /Unit/);
 });

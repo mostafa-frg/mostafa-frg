@@ -396,3 +396,58 @@ test('secret-leak-scanner identifies real private keys and whether they are encr
   assert.match(sl('-----BEGIN PRIVATE KEY-----\nTRUNCATED'), /CRITICAL.*private key \(PRIVATE KEY, NOT encrypted\)/); // header without footer is still reported
   assert.match(sl('-----BEGIN PUBLIC KEY-----\nabc\n-----END PUBLIC KEY-----'), /No secrets found/);
 });
+
+// Batch 5: ipv6-classifier and ptr-name vs Python ipaddress (fixtures/ipv6-python-fuzz.json, ptr4-python.json)
+const V6 = JSON.parse(await readFile(new URL('./fixtures/ipv6-python-fuzz.json', import.meta.url), 'utf8'));
+const P4 = JSON.parse(await readFile(new URL('./fixtures/ptr4-python.json', import.meta.url), 'utf8'));
+const line = (out, k) => { const l = out.split('\n').find(x => x.startsWith(k + ': ')); return l ? l.slice(k.length + 2) : null; };
+test('ipv6-classifier agrees with Python ipaddress on 424 addresses', () => {
+  assert.equal(V6.length, 424);
+  for (const c of V6) {
+    const o = run('ipv6-classifier', { address: c.addr });
+    assert.equal(line(o, 'Expanded'), c.exp, c.addr);
+    assert.equal(line(o, 'Compressed'), c.comp, c.addr);
+    assert.equal(line(o, 'Reverse (PTR) name'), c.ptr, c.addr);
+    const t = line(o, 'Type');
+    assert.equal(/^Loopback/.test(t), c.loop, c.addr);
+    assert.equal(/^Link-local/.test(t), c.ll, c.addr);
+    assert.equal(/^Multicast/.test(t), c.mc, c.addr);
+    assert.equal(/^Unspecified/.test(t), c.unsp, c.addr);
+    assert.equal(/^IPv4-mapped/.test(t), !!c.mapped, c.addr);
+    if (c.mapped) assert.equal(line(o, 'Embedded IPv4'), c.mapped, c.addr);
+    if (c.s64) { assert.match(t, /^6to4/); assert.equal(line(o, 'Embedded IPv4'), c.s64, c.addr); } else assert.doesNotMatch(t, /^6to4/);
+    if (c.ter) { assert.match(t, /^Teredo/); assert.equal(line(o, 'Teredo server'), c.ter[0], c.addr); assert.equal(line(o, 'Teredo client (obfuscated)'), c.ter[1], c.addr); } else assert.doesNotMatch(t, /^Teredo/);
+  }
+});
+test('ipv6-classifier special cases and input handling', () => {
+  const ty = (x) => line(run('ipv6-classifier', { address: x }), 'Type');
+  assert.match(ty('fec0::1'), /Site-local/); assert.match(ty('fd12:3456::1'), /Unique local/); assert.match(ty('fc00::1'), /Unique local/);
+  assert.match(ty('2001:db8::1'), /Documentation/); assert.match(ty('2606:4700::1111'), /Global unicast/); assert.match(ty('64:ff9b::1.2.3.4'), /NAT64/);
+  assert.match(ty('ff02::1'), /link-local/); assert.match(ty('ff0e::1'), /global/); assert.match(ty('ff05::1'), /site-local/);
+  assert.match(run('ipv6-classifier', { address: 'ff15::5' }), /transient/); assert.doesNotMatch(run('ipv6-classifier', { address: 'ff05::5' }), /transient/);
+  assert.match(ty('[fe80::1%eth0]'), /Link-local/); assert.match(run('ipv6-classifier', { address: 'fe80::1%eth0' }), /Zone ID: eth0/);
+  assert.match(run('ipv6-classifier', { address: 'fe80::21a:2bff:fe3c:4d5e' }), /MAC 00:1a:2b:3c:4d:5e/);
+  assert.doesNotMatch(run('ipv6-classifier', { address: '2001:db8::1' }), /EUI-64/);
+  for (const bad of ['1.2.3.4', ':::', '1::2::3', '12345::', '1:2:3:4:5:6:7', '1:2:3:4:5:6:7:8:9', '::ffff:1.2.3.256', '::g', 'fe80::1%', '1:2:3:4:5:6:7::8'])
+    assert.throws(() => run('ipv6-classifier', { address: bad }), /Not a valid|Invalid/, bad);
+  assert.equal(line(run('ipv6-classifier', { address: '1:0:0:2:0:0:0:3' }), 'Compressed'), '1:0:0:2::3');
+});
+test('ptr-name matches Python reverse_pointer and round-trips', () => {
+  for (const [ip, ptr] of P4) {
+    assert.equal(line(run('ptr-name', { value: ip }), 'PTR name'), ptr + '.');
+    assert.equal(line(run('ptr-name', { value: ptr }), 'Address'), ip);
+    assert.equal(line(run('ptr-name', { value: ptr + '.' }), 'Address'), ip);
+  }
+  for (const c of V6.slice(0, 80)) {
+    assert.equal(line(run('ptr-name', { value: c.addr }), 'PTR name'), c.ptr + '.');
+    assert.equal(line(run('ptr-name', { value: c.ptr }), 'Address (expanded)'), c.exp);
+  }
+  for (const bad of ['', '256.1.1.1', '1.2.3', '01.2.3.4', '1.2.3.4.5.in-addr.arpa', '1.2.3.in-addr.arpa', '300.2.3.4.in-addr.arpa', 'a.b.c.d.in-addr.arpa', '1.ip6.arpa', 'example.com', ':::', 'zz::1'])
+    assert.throws(() => run('ptr-name', { value: bad }), /Enter|Invalid|full|Not a valid/, bad);
+});
+test('ipv6-classifier prefix boundaries (one bit off the prefix is not that type)', () => {
+  const ty = (x) => line(run('ipv6-classifier', { address: x }), 'Type');
+  assert.doesNotMatch(ty('2003::1'), /6to4/); assert.match(ty('2003::1'), /Global unicast/);
+  assert.doesNotMatch(ty('64:ff9b::1:0:0'), /NAT64 well-known/); assert.doesNotMatch(ty('0:0:0:0:1:ffff:1:2'), /IPv4-mapped/);
+  assert.doesNotMatch(ty('::fffe:1:2'), /IPv4-mapped/); assert.match(ty('::ffff:1:2'), /IPv4-mapped/);
+});

@@ -365,3 +365,7 @@ body.portal[data-theme=dark]{
  .portal .nav{flex-wrap:wrap;row-gap:2px;padding-top:8px;padding-bottom:6px}
  .portal .navlinks{order:5;flex:1 1 100%;justify-content:center}
 }
+
+/* Home: the last workspace card fills the final row when the grid has an odd remainder (11 cards in 3 columns). */
+@media(min-width:601px){.portal .domain-grid>.domain-card:last-child:nth-child(3n+2){grid-column:span 2}}
+@media(max-width:600px){.portal .hero-stats>.hero-stat:last-child:nth-child(odd){grid-column:span 2}}

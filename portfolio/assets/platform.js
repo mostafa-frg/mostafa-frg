@@ -741,6 +741,57 @@ else if(label==='OPENSSH PRIVATE KEY'){try{const b=atob(body.replace(/[^A-Za-z0-
 f.push({sev:enc?'MEDIUM':'CRITICAL',kind:'private key ('+label+(enc?', passphrase-protected':', NOT encrypted')+')',n,val:null});}
 const order={CRITICAL:0,HIGH:1,MEDIUM:2};f.sort((a,b)=>order[a.sev]-order[b.sev]||a.n-b.n);
 return rows([['Lines scanned',lines.length],['Findings',f.length]])+'\n\n'+(f.map(x=>'['+x.sev+'] line '+x.n+': '+x.kind+(x.val===null?'':' '+mask(x.val))).join('\n')||'No secrets found by these patterns.')+'\n\nPattern matching only: confirm each hit, then rotate (not just delete) anything real. Values are masked; nothing is sent anywhere.';}}
+,
+{id:'ipv6-classifier',name:'IPv6 Address Classifier',cat:'networking',symbol:'V6',desc:'Expand, compress (RFC 5952) and classify an IPv6 address: loopback, link-local, unique-local, multicast scope, IPv4-mapped, NAT64, 6to4, Teredo, documentation, global; show ip6.arpa name and EUI-64 MAC hint.',tags:'ipv6 classify link-local ula multicast eui-64 nat64 6to4 teredo mapped reverse ip6.arpa',fields:[['address','IPv6 address','fe80::21a:2bff:fe3c:4d5e','text']],run:v=>{
+let a=v.address.trim().replace(/^\[|\]$/g,'');let zone='';const zi=a.indexOf('%');if(zi>=0){zone=a.slice(zi+1);a=a.slice(0,zi);if(!/^[A-Za-z0-9._~-]{1,15}$/.test(zone))throw Error('Invalid zone identifier.');}
+if(!a.includes(':')||!/^[0-9a-fA-F:.]+$/.test(a)||/:::/.test(a)||(a.match(/::/g)||[]).length>1)throw Error('Not a valid IPv6 address.');
+const m4=/^(.*:)(\d{1,3}(?:\.\d{1,3}){3})$/.exec(a);if(m4){const q=m4[2].split('.');if(q.some(x=>+x>255||(x.length>1&&x[0]==='0')))throw Error('Invalid embedded IPv4 address.');a=m4[1]+(((+q[0])<<8)|+q[1]).toString(16)+':'+(((+q[2])<<8)|+q[3]).toString(16);}
+const [h,t]=a.includes('::')?a.split('::'):[a,null];const hp=h?h.split(':'):[],tp=t?t.split(':'):[];
+if(t===null&&hp.length!==8)throw Error('Not a valid IPv6 address (needs 8 groups or ::).');if(t!==null&&hp.length+tp.length>7)throw Error('Not a valid IPv6 address (too many groups).');
+const all=[...hp,...(t===null?[]:Array(8-hp.length-tp.length).fill('0')),...tp];if(all.some(x=>!/^[0-9a-fA-F]{1,4}$/.test(x)))throw Error('Not a valid IPv6 address (bad group).');
+const g=all.map(x=>parseInt(x,16));let n=0n;for(const x of g)n=n*65536n+BigInt(x);
+const pre=(val,len)=>(n>>BigInt(128-len))===(BigInt(val)>>BigInt(128-len));
+const P=(s,len)=>{const [ph,pt]=s.includes('::')?s.split('::'):[s,''];const hh=ph?ph.split(':'):[],tt=pt?pt.split(':'):[];const gg=[...hh,...Array(8-hh.length-tt.length).fill('0'),...tt].map(x=>parseInt(x,16));let b=0n;for(const x of gg)b=b*65536n+BigInt(x);return pre(b,len);};
+const v4=(hi,lo)=>[hi>>8,hi&255,lo>>8,lo&255].join('.');
+let type,extra=[];
+const mscope={1:'interface-local',2:'link-local',3:'realm-local',4:'admin-local',5:'site-local',8:'organization-local',14:'global'};
+if(n===0n)type='Unspecified address (::/128)';
+else if(n===1n)type='Loopback (::1/128)';
+else if(P('::ffff:0:0',96)){type='IPv4-mapped address (::ffff:0:0/96)';extra.push(['Embedded IPv4',v4(g[6],g[7])]);}
+else if(P('64:ff9b::',96)){type='NAT64 well-known prefix (64:ff9b::/96, RFC 6052)';extra.push(['Embedded IPv4',v4(g[6],g[7])]);}
+else if(P('64:ff9b:1::',48))type='Local-use NAT64 prefix (64:ff9b:1::/48, RFC 8215)';
+else if(P('100::',64))type='Discard-only prefix (100::/64)';
+else if(P('2001::',32)){type='Teredo (2001::/32)';extra.push(['Teredo server',v4(g[2],g[3])],['Teredo client (obfuscated)',v4(g[6]^0xffff,g[7]^0xffff)]);}
+else if(P('2001:db8::',32))type='Documentation (2001:db8::/32)';
+else if(P('2002::',16)){type='6to4 (2002::/16)';extra.push(['Embedded IPv4',v4(g[1],g[2])]);}
+else if(P('fe80::',10))type='Link-local unicast (fe80::/10)';
+else if(P('fec0::',10))type='Site-local (fec0::/10, deprecated by RFC 3879)';
+else if(P('fc00::',7))type='Unique local address (fc00::/7, RFC 4193)';
+else if(P('ff00::',8)){const sc=g[0]&15,fl=(g[0]>>4)&15;type='Multicast (ff00::/8), scope: '+(mscope[sc]||'unassigned ('+sc+')');extra.push(['Multicast flags','0x'+fl.toString(16)+(fl&1?' (transient: not permanently assigned)':' (well-known)')]);}
+else if(P('2000::',3))type='Global unicast (2000::/3)';
+else type='Reserved / unassigned by IANA';
+const hexs=g.map(x=>x.toString(16));let bs=-1,bl=0;for(let i=0;i<8;){if(g[i]===0){let j=i;while(j<8&&g[j]===0)j++;if(j-i>bl){bs=i;bl=j-i;}i=j;}else i++;}
+const comp=bl<2?hexs.join(':'):hexs.slice(0,bs).join(':')+'::'+hexs.slice(bs+bl).join(':');
+const full=g.map(x=>x.toString(16).padStart(4,'0')).join(':');
+const rev=full.replace(/:/g,'').split('').reverse().join('.')+'.ip6.arpa';
+const rows0=[['Expanded',full],['Compressed',comp],['Type',type],['Reverse (PTR) name',rev]];
+if(zone)rows0.push(['Zone ID',zone]);
+const iid=[g[4],g[5],g[6],g[7]];
+if((g[5]&255)===0xff&&(g[6]>>8)===0xfe&&!P('ff00::',8)){const mac=[(g[4]>>8)^2,g[4]&255,g[5]>>8,g[6]&255,g[7]>>8,g[7]&255].map(x=>x.toString(16).padStart(2,'0')).join(':');extra.push(['EUI-64 interface ID','looks like modified EUI-64; derived MAC '+mac+' (a privacy-relevant hardware identifier; not proof)']);}
+return rows(rows0.concat(extra))+'\n\nClassification follows the IANA IPv6 special-purpose registry and the cited RFCs; it says nothing about reachability.';}},
+{id:'ptr-name',name:'Reverse DNS (PTR) Name Builder',cat:'networking',symbol:'PT',desc:'Convert an IPv4 or IPv6 address to its in-addr.arpa / ip6.arpa PTR name, or a PTR name back to the address.',tags:'ptr reverse dns in-addr.arpa ip6.arpa arpa rdns',fields:[['value','IP address or PTR name','203.0.113.45','text']],run:v=>{
+const s=v.value.trim().replace(/\.$/,'').toLowerCase();if(!s)throw Error('Enter an IP address or a PTR name.');
+const ip4=/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+const ok4=(q)=>q.every(x=>+x<=255&&!(x.length>1&&x[0]==='0'));
+if(s.endsWith('.in-addr.arpa')){const q=s.slice(0,-13).split('.');if(q.length!==4||!q.every(x=>/^\d{1,3}$/.test(x))||!ok4(q))throw Error('A full IPv4 PTR name has four decimal labels before in-addr.arpa.');return rows([['Address',q.reverse().join('.')],['PTR name',s+'.']]);}
+if(s.endsWith('.ip6.arpa')){const q=s.slice(0,-9).split('.');if(q.length!==32||!q.every(x=>/^[0-9a-f]$/.test(x)))throw Error('A full IPv6 PTR name has 32 hexadecimal nibble labels before ip6.arpa.');const h=q.reverse().join('');const gs=h.match(/.{4}/g);return rows([['Address (expanded)',gs.join(':')],['PTR name',s+'.']]);}
+const m=ip4.exec(s);if(m){const q=m.slice(1);if(!ok4(q))throw Error('Invalid IPv4 address.');return rows([['Address',q.join('.')],['PTR name',q.slice().reverse().join('.')+'.in-addr.arpa.']]);}
+if(s.includes(':')){let a=s;if(!/^[0-9a-f:.]+$/.test(a)||/:::/.test(a)||(a.match(/::/g)||[]).length>1)throw Error('Not a valid IP address or PTR name.');
+const m4=/^(.*:)(\d{1,3}(?:\.\d{1,3}){3})$/.exec(a);if(m4){const q=m4[2].split('.');if(!ok4(q))throw Error('Invalid embedded IPv4 address.');a=m4[1]+(((+q[0])<<8)|+q[1]).toString(16)+':'+(((+q[2])<<8)|+q[3]).toString(16);}
+const [h,t]=a.includes('::')?a.split('::'):[a,null];const hp=h?h.split(':'):[],tp=t?t.split(':'):[];if(t===null&&hp.length!==8||t!==null&&hp.length+tp.length>7)throw Error('Not a valid IPv6 address.');
+const all=[...hp,...(t===null?[]:Array(8-hp.length-tp.length).fill('0')),...tp];if(all.some(x=>!/^[0-9a-f]{1,4}$/.test(x)))throw Error('Not a valid IPv6 address.');
+const full=all.map(x=>x.padStart(4,'0')).join('');return rows([['Address (expanded)',full.match(/.{4}/g).join(':')],['PTR name',full.split('').reverse().join('.')+'.ip6.arpa.']]);}
+throw Error('Not a valid IPv4/IPv6 address or PTR name.');}}
 
 ];
 function rows(items){return items.map(x=>x[0]+': '+x[1]).join('\n');}
@@ -834,7 +885,7 @@ function renderTools(){
  const count=$('#resultCount');if(count)count.textContent=list.length+' OF '+tools.length+' TOOLS';
  const total=$('#toolCount');if(total)total.textContent=tools.length+' UTILITIES · '+Object.keys(categories).length+' WORKSPACES';
  const hero=$('#heroToolTotal'),home=$('#homeToolTotal');if(hero)hero.textContent=String(tools.length);if(home)home.textContent=String(tools.length);
- $$('[data-home-count]').forEach(node=>{const n=counts[node.dataset.homeCount]??0;node.textContent=n+' tools';});
+ $$('[data-home-count]').forEach(node=>{const n=counts[node.dataset.homeCount]??0;node.textContent=n+(n===1?' tool':' tools');});
  const empty=$('#noTools');if(empty)empty.hidden=list.length!==0;
  const title=$('#categoryTitle'),eyebrow=$('#categoryEyebrow'),sub=$('#directorySubhead');
  if(title)title.textContent=category==='all'?'All tools':categories[category]||'All tools';
@@ -886,7 +937,7 @@ if(grid) initializeAuthorizedTools();
 else {
  const counts={all:tools.length,...Object.fromEntries(Object.keys(categories).map(key=>[key,tools.filter(tool=>tool.cat===key).length]))};
  const home=$('#homeToolTotal');if(home)home.textContent=String(tools.length);
- $$('[data-home-count]').forEach(node=>{node.textContent=(counts[node.dataset.homeCount]??0)+' tools';});
+ $$('[data-home-count]').forEach(node=>{{const n=counts[node.dataset.homeCount]??0;node.textContent=n+(n===1?' tool':' tools');}});
 }
 const homeSearch=$('#homeToolSearch');
 homeSearch?.addEventListener('keydown',e=>{if(e.key==='Enter'){location.href='tools.html?q='+encodeURIComponent(homeSearch.value.trim());}});

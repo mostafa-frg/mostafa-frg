@@ -1255,6 +1255,20 @@ const TOOLS=[
     "group": "Cybersecurity",
     "mode": "browser",
     "description": "Scan pasted text, configs or logs for leaked credentials: private keys (and whether encrypted), AWS, GitHub, Slack, Stripe, Google and SendGrid tokens, JWTs, URL passwords. Findings are masked, never echoed in full."
+  },
+  {
+    "id": "ipv6-classifier",
+    "name": "IPv6 Address Classifier",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Expand, compress (RFC 5952) and classify an IPv6 address: loopback, link-local, unique-local, multicast scope, IPv4-mapped, NAT64, 6to4, Teredo, documentation, global; show ip6.arpa name and EUI-64 MAC hint."
+  },
+  {
+    "id": "ptr-name",
+    "name": "Reverse DNS (PTR) Name Builder",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Convert an IPv4 or IPv6 address to its in-addr.arpa / ip6.arpa PTR name, or a PTR name back to the address."
   }
 ];
 

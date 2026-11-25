@@ -66,7 +66,7 @@ Run from the repo root:
 - "Zero errors" cannot be guaranteed; the guarantee is that no tool ships without passing known-answer tests and the gate.
 
 ## Status (update every session)
-- Last updated: 2026-11-22 by Claude. Working branch: `platform/clean-v3` (179 tools; 125 frontend tests, 103 backend checks green;
+- Last updated: 2026-11-25 by Claude. Working branch: `platform/clean-v3` (181 tools; 129 frontend tests, 103 backend checks green locally; not deployed). Batch 5: ipv6-classifier, ptr-name (verified vs Python ipaddress, 424 addresses; the test caught a real prefix-parsing bug, fixed). Also fixed: nav overlap, stray text in the home grid, '1 tools' grammar, uneven card rows. Not visually checked: dark mode and logged-in/admin screens.
   browser run of every new tool clean).
 - Batch 1 (10): x509-inspector, ssh-fingerprint, nmap-grepable-parser, suricata-eve-summary, zeek-conn-summary, sudoers-audit,
   passwd-shadow-audit, checksum-calc, luhn-check, yara-rule-lint.

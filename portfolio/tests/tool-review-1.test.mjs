@@ -27,6 +27,11 @@ async function check(c) {
     if (c.tool === 'cidr-overlap') { if ((val(o, 'Overlap') === 'YES') !== c.ov) fail('overlap'); else if (c.ov && val(o, 'Intersection') !== c.inter[0] + ' – ' + c.inter[1]) fail('intersection');
       const rl = val(o, 'Relationship') || ''; const m = { same: /same|identical|equal/i, 'B in A': /B is inside A/i, 'A in B': /A is inside B/i, partial: /partial/i, none: /./ }[c.rel]; if (c.ov && !m.test(rl)) fail('relationship ' + rl); }
     if (c.tool === 'route-summary' && (val(o, 'Summary route') !== c.summary || val(o, 'Addresses covered') !== String(c.covered) || val(o, 'Addresses in your list') !== String(c.mine) || (val(o, 'Exact summary') === 'yes') !== c.exact)) fail('summary');
+    if (c.tool === 'color') { const m = /rgb\((\d+), (\d+), (\d+)\)/.exec(val(o, 'RGB') || ''); if (!m || m.slice(1).map(Number).join() !== c.rgb.join()) fail('rgb');
+      const h = /hsl\((\d+), (\d+)%, (\d+)%\)/.exec(val(o, 'HSL') || ''); if (!h || [0, 1, 2].some(i => Math.abs(+h[i + 1] - c.hsl[i]) > 0.5001 && !(i === 0 && Math.abs(Math.abs(+h[1] - c.hsl[0]) - 360) < 0.51))) fail('hsl ' + val(o, 'HSL')); }
+    if (c.num) for (const [k, [x, d]] of Object.entries(c.num)) { const g = parseFloat(String(val(o, k)).replace(/,/g, '')); if (!(Math.abs(g - x) <= 0.5 * 10 ** -d + 1e-9 * Math.abs(x))) fail(k); }
+    if (c.tool === 'tcp-throughput') { const m = /([\d.]+) (K|M|G)bit/.exec(val(o, 'Estimated max throughput') || ''); const mb = parseFloat(m?.[1]) * ({ K: 1e-3, M: 1, G: 1e3 }[m?.[2]]); if (!(Math.abs(mb - c.mbit) <= 0.0051 + 0.0006 * c.mbit)) fail('tcp'); }
+    if (c.tool === 'entropy' && (val(o, 'Length') !== String(c.n) || val(o, 'Distinct chars') !== String(c.dist) || Math.abs(parseFloat(val(o, 'Entropy (bits/char)')) - c.H) > 0.0006)) fail('entropy');
     if (c.tool === 'range-cidr') { const got = o.split('\n').filter(x => /^\d+\.\d+\.\d+\.\d+\/\d+$/.test(x)); if (JSON.stringify(got) !== JSON.stringify(c.cidrs)) fail('cidrs'); }
     if (c.tool === 'subnet-split') { const g = o.split('\n').filter(x => /^\d+\.\d+\.\d+\.\d+\/\d+ /.test(x)).map(x => x.split(' ')[0]); if (JSON.stringify(g) !== JSON.stringify(c.subs.slice(0, c.k))) fail('subs'); }
   }
@@ -34,4 +39,24 @@ async function check(c) {
 }
 test('hash, crc32, base32, hex, url, hmac, base-convert, inet-checksum match Python (1268 cases)', async () => { const C = load('review1-hash-encode-python.json'); assert.equal(C.length, 1268); for (const c of C) await check(c); });
 test('subnet, wildcard, ipv4, range-cidr, subnet-split, ipv6, ipv6-subnet, cidr-overlap, route-summary, eui64, mac-format match Python (2400 cases)', async () => { const C = load('review1-network-python.json'); assert.equal(C.length, 2400); for (const c of C) await check(c); });
+test('chmod, umask, color, timestamp (UTC), filesize, tcp-throughput, bdp, entropy match Python (1500 cases)', async () => { const C = load('review1-misc-python.json'); assert.equal(C.length, 1500); for (const c of C) await check(c); });
+test('cvss 3.1 matches an independent implementation of the spec for all 2592 base vectors', () => {
+  const t = tools.find(x => x.id === 'cvss');
+  for (const c of load('review1-cvss-python.json')) { const o = String(t.run({ vec: c.vec })); assert.equal(val(o, 'Base score'), c.score, c.vec); assert.equal(val(o, 'Severity'), c.sev, c.vec); }
+  assert.equal(val(String(t.run({ vec: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H' })), 'Base score'), '10.0'); // Log4Shell (published)
+  assert.equal(val(String(t.run({ vec: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N' })), 'Base score'), '7.5');
+  assert.throws(() => t.run({ vec: 'CVSS:3.1/AV:N/AV:L/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H' }), /Duplicate metric AV/);
+  assert.throws(() => t.run({ vec: 'CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H' }), /Missing or invalid metric A/);
+});
+test('json, csv-json, jwt match Python (650 cases); csv keeps blank-valued rows; unsigned jwt says absent', () => {
+  for (const c of load('review1-text-python.json')) {
+    const t = tools.find(x => x.id === c.tool); const v = {}; for (const f of t.fields) v[f[0]] = f[2]; Object.assign(v, c.v); const o = String(t.run(v));
+    if (c.tool === 'json') assert.equal(o, c.exp.replace(/(\de)([+-])0(\d)/g, '$1$2$3'));
+    if (c.tool === 'csv-json') assert.deepEqual(JSON.parse(o), c.exp, c.v.csv);
+    if (c.tool === 'jwt') { const m = /HEADER \(decoded only\)\n([\s\S]*?)\n\nPAYLOAD \(decoded only\)\n([\s\S]*?)\n\nSignature: (.*)/.exec(o); assert.ok(m, o); assert.deepEqual(JSON.parse(m[1]), c.h); assert.deepEqual(JSON.parse(m[2]), c.p); if (c.sigl === 0) assert.match(m[3], /absent/); else assert.ok(m[3].includes('(' + c.sigl + ' ')); }
+  }
+  const csv = tools.find(x => x.id === 'csv-json');
+  assert.deepEqual(JSON.parse(csv.run({ csv: 'a,b\n,\n1,2\n' })), [{ a: '', b: '' }, { a: '1', b: '2' }]);
+  assert.deepEqual(JSON.parse(csv.run({ csv: 'a\n""\nx\n\n' })), [{ a: '' }, { a: 'x' }]); // quoted empty kept, blank line skipped
+});
 test('ipv6-subnet accepts /0 and /128', () => { const t = tools.find(x => x.id === 'ipv6-subnet'); assert.match(t.run({ addr: '2001:db8::1', prefix: '0' }), /Network: ::\/0/); assert.match(t.run({ addr: '2001:db8::1', prefix: '128' }), /Network: 2001:db8::1\/128/); assert.throws(() => t.run({ addr: '::1', prefix: '129' })); });

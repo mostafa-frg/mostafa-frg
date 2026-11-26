@@ -137,3 +137,19 @@ test('cloud-init audit, apparmor zero-unconfined wording, ps aux parsing', () =>
   const o = T('linux-process-review', { output: aux, cpu: '80', mem: '20' }); assert.match(o, /Processes parsed: 2/); assert.match(o, /PID 500 www-data CPU 99% MEM 5% \/tmp\/\.x\/miner -o pool$/m);
   assert.match(T('linux-process-review', { output: 'USER PID %CPU %MEM COMMAND\nroot 1 0.1 0.2 systemd', cpu: '80', mem: '20' }), /No process met/);
 });
+test('bash-quote-builder and bash-array-builder output survives a real bash round trip; builders pass bash -n', async () => {
+  const { spawnSync } = await import('node:child_process');
+  const alpha = ["a", " ", "'", '"', '$', '`', '\\', '*', '?', '!', 'é', '日', '\t', ';', '&', '|', '(', ')', '<', '>', '#', '~', '{', '}', '[', ']', '%', '=', '-', '.'];
+  let seed = 7; const rnd = () => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff;
+  const rs = () => { let n = 1 + Math.floor(rnd() * 12), s = ''; while (n--) s += alpha[Math.floor(rnd() * alpha.length)]; return s; };
+  const q = tools.find(x => x.id === 'bash-quote-builder'), arr = tools.find(x => x.id === 'bash-array-builder');
+  for (let i = 0; i < 150; i++) {
+    const s = rs(); const quoted = String(q.run({ value: s })).split('\n\n')[1];
+    assert.equal(spawnSync('bash', ['-c', 'printf %s ' + quoted], { encoding: 'utf8' }).stdout, s, JSON.stringify(s));
+    const vals = [rs(), rs(), rs()].map(x => 'x' + x + 'x'); const code = String(arr.run({ values: vals.join('\n') }));
+    const got = spawnSync('bash', ['-c', code], { encoding: 'utf8' }).stdout.replace(/\n$/, '').split('\n');
+    assert.deepEqual(got, vals, JSON.stringify(vals));
+  }
+  for (const id of ['bash-trap-builder', 'bash-loop-builder']) { const t = tools.find(x => x.id === id); const d = {}; for (const f of t.fields) d[f[0]] = f[2]; const kinds = t.fields.find(f => f[0] === 'kind')?.[4] || [undefined];
+    for (const kind of kinds) { const code = String(t.run(kind ? { ...d, kind } : d)).split('\n\n')[0]; assert.equal(spawnSync('bash', ['-n', '-c', code], { encoding: 'utf8' }).status, 0, id + ' ' + kind); } }
+});

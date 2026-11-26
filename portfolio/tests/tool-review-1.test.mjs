@@ -125,3 +125,15 @@ test('k8s host-namespace checks and every GTFOBins name in the SUID list', () =>
   for (const n of names) assert.match(o, new RegExp('\\[HIGH\\] Known shell-escape.*: /usr/bin/' + n + '$', 'm'), n);
   assert.doesNotMatch(String(tools.find(x => x.id === 'kali-suid-audit').run({ paths: '/usr/bin/passwd\n/usr/bin/sudo' })), /Known shell-escape/);
 });
+test('cloud-init audit, apparmor zero-unconfined wording, ps aux parsing', () => {
+  const T = (id, v) => String(tools.find(x => x.id === id).run(v));
+  const ci = T('ubuntu-cloud-init-audit', { config: '#cloud-config\nusers:\n  - name: a\n    lock_passwd: false\n    passwd: $6$abc\nchpasswd:\n  list: |\n    root:password123\n  expire: false\nruncmd:\n  - curl -fsSL http://x | sudo bash' });
+  for (const m of [/Inline password hash/, /lock_passwd is false/, /CRITICAL\] chpasswd sets a plaintext/, /piped directly to a shell/]) assert.match(ci, m);
+  assert.doesNotMatch(T('ubuntu-cloud-init-audit', { config: '#cloud-config\nchpasswd:\n  list: |\n    root:$6$abc$def\n    bob:RANDOM\n  expire: true' }), /plaintext/);
+  assert.doesNotMatch(T('ubuntu-cloud-init-audit', { config: '#cloud-config\npackages:\n  - curl' }), /piped|plaintext|passwd/);
+  assert.match(T('ubuntu-apparmor-audit', { output: 'apparmor module is loaded.\n12 profiles are loaded.\n0 processes are unconfined but have a profile defined.' }), /No unconfined processes with a defined profile/);
+  assert.match(T('ubuntu-apparmor-audit', { output: 'apparmor module is loaded.\n12 profiles are loaded.\n3 processes are unconfined but have a profile defined.' }), /Investigate unconfined/);
+  const aux = 'USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND\nroot 1 0.0 0.1 100 50 ? Ss 10:00 0:01 /sbin/init\nwww-data 500 99.0 5.0 1 1 ? R 10:01 5:00 /tmp/.x/miner -o pool';
+  const o = T('linux-process-review', { output: aux, cpu: '80', mem: '20' }); assert.match(o, /Processes parsed: 2/); assert.match(o, /PID 500 www-data CPU 99% MEM 5% \/tmp\/\.x\/miner -o pool$/m);
+  assert.match(T('linux-process-review', { output: 'USER PID %CPU %MEM COMMAND\nroot 1 0.1 0.2 systemd', cpu: '80', mem: '20' }), /No process met/);
+});

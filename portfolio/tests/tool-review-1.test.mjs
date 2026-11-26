@@ -102,3 +102,26 @@ test('nmap-parser counts only state "open" as open; tcpdump-analyzer parses IPv4
   const out = String(tools.find(x => x.id === 'tcpdump-analyzer').run({ out: '12:00:00.1 IP6 2001:db8::1.443 > 2001:db8::2.51000: Flags [S.], seq 1\n12:00:00.2 ARP, Request who-has 10.0.0.1 tell 10.0.0.2, length 28\n12:00:00.3 IP 10.0.0.2 > 10.0.0.1: ICMP echo request, id 1, seq 1, length 64\n12:00:00.4 IP 10.0.0.2.5353 > 224.0.0.251.5353: UDP, length 40\n' }));
   assert.match(out, /Packets parsed: 3/); assert.match(out, /2001:db8::1 {2}\(1\)/); assert.match(out, /10\.0\.0\.2 {2}\(2\)/); assert.match(out, /2001:db8::2 {2}\(1\)/); assert.match(out, /51000 {2}\(1\)/); assert.match(out, /5353 {2}\(1\)/); assert.doesNotMatch(out, /\s10\.0\.0 {2}/);
 });
+test('config audits catch real-world problems: sshd (Match, protocol, ciphers), SUID GTFOBins, k8s secret env, wrangler JSONC', () => {
+  const T = (id, v) => String(tools.find(x => x.id === id).run(v));
+  const ssh = T('sshd-config-audit', { config: 'PermitRootLogin prohibit-password\nProtocol 1\nCiphers aes128-cbc,aes256-gcm@openssh.com\nMACs hmac-md5\nMatch User bob\n  PasswordAuthentication no\n  PermitRootLogin yes' });
+  assert.match(ssh, /permitrootlogin: prohibit-password \[OK\]/); assert.match(ssh, /protocol: 1 \[RISK\]/); assert.match(ssh, /ciphers: .*\[RISK\]/); assert.match(ssh, /macs: hmac-md5 \[RISK\]/); assert.doesNotMatch(ssh, /duplicate directives/); assert.doesNotMatch(ssh, /passwordauthentication: no \[/);
+  assert.match(T('sshd-config-audit', { config: 'PermitRootLogin yes' }), /permitrootlogin: yes \[RISK\]/);
+  assert.doesNotMatch(T('sshd-config-audit', { config: 'Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com' }), /ciphers: .*\[RISK\]/);
+  const su = T('kali-suid-audit', { paths: '/usr/bin/find\n/usr/bin/vim.basic\n/usr/bin/python3.11\n/usr/bin/passwd\n/tmp/x' });
+  for (const p of ['/usr/bin/find', '/usr/bin/vim.basic', '/usr/bin/python3.11']) assert.match(su, new RegExp('\\[HIGH\\] Known shell-escape.*: ' + p.replace(/\./g, '\\.')));
+  assert.match(su, /\[REVIEW\] System executable.*passwd/); assert.match(su, /\[HIGH\] User-writable.*\/tmp\/x/);
+  assert.match(T('k8s-manifest-audit', { manifest: 'spec:\n  containers:\n  - name: a\n    image: nginx:1.25\n    env:\n    - name: DB_PASSWORD\n      value: hunter2\n    - name: TOKEN\n      valueFrom:\n        secretKeyRef: {name: s, key: t}' }), /HIGH line 7: secret-like environment variable DB_PASSWORD/);
+  assert.doesNotMatch(T('k8s-manifest-audit', { manifest: 'spec:\n  containers:\n  - name: a\n    image: nginx:1.25\n    env:\n    - name: TOKEN\n      valueFrom:\n        secretKeyRef: {name: s, key: t}' }), /secret-like environment/);
+  const wr = T('wrangler-config-audit', { config: '{\n // comment\n "name":"x","main":"src/index.js","compatibility_date":"2020-01-01",\n "vars":{"API_TOKEN":"abc","MODE":"prod",},\n "env":{"production":{"vars":{"DB_PASSWORD":"p"}}}, "workers_dev":true,\n}' });
+  assert.match(wr, /HIGH vars\.API_TOKEN/); assert.match(wr, /HIGH env\.production\.vars\.DB_PASSWORD/); assert.match(wr, /workers_dev is enabled/); assert.match(wr, /compatibility_date is more than/); assert.doesNotMatch(wr, /vars\.MODE/); assert.doesNotMatch(wr, /no env\.production/);
+  assert.throws(() => tools.find(x => x.id === 'wrangler-config-audit').run({ config: '{ "name": ' }), /Could not parse/);
+});
+test('k8s host-namespace checks and every GTFOBins name in the SUID list', () => {
+  const k = String(tools.find(x => x.id === 'k8s-manifest-audit').run({ manifest: 'spec:\n  hostNetwork: true\n  hostPID: true\n  hostIPC: true\n  containers:\n  - name: a\n    image: x:1\n    securityContext:\n      readOnlyRootFilesystem: false' }));
+  for (const m of [/line 2: Pod shares the host network/, /line 3: Pod shares the host PID/, /line 4: Pod shares the host IPC/, /line 9: A writable container root/]) assert.match(k, m);
+  const names = 'bash sh dash zsh csh ksh busybox cp env find gdb less more nano vi vim view nmap node perl php python python2 python3 ruby rsync strace tar awk gawk mawk nawk sed tclsh timeout unshare xargs watch ionice nice taskset setarch time'.split(' ');
+  const o = String(tools.find(x => x.id === 'kali-suid-audit').run({ paths: names.map(n => '/usr/bin/' + n).join('\n') }));
+  for (const n of names) assert.match(o, new RegExp('\\[HIGH\\] Known shell-escape.*: /usr/bin/' + n + '$', 'm'), n);
+  assert.doesNotMatch(String(tools.find(x => x.id === 'kali-suid-audit').run({ paths: '/usr/bin/passwd\n/usr/bin/sudo' })), /Known shell-escape/);
+});

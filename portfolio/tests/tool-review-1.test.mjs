@@ -160,3 +160,17 @@ test('bash-loop-builder accepts leading-glob and absolute paths, rejects hostile
   assert.match(String(t.run({ kind: 'lines', source: '/etc/hosts' })), /< '\/etc\/hosts'|< \/etc\/hosts/);
   for (const bad of ['*.txt; rm -rf /', '$(id)', '`id`', '../x', 'a b', '*.txt\nid', '*|id']) assert.throws(() => t.run({ kind: 'glob', source: bad }), /simple variable|Parent traversal/, bad);
 });
+test('web header tools: Set-Cookie prefix rules, weak HSTS, CSP data:/http: sources, DMARC sp weaker than p', () => {
+  const T = (id, v) => String(tools.find(x => x.id === id).run(v));
+  assert.match(T('cookies', { cookies: 'Set-Cookie: __Host-x=1; Secure; Path=/; Domain=example.com; SameSite=Lax' }), /^__Host-x\n[\s\S]*\[RISK\] __Host- requires/);
+  assert.doesNotMatch(T('cookies', { cookies: 'Set-Cookie: __Host-x=1; Secure; Path=/; HttpOnly; SameSite=Lax' }), /RISK/);
+  assert.match(T('cookies', { cookies: 'Set-Cookie: __Secure-y=1; Path=/' }), /__Secure- prefix requires Secure/);
+  assert.match(T('cookies', { cookies: 'Set-Cookie: a=1; SameSite=None' }), /SameSite=None requires Secure/);
+  assert.match(T('headers', { headers: 'Strict-Transport-Security: max-age=300\nServer: nginx/1.18.0\nX-Powered-By: PHP/7.4' }), /\[WEAK\] HSTS max-age is 300[\s\S]*Server header discloses[\s\S]*X-Powered-By discloses/);
+  assert.doesNotMatch(T('headers', { headers: 'Strict-Transport-Security: max-age=31536000; includeSubDomains' }), /WEAK/);
+  const csp = T('csp-audit', { policy: "default-src 'self'; script-src 'self' data: http: ; object-src https:" });
+  assert.match(csp, /\[RISK\] data: source in script-src/); assert.match(csp, /\[RISK\] plain http: source in script-src/); assert.match(csp, /\[REVIEW\] scheme-only https: source in object-src/);
+  assert.doesNotMatch(T('csp-audit', { policy: "default-src 'self'; img-src data:" }), /data: source/);
+  assert.match(T('spf-dmarc', { type: 'DMARC', rec: 'v=DMARC1; p=reject; sp=none; rua=mailto:a@b.example' }), /sp=none is weaker than p=reject/);
+  assert.doesNotMatch(T('spf-dmarc', { type: 'DMARC', rec: 'v=DMARC1; p=none; sp=reject; rua=mailto:a@b.example' }), /weaker/);
+});

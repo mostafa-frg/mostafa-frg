@@ -87,3 +87,18 @@ test('http-status and signals match Python http.HTTPStatus / signal; case conver
   assert.equal(cs.run({ text: 'café au lait', mode: 'snake' }), 'café_au_lait'); assert.equal(cs.run({ text: 'fooBarBaz', mode: 'kebab' }), 'foo-bar-baz'); assert.equal(cs.run({ text: 'caféBar', mode: 'kebab' }), 'café-bar'); assert.equal(cs.run({ text: 'naïveÜber', mode: 'snake' }), 'naïve_über');
   assert.equal(cs.run({ text: 'naïve ÜBER', mode: 'kebab' }), 'naïve-über'); assert.equal(cs.run({ text: 'HTTPServer2Go', mode: 'snake' }), 'httpserver2_go');
 });
+test('ioc-extractor: refang keeps the scheme, no false IPs/domains, emails and IPv6 found', () => {
+  const t = tools.find(x => x.id === 'ioc-extractor'); const md5 = 'd41d8cd98f00b204e9800998ecf8427e';
+  const o = String(t.run({ data: `999.1.1.1 1.2.3.4.5 10.0.0.1 hxxp://c[.]example/p hxxps[:]//q[.]example ftp://f.example/ file.txt image.png dll.dll user@evil.example 2001:db8::1 ::1 10:15:22 ${md5} ${md5.toUpperCase()}` }));
+  const sec = (n) => { const m = new RegExp(n + ' \\((\\d+)\\)\\n([\\s\\S]*?)\\n\\n').exec(o); assert.ok(m, n); return m[2].split('\n').filter(x => x !== 'None'); };
+  assert.deepEqual(sec('URLs'), ['http://c.example/p', 'https://q.example', 'ftp://f.example/']);
+  assert.deepEqual(sec('IPv4 addresses'), ['10.0.0.1']); assert.deepEqual(sec('IPv6 addresses'), ['2001:db8::1', '::1']);
+  assert.deepEqual(sec('Email addresses'), ['user@evil.example']); assert.deepEqual(sec('Domains'), ['evil.example']);
+  assert.deepEqual(sec('File hashes'), [md5 + ' (MD5)']);
+});
+test('nmap-parser counts only state "open" as open; tcpdump-analyzer parses IPv4/IPv6/ICMP addresses and ports', () => {
+  const np = tools.find(x => x.id === 'nmap-parser').run({ out: 'Nmap scan report for 10.0.0.5\nPORT STATE SERVICE\n22/tcp open ssh OpenSSH 8.9\n25/tcp filtered smtp\n53/udp open|filtered domain\n80/tcp closed http\n443/tcp open https\n' });
+  assert.match(np, /Open: 2 \/ listed: 5 \(filtered: 1, open\|filtered: 1, closed: 1\)/); assert.doesNotMatch(np, /53\/udp/);
+  const out = String(tools.find(x => x.id === 'tcpdump-analyzer').run({ out: '12:00:00.1 IP6 2001:db8::1.443 > 2001:db8::2.51000: Flags [S.], seq 1\n12:00:00.2 ARP, Request who-has 10.0.0.1 tell 10.0.0.2, length 28\n12:00:00.3 IP 10.0.0.2 > 10.0.0.1: ICMP echo request, id 1, seq 1, length 64\n12:00:00.4 IP 10.0.0.2.5353 > 224.0.0.251.5353: UDP, length 40\n' }));
+  assert.match(out, /Packets parsed: 3/); assert.match(out, /2001:db8::1 {2}\(1\)/); assert.match(out, /10\.0\.0\.2 {2}\(2\)/); assert.match(out, /2001:db8::2 {2}\(1\)/); assert.match(out, /51000 {2}\(1\)/); assert.match(out, /5353 {2}\(1\)/); assert.doesNotMatch(out, /\s10\.0\.0 {2}/);
+});

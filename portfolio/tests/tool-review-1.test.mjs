@@ -151,5 +151,12 @@ test('bash-quote-builder and bash-array-builder output survives a real bash roun
     assert.deepEqual(got, vals, JSON.stringify(vals));
   }
   for (const id of ['bash-trap-builder', 'bash-loop-builder']) { const t = tools.find(x => x.id === id); const d = {}; for (const f of t.fields) d[f[0]] = f[2]; const kinds = t.fields.find(f => f[0] === 'kind')?.[4] || [undefined];
-    for (const kind of kinds) { const code = String(t.run(kind ? { ...d, kind } : d)).split('\n\n')[0]; assert.equal(spawnSync('bash', ['-n', '-c', code], { encoding: 'utf8' }).status, 0, id + ' ' + kind); } }
+    for (const kind of kinds) { const code = String(t.run(kind ? { ...d, kind, source: kind === 'array' ? 'items' : kind === 'glob' ? '*.txt' : 'input.txt' } : d)).split('\n\n')[0]; assert.equal(spawnSync('bash', ['-n', '-c', code], { encoding: 'utf8' }).status, 0, id + ' ' + kind); } }
+});
+test('bash-loop-builder accepts leading-glob and absolute paths, rejects hostile ones', () => {
+  const t = tools.find(x => x.id === 'bash-loop-builder');
+  assert.match(String(t.run({ kind: 'glob', source: '*.txt' })), /^for file in \*\.txt; do/);
+  assert.match(String(t.run({ kind: 'glob', source: '/var/log/*.log' })), /^for file in \/var\/log\/\*\.log; do/);
+  assert.match(String(t.run({ kind: 'lines', source: '/etc/hosts' })), /< '\/etc\/hosts'|< \/etc\/hosts/);
+  for (const bad of ['*.txt; rm -rf /', '$(id)', '`id`', '../x', 'a b', '*.txt\nid', '*|id']) assert.throws(() => t.run({ kind: 'glob', source: bad }), /simple variable|Parent traversal/, bad);
 });

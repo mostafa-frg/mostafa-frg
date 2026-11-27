@@ -1675,6 +1675,83 @@ const TOOLS=[
     "group": "Linux Administration",
     "mode": "browser",
     "description": "Review systemd unit snippets for privilege, filesystem and kernel hardening gaps."
+  },
+  {
+    "id": "dns-zone-file-audit",
+    "name": "DNS Zone File Security Auditor",
+    "group": "Networking",
+    "mode": "browser",
+    "description": "Inspect DNS zone snippets for risky SPF records, wildcard entries and missing mail policy signals."
+  },
+  {
+    "id": "tls-cipher-suite-audit",
+    "name": "TLS Cipher Suite Output Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review protocol and cipher output for deprecated TLS versions and weak cipher families."
+  },
+  {
+    "id": "csp-policy-audit",
+    "name": "Content Security Policy Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Analyze CSP directives for unsafe script sources, wildcards and missing defense-in-depth controls."
+  },
+  {
+    "id": "http-security-headers-audit",
+    "name": "HTTP Response Security Headers Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Inspect HTTP response headers for missing transport, framing, MIME and referrer protections."
+  },
+  {
+    "id": "jwt-claims-inspector",
+    "name": "JWT Claims Inspector (Local Decode)",
+    "group": "Developer Tools",
+    "mode": "browser",
+    "description": "Decode JWT header and payload locally and inspect claims; signature verification is NOT performed."
+  },
+  {
+    "id": "url-security-inspector",
+    "name": "URL Structure & Safety Inspector",
+    "group": "Developer Tools",
+    "mode": "browser",
+    "description": "Parse a URL locally and highlight credentials, HTTP transport, unusual ports and encoded path separators."
+  },
+  {
+    "id": "sql-migration-risk-review",
+    "name": "SQL Migration Risk Reviewer",
+    "group": "Database Engineering",
+    "mode": "browser",
+    "description": "Flag destructive SQL migration statements and broad data changes before deployment."
+  },
+  {
+    "id": "redis-config-hardening-audit",
+    "name": "Redis Configuration Hardening Auditor",
+    "group": "Database Engineering",
+    "mode": "browser",
+    "description": "Inspect redis.conf for unauthenticated access, unsafe binding and disabled protected mode."
+  },
+  {
+    "id": "mysql-config-hardening-audit",
+    "name": "MySQL Server Configuration Auditor",
+    "group": "Database Engineering",
+    "mode": "browser",
+    "description": "Review MySQL option snippets for network exposure, LOCAL INFILE and transport security."
+  },
+  {
+    "id": "gitlab-ci-security-audit",
+    "name": "GitLab CI Pipeline Security Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect GitLab CI YAML for privileged Docker, exposed tokens and broad deployment branch rules."
+  },
+  {
+    "id": "terraform-iam-wildcard-audit",
+    "name": "Terraform IAM Wildcard Permission Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect Terraform IAM policy snippets for wildcard principals, actions and resource scope."
   }
 ];
 

@@ -1619,6 +1619,62 @@ const TOOLS=[
     "group": "SOC & Incident Response",
     "mode": "browser",
     "description": "Review Get-ExecutionPolicy -List output for Bypass/Unrestricted scopes and process-level policy overrides."
+  },
+  {
+    "id": "nginx-config-audit",
+    "name": "Nginx Security Configuration Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Review Nginx configuration text for weak TLS, unsafe headers, directory listing and risky proxy settings."
+  },
+  {
+    "id": "apache-config-audit",
+    "name": "Apache HTTP Server Security Auditor",
+    "group": "Cybersecurity",
+    "mode": "browser",
+    "description": "Inspect Apache configuration snippets for directory exposure, server banners, weak TLS and proxy verification."
+  },
+  {
+    "id": "github-actions-permissions-audit",
+    "name": "GitHub Actions Permissions Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Review workflow YAML for implicit write permissions, pull-request target triggers and unpinned third-party actions."
+  },
+  {
+    "id": "terraform-s3-public-access-audit",
+    "name": "Terraform S3 Public Exposure Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect Terraform snippets for public S3 ACLs, public bucket policies and disabled public-access blocks."
+  },
+  {
+    "id": "env-secret-exposure-audit",
+    "name": "Environment File Secret Exposure Scanner",
+    "group": "SOC & Incident Response",
+    "mode": "browser",
+    "description": "Scan pasted environment-file text for likely credentials and redact detected values in the report."
+  },
+  {
+    "id": "kubernetes-ingress-tls-audit",
+    "name": "Kubernetes Ingress TLS Auditor",
+    "group": "Cloud & DevOps",
+    "mode": "browser",
+    "description": "Inspect Ingress YAML for missing TLS blocks, wildcard hosts and broad backend exposure indicators."
+  },
+  {
+    "id": "postgresql-config-audit",
+    "name": "PostgreSQL Configuration Security Auditor",
+    "group": "Database Engineering",
+    "mode": "browser",
+    "description": "Review postgresql.conf and pg_hba.conf snippets for risky listener, authentication and TLS settings."
+  },
+  {
+    "id": "systemd-service-hardening-audit",
+    "name": "Systemd Service Hardening Auditor",
+    "group": "Linux Administration",
+    "mode": "browser",
+    "description": "Review systemd unit snippets for privilege, filesystem and kernel hardening gaps."
   }
 ];
 

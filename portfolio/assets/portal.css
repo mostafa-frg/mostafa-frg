@@ -343,3 +343,30 @@ body.portal[data-theme=dark]{
 @media(prefers-reduced-motion:reduce){
  .portal .directory-tool,.portal .domain-card,.portal .quick-link,.portal .tool-run-form .btn{transition:none}
 }
+
+/* Engineering workspace refinement */
+.portal .portal-hero{padding-top:68px;padding-bottom:42px}
+.portal .hero-stats{align-self:center}
+.portal .hero-stat{min-width:132px}
+.portal .directory-sidebar{border-radius:14px}
+.portal .sidebar-title{display:flex;align-items:center;gap:9px}
+.portal .sidebar-title:before{content:"";width:16px;height:2px;background:var(--p-accent);border-radius:2px}
+.portal .directory-toolbar{padding:2px 0 14px;border-bottom:1px solid var(--p-line)}
+.portal .directory-toolbar h2{font-size:30px}
+.portal .tool-directory-grid{gap:12px}
+.portal .directory-tool{min-height:214px;border-radius:13px;padding:16px}
+.portal .directory-tool:focus-visible{outline:3px solid color-mix(in srgb,var(--p-accent) 58%,transparent);outline-offset:3px}
+.portal .directory-tool-top{margin-bottom:14px}
+.portal .tool-symbol{border-radius:9px}
+.portal .directory-tool h3{font-size:13px}
+.portal .directory-tool p{font-size:10px}
+.portal .tool-modal-panel{width:min(1120px,100%);border-radius:16px}
+.portal .tool-workspace-grid{gap:16px}
+.portal .tool-input-panel,.portal .tool-output-panel{padding:18px}
+.portal .tool-modal-result{font-size:11px;line-height:1.8}
+.portal .tool-field input,.portal .tool-field textarea,.portal .tool-field select{min-height:42px}
+.portal .tool-run-form .btn{min-height:44px}
+.portal .category-tab{min-height:46px}
+.portal .portal-note{border-left:3px solid var(--p-accent)}
+@media(max-width:850px){.portal .directory-toolbar{padding-bottom:12px}}
+@media(max-width:600px){.portal .portal-hero{padding-top:38px}.portal .hero-stat{min-width:0}.portal .directory-toolbar h2{font-size:24px}}

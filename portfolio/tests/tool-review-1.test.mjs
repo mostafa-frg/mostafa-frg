@@ -174,3 +174,19 @@ test('web header tools: Set-Cookie prefix rules, weak HSTS, CSP data:/http: sour
   assert.match(T('spf-dmarc', { type: 'DMARC', rec: 'v=DMARC1; p=reject; sp=none; rua=mailto:a@b.example' }), /sp=none is weaker than p=reject/);
   assert.doesNotMatch(T('spf-dmarc', { type: 'DMARC', rec: 'v=DMARC1; p=none; sp=reject; rua=mailto:a@b.example' }), /weaker/);
 });
+test('cron: next run times match croniter (203 expressions); macros, names, impossible dates, vixie day rule', () => {
+  const t = tools.find(x => x.id === 'cron');
+  for (const c of load('review2-cron-croniter.json')) { const o = String(t.run({ expression: c.e, from: c.f })); const got = o.split('\n').filter(l => /^\d{4}-\d\d-\d\d \d\d:\d\d UTC$/.test(l)); assert.deepEqual(got, c.runs, c.e + ' from ' + c.f); }
+  const runs = (e, f) => String(t.run({ expression: e, from: f })).split('\n').filter(l => /UTC$/.test(l));
+  assert.deepEqual(runs('@daily', '2026-11-27 23:59').slice(0, 2), ['2026-11-28 00:00 UTC', '2026-11-29 00:00 UTC']);
+  assert.deepEqual(runs('30 8 * * MON-FRI', '2026-11-27 08:30').slice(0, 2), ['2026-11-30 08:30 UTC', '2026-12-01 08:30 UTC']);
+  assert.deepEqual(runs('0 0 1 JAN,JUL *', '2026-01-01 00:00').slice(0, 2), ['2026-07-01 00:00 UTC', '2027-01-01 00:00 UTC']);
+  assert.match(String(t.run({ expression: '0 0 31 2 *', from: '2026-01-01 00:00' })), /None within 8 years/);
+  assert.deepEqual(runs('0 0 29 2 *', '2026-03-01 00:00').slice(0, 2), ['2028-02-29 00:00 UTC', '2032-02-29 00:00 UTC']);
+  assert.deepEqual(runs('0 0 * * 7', '2026-11-27 00:00').slice(0, 1), ['2026-11-29 00:00 UTC']); // 7 = Sunday
+  assert.deepEqual(runs('0 0 13 * 5', '2026-11-01 00:00').slice(0, 3), ['2026-11-06 00:00 UTC', '2026-11-13 00:00 UTC', '2026-11-20 00:00 UTC']); // dom OR dow
+  assert.deepEqual(runs('0 0 13 * */2', '2026-11-01 00:00').slice(0, 2), ['2026-12-13 00:00 UTC', '2027-02-13 00:00 UTC']); // a field starting with * makes day matching AND (Vixie/cronie)
+  assert.deepEqual(runs('0 0 */10 * 1', '2026-11-01 00:00').slice(0, 3), ['2026-12-21 00:00 UTC', '2027-01-11 00:00 UTC', '2027-02-01 00:00 UTC']); // */n in day-of-month also counts as star (AND), checked by brute force in Python
+  assert.throws(() => t.run({ expression: '* * * * *', from: '2026-02-30 00:00' }), /not a real date/); assert.throws(() => t.run({ expression: '* * * * *', from: 'tomorrow' }), /Start time must look like/);
+  assert.throws(() => t.run({ expression: '61 * * * *' }), /out-of-range/); assert.throws(() => t.run({ expression: '* * * *' }), /exactly five/);
+});

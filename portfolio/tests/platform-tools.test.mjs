@@ -205,7 +205,7 @@ test('homepage search and quick-access deep links resolve to real tool workspace
 test('tool registry has unique IDs and eleven declared workspaces', () => {
   const ids = tools.map(tool => tool.id);
   assert.equal(new Set(ids).size, ids.length);
-  assert.equal(tools.length, 239);
+  assert.equal(tools.length, 250);
   assert.deepEqual(
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
@@ -381,7 +381,7 @@ test('query string builder safely encodes values and preserves duplicate keys', 
 
 
 test('every registered utility has a unique ID, description, category and executable handler', () => {
-  assert.equal(tools.length, 239);
+  assert.equal(tools.length, 250);
   for (const tool of tools) {
     assert.match(tool.id, /^[a-z0-9-]+$/);
     assert.ok(tool.name && tool.name.length >= 5, tool.id + ' has a useful name');
@@ -1027,14 +1027,14 @@ test('ten additional engineering analyzers detect representative configuration r
  assert.match(byId('dns-zone-file-audit').run({data:'@ IN TXT "v=spf1 +all"'}),/SPF \+all|_dmarc/);
  assert.match(byId('tls-cipher-suite-audit').run({data:'TLSv1.0 DES-CBC3-SHA'}),/deprecated protocol|weak or obsolete cipher/i);
  assert.match(byId('csp-policy-audit').run({data:"default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; object-src *"}),/wildcard|unsafe-inline|unsafe-eval/i);
- assert.match(byId('http-security-headers-audit').run({data:'HTTP/1.1 200 OK\\nServer: nginx'}),/Strict-Transport-Security|Content-Security-Policy|X-Content-Type-Options/i);
+ assert.match(byId('http-security-headers-audit').run({data:'HTTP/1.1 200 OK\nServer: nginx'}),/Strict-Transport-Security|Content-Security-Policy|X-Content-Type-Options/i);
  const jwt=byId('jwt-claims-inspector').run({token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJzdWIiOiJkZW1vIiwiZXhwIjo0MTAyNDQ0ODAwfQ.'});
  assert.match(jwt,/alg=none|not signature verification/i);
  assert.match(byId('url-security-inspector').run({url:'http://user:pass@example.com:8080/%2fadmin'}),/unencrypted HTTP|credentials|non-default port|encoded path/i);
- assert.match(byId('sql-migration-risk-review').run({data:'DROP TABLE users;\\nDELETE FROM sessions;'}),/destructive DROP|DELETE statement/i);
- assert.match(byId('redis-config-hardening-audit').run({data:'bind 0.0.0.0\\nprotected-mode no'}),/all IPv4 interfaces|protected-mode|requirepass/i);
+ assert.match(byId('sql-migration-risk-review').run({data:'DROP TABLE users;\nDELETE FROM sessions;'}),/destructive DROP|DELETE statement/i);
+ assert.match(byId('redis-config-hardening-audit').run({data:'bind 0.0.0.0\nprotected-mode no'}),/all IPv4 interfaces|protected-mode|requirepass/i);
  assert.match(byId('mysql-config-hardening-audit').run({data:'[mysqld]\\nbind-address=0.0.0.0\\nlocal_infile=ON'}),/all IPv4 interfaces|LOCAL INFILE/i);
- assert.match(byId('gitlab-ci-security-audit').run({data:'deploy:\\n  script:\\n    - docker run --privileged app:latest\\n  only:\\n    - branches'}),/privileged|latest image|all branches/i);
- assert.match(byId('terraform-iam-wildcard-audit').run({data:'actions = ["s3:*"]\\nresources = ["*"]\\nidentifiers = ["*"]'}),/wildcard IAM action|wildcard resource|wildcard principal/i);
+ assert.match(byId('gitlab-ci-security-audit').run({data:'deploy:\n  script:\n    - docker run --privileged app:latest\n  only:\n    - branches'}),/privileged|latest image|all branches/i);
+ assert.match(byId('terraform-iam-wildcard-audit').run({data:'actions = ["s3:*"]\nresources = ["*"]\nidentifiers = ["*"]'}),/wildcard IAM action|wildcard resource|wildcard principal/i);
  assert.throws(()=>byId('jwt-claims-inspector').run({token:'not.a.jwt.payload'}),/three dot-separated segments/);
 });

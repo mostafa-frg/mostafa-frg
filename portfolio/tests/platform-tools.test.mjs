@@ -210,7 +210,7 @@ test('tool registry has unique IDs and eleven declared workspaces', () => {
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
   );
-  const expected={networking:21,security:39,linux:35,developer:20,soc:36,bash:13,kali:28,ubuntu:13,cloud:10,database:1,termux:15};
+  const expected={networking:21,security:41,linux:36,developer:20,soc:37,bash:13,kali:28,ubuntu:13,cloud:13,database:2,termux:15};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -1012,13 +1012,13 @@ test('backend authorization catalog exactly matches the frontend registry', asyn
 
 test('eight new website analyzers detect representative configuration risks', () => {
   assert.match(byId('nginx-config-audit').run({data:'server { listen 80; server_tokens on; autoindex on; proxy_ssl_verify off; }'}),/directory listing|proxy TLS|server_tokens/i);
-  assert.match(byId('apache-config-audit').run({data:'ServerTokens Full\\nServerSignature On\\nOptions Indexes\\nSSLProxyVerify none'}),/directory indexes|ServerTokens|verification/i);
-  assert.match(byId('github-actions-permissions-audit').run({data:'on: pull_request_target\\njobs:\\n  build:\\n    steps:\\n      - uses: actions/checkout@v4'}),/permissions|pull_request_target|full commit SHA/i);
-  assert.match(byId('terraform-s3-public-access-audit').run({data:'acl = "public-read"\\nblock_public_acls = false'}),/public|false/i);
-  const envReport=byId('env-secret-exposure-audit').run({data:'API_KEY=supersecretvalue\\nAPP_ENV=production'});
+  assert.match(byId('apache-config-audit').run({data:'ServerTokens Full\nServerSignature On\nOptions Indexes\nSSLProxyVerify none'}),/directory indexes|ServerTokens|verification/i);
+  assert.match(byId('github-actions-permissions-audit').run({data:'on: pull_request_target\njobs:\n  build:\n    steps:\n      - uses: actions/checkout@v4'}),/permissions|pull_request_target|full commit SHA/i);
+  assert.match(byId('terraform-s3-public-access-audit').run({data:'acl = "public-read"\nblock_public_acls = false'}),/public|false/i);
+  const envReport=byId('env-secret-exposure-audit').run({data:'API_KEY=supersecretvalue\nAPP_ENV=production'});
   assert.match(envReport,/API_KEY/);
   assert.doesNotMatch(envReport,/supersecretvalue/);
-  assert.match(byId('kubernetes-ingress-tls-audit').run({data:'kind: Ingress\\nspec:\\n  rules:\\n  - host: "*"'}),/TLS block|wildcard/i);
-  assert.match(byId('postgresql-config-audit').run({data:"listen_addresses = '*'\\nssl = off\\npassword_encryption = md5\\nhost all all 0.0.0.0/0 trust"}),/all interfaces|TLS|MD5|trust|broad IPv4/i);
-  assert.match(byId('systemd-service-hardening-audit').run({data:'[Service]\\nUser=root\\nNoNewPrivileges=false\\nPrivateTmp=false\\nProtectSystem=off'}),/root|NoNewPrivileges|PrivateTmp|ProtectSystem/i);
+  assert.match(byId('kubernetes-ingress-tls-audit').run({data:'kind: Ingress\nspec:\n  rules:\n  - host: "*"'}),/TLS block|wildcard/i);
+  assert.match(byId('postgresql-config-audit').run({data:"listen_addresses = '*'\nssl = off\npassword_encryption = md5\nhost all all 0.0.0.0/0 trust"}),/all interfaces|TLS|MD5|trust|broad IPv4/i);
+  assert.match(byId('systemd-service-hardening-audit').run({data:'[Service]\nUser=root\nNoNewPrivileges=false\nPrivateTmp=false\nProtectSystem=off'}),/root|NoNewPrivileges|PrivateTmp|ProtectSystem/i);
 });

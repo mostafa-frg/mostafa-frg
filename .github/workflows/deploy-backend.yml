@@ -70,7 +70,7 @@ jobs:
           for f in sorted(glob.glob('backend/migrations/*.sql')):
               db.executescript(open(f, encoding='utf-8').read())
           tables = {r[0] for r in db.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-          required = {'users','sessions','auth_attempts','tool_access','audit_logs'}
+          required = {'users','sessions','auth_attempts','tool_access','audit_logs','ai_usage'}
           assert required <= tables, f"Missing tables: {required - tables}"
           cols = {r[1] for r in db.execute('PRAGMA table_info(users)')}
           assert 'password_iter' in cols, 'password_iter column missing'

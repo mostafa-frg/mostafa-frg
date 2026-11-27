@@ -27,3 +27,13 @@
 .dashboard button:disabled{opacity:.55;cursor:wait}
 @media(max-width:960px){.overview-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:640px){.dashboard{padding-top:28px}.dash-head{align-items:flex-start;flex-direction:column;padding:20px}.overview-head{flex-direction:column}.overview-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.overview-card{padding:14px}.audit-row{grid-template-columns:1fr}.audit-row p{grid-column:auto}}
+
+.ai-log{max-height:420px;overflow:auto;display:flex;flex-direction:column;gap:10px;margin:12px 0}
+.ai-log:empty{display:none}
+.ai-msg{padding:10px 12px;border:1px solid var(--line,#d0d7de);border-radius:6px}
+.ai-msg strong{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-bottom:4px}
+.ai-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.ai-user{align-self:flex-end;max-width:92%}
+.ai-assistant{align-self:flex-start;max-width:100%}
+.ai-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+#aiInput{width:100%;resize:vertical;min-height:84px}

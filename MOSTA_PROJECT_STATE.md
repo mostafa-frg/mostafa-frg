@@ -1,6 +1,6 @@
 # MOSTA Project State
 
-Last updated: 2026-11-20
+Last updated: 2026-11-27
 
 ## Active work
 
@@ -14,18 +14,18 @@ Last updated: 2026-11-20
 ## Tool inventory
 
 - Parent browser registry: 107 definitions.
-- Expansion branch browser registry: 231 definitions.
-- New additions on this branch: 124.
-- Backend catalog: 231 definitions.
+- Expansion branch browser registry: 239 definitions.
+- New additions on this branch: 132.
+- Backend catalog: 239 definitions.
 - Frontend/backend IDs were compared: no missing or duplicate IDs at the latest audit.
 - Upstream CLI CSV index: 61 entries; do not add this count to the browser registry because these are separate inventories.
-- Requested target: 1,000 genuinely distinct new tools. Remaining target after current additions: 876. Do not count placeholders, renamed aliases or reference-only links.
+- Requested target: 1,000 genuinely distinct new tools. Remaining target after current additions: 868. Do not count placeholders, renamed aliases or reference-only links.
 
 ## Implemented in PR #7
 
 - Local read-only `mosta-index` CLI catalog browser: list, search, platform/category filters and JSON output.
 - CSV catalog validator with unit tests and Python 3.10/3.12 GitHub Actions workflow.
-- 107 new frontend utilities covering Linux, Kali Linux, SOC/DFIR, Termux/Android, networking, DevSecOps and defensive configuration review.
+- 115 new frontend utilities covering Linux, Kali Linux, SOC/DFIR, Termux/Android, networking, DevSecOps and defensive configuration review.
 - Matching backend catalog entries and per-user default-deny access model.
 - Dedicated Termux & Android Terminal workspace on the portfolio homepage.
 - Command builders produce command text only; the website does not execute shell commands on visitor devices.
@@ -83,3 +83,23 @@ Last updated: 2026-11-20
 - Optional upstream executables absent from the CI runner remain informational and are not claimed as installed or functionally tested.
 - The PR remains Draft and non-mergeable; the six overlapping paths have been reviewed and their safe content choices recorded, but no retarget, merge, Preview deployment, Production deployment, D1 migration, or Cloudflare account change was performed.
 - Inventory remains **231** distinct browser tools, **124** new additions toward the 1,000-tool target, and a separate **61-entry** CLI catalog. These are not 200,000 tools.
+
+
+## Latest website tool expansion — 2026-11-27
+
+- Added eight distinct browser analyzers to the existing tool directory:
+  - Nginx security configuration review
+  - Apache HTTP Server security review
+  - GitHub Actions permissions and action-pinning review
+  - Terraform S3 public-exposure review
+  - Environment-file secret exposure scan with value redaction
+  - Kubernetes Ingress TLS review
+  - PostgreSQL listener, TLS and authentication review
+  - systemd service hardening review
+- Updated `portfolio/assets/platform.js`, `backend/src/index.js`, and the regression/security tests together.
+- Frontend registry and backend authorization catalog each contain **239 unique IDs**, with exact set parity.
+- Updated category totals and the API security assertion to verify the 239-tool catalog and the eight new IDs.
+- Exact source/test head: `f96c23b28a63c5155e62e74c437defab88f4e588`.
+- Lab Checks run [46015241042](https://github.com/mostafa-frg/mostafa-frg/actions/runs/46015241042) passed: JavaScript regression tests **67/67**, pytest **42/42**, backend API security **89/89**, plus Python compilation, portfolio tests, offline network/PCAP/HTTP/Flask checks, installer checks and Docker Compose validation.
+- The eight additions bring the branch to **132 new browser tools** toward the 1,000-tool target; **868 remain**. The separate CLI reference catalog remains 61 entries.
+- No merge, retarget, Preview deployment, Production deployment, D1 migration or Cloudflare account change was performed. PR #7 remains Draft and non-mergeable pending its separate integration/conflict review.

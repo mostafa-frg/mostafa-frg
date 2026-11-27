@@ -96,3 +96,9 @@ Run from the repo root:
 - `main` last seen at 0b90b7c. Older `feat/*` and `fix/terminal-tools-*` branches are superseded; do not merge them.
 - Next action: Phase 2 batch 4: finish the not-done items above (each needs a cited or locally produced ground truth first), then
   more SOC/DFIR and Linux-hardening tools.
+
+
+## Review pass 1 (2026-11-25, branch platform/review-1)
+Older tools re-verified against independent references (Python hashlib/hmac/zlib/base64/ipaddress/colorsys/stat/datetime, CVSS 3.1 spec, RFC 4226/6238 maths): hash-text, multi-hash, crc32, base32, text-hex, base-convert, inet-checksum, hmac, url, subnet, wildcard, ipv4, range-cidr, subnet-split, ipv6, ipv6-subnet, cidr-overlap, route-summary, eui64, mac-format, chmod, umask, color, timestamp, filesize, tcp-throughput, bdp, entropy, cvss, json, csv-json, jwt, otp. Command builders were checked for shell injection (0 hits) and, where a real binary exists locally (journalctl, find, df), for valid syntax.
+Fixed: IPv6 /0 rejected; CSV dropped blank-valued rows; CVSS accepted duplicate metrics; unsigned JWT reported as signature present; ufw-builder emitted invalid `ufw allow port N proto P`; kali-journalctl-builder emitted `-p all`; kali-tcpdump-filter emitted primitives without `and` and allowed ports on icmp/arp.
+Not yet independently verified: cron, html, diff, case, http-status, ports, signals, uuid, and the audit/analyzer/reference tools (sshd/nginx-style config audits, log triage, nmap/tcpdump parsers, kali/ubuntu/bash helpers). nmap, tcpdump, tshark and ufw are not installed in the sandbox, so their command syntax is checked against documentation only. Network tools (dns, public-ip, mac, latency, speed, crt) need a real internet-connected browser.

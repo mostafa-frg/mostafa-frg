@@ -283,7 +283,7 @@ test('optional fields work when left blank, and are not marked required in the f
   }
   assert.match(await run('nmap-builder', { target: '10.0.0.1', scan: 'TCP connect scan', ports: '', timing: 'T3', save: 'no' }), /^nmap -sT -T3 10\.0\.0\.1/);
   assert.match(await run('journalctl-builder', { unit: '', since: 'today', prio: 'all' }), /^journalctl --since today --no-pager/);
-  assert.match(await run('ufw-builder', { action: 'allow', port: '443', proto: 'tcp', src: '' }), /^sudo ufw allow port 443 proto tcp/);
+  assert.match(await run('ufw-builder', { action: 'allow', port: '443', proto: 'tcp', src: '' }), /^sudo ufw allow 443\/tcp/);
   assert.match(await run('wireshark-filter', { proto: 'dns', host: '', port: '' }), /Display filter:\ndns\n/);
   assert.match(source, /el\.step='any'/, 'number inputs must accept decimals (tcp-throughput loss 0.1, transfer-time 2.5 GB)');
   assert.match(source, /el\.required=\(type==='file'\|\|\(type!=='textarea'&&type!=='number'\)\)&&!\/optional\|blank\/i\.test\(label\)/);
@@ -296,7 +296,7 @@ test('port reference covers common services and unknown queries', async () => {
 });
 
 test('every registered tool has a dedicated closure test (guards future additions)', async () => {
-  const files = ['platform-tools.test.mjs', 'tool-closure.test.mjs', 'tool-closure-b.test.mjs', 'tool-closure-c.test.mjs', 'tool-closure-d.test.mjs', 'tool-closure-e.test.mjs'];
+  const files = ['platform-tools.test.mjs', 'tool-closure.test.mjs', 'tool-closure-b.test.mjs', 'tool-closure-c.test.mjs', 'tool-closure-d.test.mjs', 'tool-closure-e.test.mjs', 'tool-review-1.test.mjs'];
   let text = '';
   for (const f of files) text += await readFile(new URL('./' + f, import.meta.url), 'utf8');
   text = text.replace(/const overrides = \{[\s\S]*?\n  \};/, '');

@@ -50,6 +50,7 @@ jobs:
           node --test portfolio/tests/tool-closure-c.test.mjs
           node --test portfolio/tests/tool-closure-d.test.mjs
           node --test portfolio/tests/tool-closure-e.test.mjs
+          node --test portfolio/tests/tool-review-1.test.mjs
           node --test portfolio/tests/tool-robustness.test.mjs
           node --check portfolio/assets/home.js
           node --check portfolio/assets/tools.js

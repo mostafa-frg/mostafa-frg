@@ -210,7 +210,7 @@ test('tool registry has unique IDs and eleven declared workspaces', () => {
     [...new Set(tools.map(tool => tool.cat))].sort(),
     ['bash','cloud','database','developer','kali','linux','networking','security','soc','termux','ubuntu'].sort(),
   );
-  const expected={networking:21,security:41,linux:36,developer:20,soc:37,bash:13,kali:28,ubuntu:13,cloud:13,database:2,termux:15};
+  const expected={networking:22,security:44,linux:36,developer:22,soc:37,bash:13,kali:28,ubuntu:13,cloud:15,database:5,termux:15};
   for(const [category,count] of Object.entries(expected))
     assert.equal(tools.filter(tool=>tool.cat===category).length,count,category+' tool count');
 });
@@ -1033,7 +1033,7 @@ test('ten additional engineering analyzers detect representative configuration r
  assert.match(byId('url-security-inspector').run({url:'http://user:pass@example.com:8080/%2fadmin'}),/unencrypted HTTP|credentials|non-default port|encoded path/i);
  assert.match(byId('sql-migration-risk-review').run({data:'DROP TABLE users;\nDELETE FROM sessions;'}),/destructive DROP|DELETE statement/i);
  assert.match(byId('redis-config-hardening-audit').run({data:'bind 0.0.0.0\nprotected-mode no'}),/all IPv4 interfaces|protected-mode|requirepass/i);
- assert.match(byId('mysql-config-hardening-audit').run({data:'[mysqld]\\nbind-address=0.0.0.0\\nlocal_infile=ON'}),/all IPv4 interfaces|LOCAL INFILE/i);
+ assert.match(byId('mysql-config-hardening-audit').run({data:'[mysqld]\nbind-address=0.0.0.0\nlocal_infile=ON'}),/all IPv4 interfaces|LOCAL INFILE/i);
  assert.match(byId('gitlab-ci-security-audit').run({data:'deploy:\n  script:\n    - docker run --privileged app:latest\n  only:\n    - branches'}),/privileged|latest image|all branches/i);
  assert.match(byId('terraform-iam-wildcard-audit').run({data:'actions = ["s3:*"]\nresources = ["*"]\nidentifiers = ["*"]'}),/wildcard IAM action|wildcard resource|wildcard principal/i);
  assert.throws(()=>byId('jwt-claims-inspector').run({token:'not.a.jwt.payload'}),/three dot-separated segments/);

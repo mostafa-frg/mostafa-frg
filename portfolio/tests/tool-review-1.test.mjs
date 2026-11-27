@@ -174,3 +174,9 @@ test('web header tools: Set-Cookie prefix rules, weak HSTS, CSP data:/http: sour
   assert.match(T('spf-dmarc', { type: 'DMARC', rec: 'v=DMARC1; p=reject; sp=none; rua=mailto:a@b.example' }), /sp=none is weaker than p=reject/);
   assert.doesNotMatch(T('spf-dmarc', { type: 'DMARC', rec: 'v=DMARC1; p=none; sp=reject; rua=mailto:a@b.example' }), /weaker/);
 });
+test('hash-id recognises real openssl passwd (md5/sha256/sha512 crypt), bcrypt, MySQL 4.1 and plain digests (260 samples)', () => {
+  const t = tools.find(x => x.id === 'hash-id'); const exp = { md5crypt: /md5crypt/, sha256crypt: /SHA-256 crypt/, sha512crypt: /SHA-512 crypt/, bcrypt: /bcrypt/, mysql: /MySQL 4\.1/, md5: /MD5/, sha1: /SHA-1/, sha256: /SHA-256$/m, sha512: /SHA-512$/m };
+  for (const c of load('review3-hashes-openssl-python.json')) assert.match(val(String(t.run({ hash: c.h })), 'Likely') ?? '', new RegExp(exp[c.k].source.replace(/\$\/m$/, '$'))   , c.k + ' ' + c.h.slice(0, 30));
+  assert.match(String(t.run({ hash: '$6$rounds=5000$salt$' + 'a'.repeat(86) })), /SHA-512 crypt/); assert.match(String(t.run({ hash: '$P$B' + 'a'.repeat(30) })), /phpass/);
+  for (const bad of ['', 'zz', '$6$salt$short', '$1$salt$' + 'a'.repeat(21), '*' + 'a'.repeat(39), 'a'.repeat(33)]) assert.throws(() => t.run({ hash: bad }), /No common hash format/, bad);
+});
